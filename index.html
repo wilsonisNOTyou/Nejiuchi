@@ -178,6 +178,28 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
 .rank-row.me{border-color:var(--amber); box-shadow:0 0 8px rgba(245,179,1,.3)}
 .rank-row.top1 .pos{font-size:1.25em}
 
+/* ---- ペナルティ / 辞典 ---- */
+.screw.back{animation:screwin .55s ease-out}
+@keyframes screwin{
+  0%{transform:rotate(-900deg) translateY(-70px); opacity:0}
+  55%{transform:rotate(-360deg) translateY(-10px); opacity:1}
+  100%{transform:rotate(0) translateY(0); opacity:1}
+}
+#penaltyPop{
+  position:absolute; left:50%; top:-1.5em; transform:translateX(-50%);
+  color:var(--miss); font-size:1rem; white-space:nowrap;
+  opacity:0; pointer-events:none;
+}
+#penaltyPop.show{animation:poppenalty 1.1s ease-out}
+@keyframes poppenalty{
+  0%{opacity:0; transform:translate(-50%,8px)}
+  15%{opacity:1}
+  100%{opacity:0; transform:translate(-50%,-16px)}
+}
+#score.penalty{animation:scoreflash .5s}
+@keyframes scoreflash{0%,60%{color:var(--miss)}100%{color:var(--amber)}}
+.rank-row .pname.locked{color:#596170; letter-spacing:.25em}
+
 /* カウントダウン */
 #countdown{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -197,20 +219,21 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
     <div class="diff-row">
       <button class="diff-btn" data-diff="easy">
         <div class="name">イージー</div>
-        <div class="desc">8文字以下の語録<br>制限時間 60秒</div>
+        <div class="desc">8文字以下・60秒<br>10ミスでネジ-1本</div>
       </button>
       <button class="diff-btn" data-diff="normal">
         <div class="name">ノーマル</div>
-        <div class="desc">9〜13文字の語録<br>制限時間 60秒</div>
+        <div class="desc">9〜13文字・60秒<br>7ミスでネジ-1本</div>
       </button>
       <button class="diff-btn" data-diff="hard">
         <div class="name">ハード</div>
-        <div class="desc">14文字以上の語録<br>制限時間 60秒</div>
+        <div class="desc">14文字以上・60秒<br>5ミスでネジ-1本</div>
       </button>
     </div>
     <p class="best-line" id="bestLine"></p>
     <div class="btn-row" style="margin-top:.2rem">
       <button class="btn" id="rankBtn">ランキングを見る</button>
+      <button class="btn" id="dictBtn">ネジ抜き辞典</button>
     </div>
     <p class="hint">難易度をクリックで開始(キー 1 / 2 / 3 でも可) / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
     <div class="hazard"></div>
@@ -227,6 +250,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
 
     <div class="word-panel" id="wordPanel">
       <span class="corner"></span>
+      <div id="penaltyPop">ミス上限! ネジが1本戻った…</div>
       <div id="wordText">&nbsp;</div>
       <div id="wordKana">&nbsp;</div>
       <div id="romaji">&nbsp;</div>
@@ -269,6 +293,21 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
       <button class="btn" id="rankBackBtn">タイトルへ (Esc)</button>
     </div>
   </section>
+
+  <!-- ネジ抜き辞典画面 -->
+  <section id="screen-dict" class="screen">
+    <h2 class="rank-title">ネジ抜き辞典</h2>
+    <p class="reg-status" id="dictRate"></p>
+    <div class="rank-tabs">
+      <button class="btn" id="dtab-easy">イージー</button>
+      <button class="btn" id="dtab-normal">ノーマル</button>
+      <button class="btn" id="dtab-hard">ハード</button>
+    </div>
+    <ol class="rank-list" id="dictList"></ol>
+    <div class="btn-row">
+      <button class="btn" id="dictBackBtn">タイトルへ (Esc)</button>
+    </div>
+  </section>
 </div>
 
 <div id="countdown"></div>
@@ -283,7 +322,7 @@ const WORDS_EASY = [
   { t: "せもい", k: "せもい" },
   { t: "たぁじゃん", k: "たぁじゃん" },
   { t: "うぃるせない", k: "うぃるせない" },
-  { t: "寝たぁじゃん？", k: "ねたぁじゃん" },
+  { t: "寝たぁじゃん？", k: "ねたぁじゃん？" },
   { t: "ダンスタイム", k: "だんすたいむ" },
   { t: "さみしいじゃん", k: "さみしいじゃん" },
   { t: "セロリンテープ", k: "せろりんてーぷ" },
@@ -295,7 +334,7 @@ const WORDS_EASY = [
   { t: "肩たたいてくれ", k: "かたたたいてくれ" },
   { t: "ちゃっかりうさぎ", k: "ちゃっかりうさぎ" },
   { t: "枕オリジナル", k: "まくらおりじなる" },
-  { t: "今日泊まらない？", k: "きょうとまらない" },
+  { t: "今日泊まらない？", k: "きょうとまらない？" },
 ];
 const WORDS_NORMAL = [
   { t: "ねぎはるとうめはる", k: "ねぎはるとうめはる" },
@@ -304,24 +343,24 @@ const WORDS_NORMAL = [
   { t: "道端の不良", k: "みちばたのふりょう" },
   { t: "自称じゃがりこ", k: "じしょうじゃがりこ" },
   { t: "起こしてちょんまげ", k: "おこしてちょんまげ" },
-  { t: "おお、ふみながちゃん、", k: "おおふみながちゃん" },
-  { t: "目と鼻と花房", k: "めとはなとはなふさ" },
+  { t: "おお、ふみながちゃん", k: "おお、ふみながちゃん" },
+  { t: "目と鼻と花房", k: "めとはなとはなぶさ" },
   { t: "テトリスアシトリス", k: "てとりすあしとりす" },
-  { t: "じゃれ本やらない？", k: "じゃれほんやらない" },
+  { t: "じゃれ本やらない？", k: "じゃれほんやらない？" },
   { t: "2人とも可愛いね", k: "ふたりともかわいいね" },
   { t: "私がいじめました", k: "わたしがいじめました" },
   { t: "こんぶこんぶ先輩", k: "こんぶこんぶせんぱい" },
   { t: "抜けたネジの報告", k: "ぬけたねじのほうこく" },
-  { t: "さくやさん、さくやです。", k: "さくやさんさくやです" },
+  { t: "さくやさん、さくやです。", k: "さくやさん、さくやです。" },
   { t: "ラーメン酒ラーメン", k: "らーめんさけらーめん" },
   { t: "美容系カップ麺", k: "びようけいかっぷめん" },
   { t: "炭酸の抜けたコーラ", k: "たんさんのぬけたこーら" },
   { t: "浮気の境界線", k: "うわきのきょうかいせん" },
   { t: "ごめんなさいどすてっぷ", k: "ごめんなさいどすてっぷ" },
   { t: "さみしいじゃないですか", k: "さみしいじゃないですか" },
-  { t: "太陽が2つある～", k: "たいようがふたつあるー" },
-  { t: "奢ってくれるんですか？", k: "おごってくれるんですか" },
-  { t: "合宿に行きたいな～", k: "がっしゅくにいきたいなー" },
+  { t: "太陽が2つある～", k: "たいようがふたつある～" },
+  { t: "奢ってくれるんですか？", k: "おごってくれるんですか？" },
+  { t: "合宿に行きたいな～", k: "がっしゅくにいきたいな～" },
   { t: "ラーメン奢ってください", k: "らーめんおごってください" },
   { t: "サイゼリヤで卵祭り", k: "さいぜりやでたまごまつり" },
   { t: "鈴カステラ美味しかった", k: "すずかすてらおいしかった" },
@@ -332,24 +371,24 @@ const WORDS_NORMAL = [
 ];
 const WORDS_HARD = [
   { t: "星巡りの歌を歌う会", k: "ほしめぐりのうたをうたうかい" },
-  { t: "音戦隊ヴォカレンジャー", k: "おんせんたいゔぉかれんじゃー" },
+  { t: "音戦隊ヴォカレンジャー", k: "おとせんたいゔぉかれんじゃー" },
   { t: "モンスターリーグファクトリー", k: "もんすたーりーぐふぁくとりー" },
   { t: "チケット3500円", k: "ちけっとさんぜんごひゃくえん" },
   { t: "キャリア教育基礎と私", k: "きゃりあきょういくきそとわたし" },
   { t: "好きなヒスイ発表ドラゴン", k: "すきなひすいはっぴょうどらごん" },
-  { t: "川柳を検出しました！", k: "せんりゅうをけんしゅつしました" },
+  { t: "川柳を検出しました！", k: "せんりゅうをけんしゅつしました！" },
   { t: "東雲ジョセフ概論第一", k: "しののめじょせふがいろんだいいち" },
-  { t: "アラサー、アラフォーの次はアラフー", k: "あらさーあらふぉーのつぎはあらふー" },
+  { t: "アラサー、アラフォーの次はアラフー", k: "あらさー、あらふぉーのつぎはあらふー" },
   { t: "教室使用願がレゴブロック", k: "きょうしつしようねがいがれごぶろっく" },
-  { t: "今日のハーモニー、あってなかったーにー", k: "きょうのはーもにーあってなかったーにー" },
-  { t: "セロリオンライン・酒の誓約書同意", k: "せろりおんらいんさけのせいやくしょどうい" },
+  { t: "今日のハーモニー、あってなかったーにー", k: "きょうのはーもにー、あってなかったーにー" },
+  { t: "セロリオンライン・酒の誓約書同意", k: "せろりおんらいん・さけのせいやくしょどうい" },
   { t: "貴団の情宣を受け入れることについて", k: "きだんのじょうせんをうけいれることについて" },
-  { t: "たてくん、私その呼ばれ方好きじゃないんだ", k: "たてくんわたしそのよばれかたすきじゃないんだ" },
-  { t: "たてくん、噛んでもかわいいから大丈夫だよ～", k: "たてくんかんでもかわいいからだいじょうぶだよー" },
-  { t: "ういるそん・そんそん・人の誓約書同意うぃるせない", k: "ういるそんそんそんひとのせいやくしょどういうぃるせない" },
-  { t: "ういそるん・るんるん・人の誓約書同意うぃるせるん", k: "ういそるんるんるんひとのせいやくしょどういうぃるせるん" },
-  { t: "今日も彼女は電話に出ない。音ゲー中なのだろう", k: "きょうもかのじょはでんわにでないおとげーちゅうなのだろう" },
-  { t: "自転車をこいで、自転車をこいで、自転車をこいでたね～", k: "じてんしゃをこいでじてんしゃをこいでじてんしゃをこいでたねー" },
+  { t: "たてくん、私その呼ばれ方好きじゃないんだ", k: "たてくん、わたしそのよばれかたすきじゃないんだ" },
+  { t: "たてくん、噛んでもかわいいから大丈夫だよ～", k: "たてくん、かんでもかわいいからだいじょうぶだよ～" },
+  { t: "ういるそん・そんそん・人の誓約書同意うぃるせない", k: "ういるそん・そんそん・ひとのせいやくしょどういうぃるせない" },
+  { t: "ういそるん・るんるん・人の誓約書同意うぃるせるん", k: "ういそるん・るんるん・ひとのせいやくしょどういうぃるせるん" },
+  { t: "今日も彼女は電話に出ない。音ゲー中なのだろう", k: "きょうもかのじょはでんわにでない。おとげーちゅうなのだろう" },
+  { t: "自転車をこいで、自転車をこいで、自転車をこいでたね～", k: "じてんしゃをこいで、じてんしゃをこいで、じてんしゃをこいでたね～" },
 ];
 /* ==================== ここまで ==================== */
 
@@ -359,16 +398,19 @@ const WORDS_HARD = [
     Realtime Database を使用。databaseURL 必須)
 ===================================================== */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT",
+  apiKey: "AIzaSyBlnTCURyBlivxJlKgcPhxq3irPySRxA-c",
+  authDomain: "nejiuchi-c4249.firebaseapp.com",
+  databaseURL: "https://nejiuchi-c4249-default-rtdb.firebaseio.com",
+  projectId: "nejiuchi-c4249",
+  storageBucket: "nejiuchi-c4249.firebasestorage.app",
+  messagingSenderId: "299129471044",
+  appId: "1:299129471044:web:c2a338200c068bfae83c11"
 };
 const MAX_ENTRIES_PER_PLAYER = 2;  // ランキング掲載は1人2件まで
 const RANKING_SIZE = 20;           // 表示件数
 let db = null;
 try{
-  if(window.firebase && firebaseConfig.apiKey !== "YOUR_API_KEY"){
+  if(window.firebase && firebaseConfig.databaseURL){
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
   }
@@ -379,6 +421,7 @@ const GAME_SECONDS = 60;
 const SCREWS_PER_PLATE = 8;
 const WORD_SETS = { easy: WORDS_EASY, normal: WORDS_NORMAL, hard: WORDS_HARD };
 const DIFF_LABEL = { easy: "イージー", normal: "ノーマル", hard: "ハード" };
+const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
 
 /* ---------- ローマ字テーブル ---------- */
 const KANA = {
@@ -400,6 +443,7 @@ const KANA = {
 "ぁ":["xa","la"],"ぃ":["xi","li"],"ぅ":["xu","lu"],"ぇ":["xe","le"],"ぉ":["xo","lo"],
 "ゃ":["xya","lya"],"ゅ":["xyu","lyu"],"ょ":["xyo","lyo"],
 "ゔ":["vu"],"ー":["-"],
+"、":[","],"。":["."],"・":["/"],"！":["!"],"？":["?"],"〜":["~"],"～":["~"],
 "きゃ":["kya"],"きゅ":["kyu"],"きょ":["kyo"],
 "しゃ":["sya","sha"],"しゅ":["syu","shu"],"しょ":["syo","sho"],"しぇ":["sye","she"],
 "ちゃ":["tya","cha","cya"],"ちゅ":["tyu","chu","cyu"],"ちょ":["tyo","cho","cyo"],"ちぇ":["tye","che"],
@@ -557,6 +601,7 @@ function beep(freq,dur,type,gain){
 const sndType=()=>beep(1400,.04,"square",.03);
 const sndDone=()=>{beep(700,.09,"square",.06); setTimeout(()=>beep(1050,.12,"square",.06),70);};
 const sndMiss=()=>beep(160,.12,"sawtooth",.07);
+const sndPenalty=()=>{beep(220,.18,"sawtooth",.09); setTimeout(()=>beep(150,.25,"sawtooth",.09),130);};
 const sndPlate=()=>beep(90,.3,"triangle",.12);
 
 /* ---------- 記録(ベスト) ---------- */
@@ -574,7 +619,7 @@ async function saveBest(d,v){
 
 /* ---------- 画面制御 ---------- */
 const $=id=>document.getElementById(id);
-const screens={title:$("screen-title"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking")};
+const screens={title:$("screen-title"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict")};
 let scene="title";
 function show(name){
   scene=name;
@@ -582,7 +627,7 @@ function show(name){
 }
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
-let timerId=null, lastWordIdx=-1, plateScrews=0, running=false;
+let timerId=null, lastWordIdx=-1, plateScrews=0, running=false, currentWord=null;
 
 async function refreshBestLine(){
   const e=await loadBest("easy"), n=await loadBest("normal"), h=await loadBest("hard");
@@ -615,11 +660,23 @@ function removeScrew(){
   }
 }
 
+function reviveScrew(){
+  const plate=$("plate");
+  const removed=plate.querySelectorAll(".screw.gone, .screw.out");
+  const s=removed[removed.length-1];
+  if(!s) return;
+  s.classList.remove("gone","out");
+  s.classList.add("back");
+  plateScrews++;
+  setTimeout(()=>s.classList.remove("back"),600);
+}
+
 function pickWord(){
   let i;
   do{ i=Math.floor(Math.random()*words.length); }while(words.length>1 && i===lastWordIdx);
   lastWordIdx=i;
   const w=words[i];
+  currentWord=w;
   setWord(w.k);
   $("wordText").textContent=w.t;
   $("wordKana").textContent=w.t===w.k?"\u00a0":w.k;
@@ -697,6 +754,10 @@ document.addEventListener("keydown",e=>{
     if(e.key==="Escape") show("title");
     return;
   }
+  if(scene==="dict"){
+    if(e.key==="Escape") show("title");
+    return;
+  }
   if(scene==="result"){
     if(e.key==="Enter") startGame(diff);
     if(e.key==="Escape") show("title");
@@ -706,7 +767,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){ clearInterval(timerId); running=false; show("title"); return; }
   if(!running) return;
   const key=e.key.toLowerCase();
-  if(!/^[a-z\-']$/.test(key)) return;
+  if(!/^[a-z\-'!?,.~\/]$/.test(key)) return;
   e.preventDefault();
   const r=handleKey(key);
   if(r==="miss"){
@@ -714,6 +775,16 @@ document.addEventListener("keydown",e=>{
     sndMiss();
     const p=$("wordPanel");
     p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
+    // ミス上限でネジが1本戻る
+    if(miss % MISS_PENALTY[diff]===0 && score>0){
+      score--; $("score").textContent=score;
+      reviveScrew();
+      sndPenalty();
+      const sc=$("score");
+      sc.classList.remove("penalty"); void sc.offsetWidth; sc.classList.add("penalty");
+      const pop=$("penaltyPop");
+      pop.classList.remove("show"); void pop.offsetWidth; pop.classList.add("show");
+    }
   } else {
     sndType();
     renderRomaji();
@@ -721,6 +792,7 @@ document.addEventListener("keydown",e=>{
       score++; $("score").textContent=score;
       sndDone();
       removeScrew();
+      unlockWord(diff,currentWord.k);
       pickWord();
     }
   }
@@ -825,6 +897,59 @@ $("tab-easy").addEventListener("click",()=>openRanking("easy",playerName));
 $("tab-normal").addEventListener("click",()=>openRanking("normal",playerName));
 $("tab-hard").addEventListener("click",()=>openRanking("hard",playerName));
 $("rankBackBtn").addEventListener("click",()=>show("title"));
+
+/* ---------- ネジ抜き辞典 ---------- */
+const unlocked={easy:new Set(),normal:new Set(),hard:new Set()};
+(async()=>{
+  try{
+    const r=await window.storage.get("dict");
+    if(r&&r.value){
+      const o=JSON.parse(r.value);
+      for(const d of ["easy","normal","hard"]) unlocked[d]=new Set(o[d]||[]);
+    }
+  }catch(e){}
+})();
+async function saveDict(){
+  try{
+    await window.storage.set("dict",JSON.stringify({
+      easy:[...unlocked.easy], normal:[...unlocked.normal], hard:[...unlocked.hard]
+    }));
+  }catch(e){}
+}
+function unlockWord(d,k){
+  if(!unlocked[d].has(k)){ unlocked[d].add(k); saveDict(); }
+}
+function openDict(d){
+  $("dtab-easy").classList.toggle("active",d==="easy");
+  $("dtab-normal").classList.toggle("active",d==="normal");
+  $("dtab-hard").classList.toggle("active",d==="hard");
+  show("dict");
+  const arr=WORD_SETS[d], set=unlocked[d];
+  const got=arr.filter(w=>set.has(w.k)).length;
+  let allGot=0, allTotal=0;
+  for(const dd of ["easy","normal","hard"]){
+    allGot+=WORD_SETS[dd].filter(w=>unlocked[dd].has(w.k)).length;
+    allTotal+=WORD_SETS[dd].length;
+  }
+  const pct=v=>Math.round(v*100);
+  $("dictRate").textContent=
+    `開放率 — ${DIFF_LABEL[d]}: ${got}/${arr.length} (${pct(got/arr.length)}%) / 全体: ${allGot}/${allTotal} (${pct(allGot/allTotal)}%)`;
+  const list=$("dictList");
+  list.innerHTML="";
+  arr.forEach((w,i)=>{
+    const open=set.has(w.k);
+    const li=document.createElement("li");
+    li.className="rank-row";
+    li.innerHTML=`<span class="pos">${String(i+1).padStart(2,"0")}</span><span class="pname${open?"":" locked"}"></span>`;
+    li.querySelector(".pname").textContent=open?w.t:"？？？";
+    list.appendChild(li);
+  });
+}
+$("dictBtn").addEventListener("click",()=>openDict("easy"));
+$("dtab-easy").addEventListener("click",()=>openDict("easy"));
+$("dtab-normal").addEventListener("click",()=>openDict("normal"));
+$("dtab-hard").addEventListener("click",()=>openDict("hard"));
+$("dictBackBtn").addEventListener("click",()=>show("title"));
 
 refreshBestLine();
 </script>
