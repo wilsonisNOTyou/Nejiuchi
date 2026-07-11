@@ -231,6 +231,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
       </button>
     </div>
     <p class="best-line" id="bestLine"></p>
+    <p class="best-line" id="statsLine"></p>
     <div class="btn-row" style="margin-top:.2rem">
       <button class="btn" id="rankBtn">ランキングを見る</button>
       <button class="btn" id="dictBtn">ネジ抜き辞典</button>
@@ -335,6 +336,30 @@ const WORDS_EASY = [
   { t: "ちゃっかりうさぎ", k: "ちゃっかりうさぎ" },
   { t: "枕オリジナル", k: "まくらおりじなる" },
   { t: "今日泊まらない？", k: "きょうとまらない？" },
+  { t: "ソフィア", k: "そふぃあ" },
+  { t: "うぃるせる", k: "うぃるせる" },
+  { t: "んご", k: "んご" },
+  { t: "じゃがりこ", k: "じゃがりこ" },
+  { t: "富裕層", k: "ふゆうそう" },
+  { t: "元ヤン", k: "もとやん" },
+  { t: "ズッ友", k: "ずっとも" },
+  { t: "オワハラ", k: "おわはら" },
+  { t: "ネジ抜き", k: "ねじぬき" },
+  { t: "萌え声", k: "もえごえ" },
+  { t: "もちろんです", k: "もちろんです" },
+  { t: "オブリガード", k: "おぶりがーど" },
+  { t: "水素の音", k: "すいそのおと" },
+  { t: "バスブラック", k: "ばすぶらっく" },
+  { t: "ソプラノレッド", k: "そぷらのれっど" },
+  { t: "アルトイエロー", k: "あるといえろー" },
+  { t: "テナーシルバー", k: "てなーしるばー" },
+  { t: "寝落ちもちもち", k: "ねおちもちもち" },
+  { t: "サルノコシカケ", k: "さるのこしかけ" },
+  { t: "はませんスマイル", k: "はませんすまいる" },
+  { t: "INFOSS再履", k: "INFOSSさいり" },
+  { t: "すぎちゃりちゃり", k: "すぎちゃりちゃり" },
+  { t: "背高いアピール", k: "せたかいあぴーる" },
+  { t: "歌詞クイズちゃん", k: "かしくいずちゃん" },
 ];
 const WORDS_NORMAL = [
   { t: "ねぎはるとうめはる", k: "ねぎはるとうめはる" },
@@ -346,8 +371,8 @@ const WORDS_NORMAL = [
   { t: "おお、ふみながちゃん", k: "おお、ふみながちゃん" },
   { t: "目と鼻と花房", k: "めとはなとはなぶさ" },
   { t: "テトリスアシトリス", k: "てとりすあしとりす" },
-  { t: "じゃれ本やらない？", k: "じゃれほんやらない？" },
-  { t: "2人とも可愛いね", k: "ふたりともかわいいね" },
+  { t: "じゃれ本やらない？", k: "じゃれぼんやらない？" },
+  { t: "2人とも可愛いね", k: "2にんともかわいいね" },
   { t: "私がいじめました", k: "わたしがいじめました" },
   { t: "こんぶこんぶ先輩", k: "こんぶこんぶせんぱい" },
   { t: "抜けたネジの報告", k: "ぬけたねじのほうこく" },
@@ -358,7 +383,7 @@ const WORDS_NORMAL = [
   { t: "浮気の境界線", k: "うわきのきょうかいせん" },
   { t: "ごめんなさいどすてっぷ", k: "ごめんなさいどすてっぷ" },
   { t: "さみしいじゃないですか", k: "さみしいじゃないですか" },
-  { t: "太陽が2つある～", k: "たいようがふたつある～" },
+  { t: "太陽が2つある～", k: "たいようが2つある～" },
   { t: "奢ってくれるんですか？", k: "おごってくれるんですか？" },
   { t: "合宿に行きたいな～", k: "がっしゅくにいきたいな～" },
   { t: "ラーメン奢ってください", k: "らーめんおごってください" },
@@ -368,12 +393,16 @@ const WORDS_NORMAL = [
   { t: "晩御飯が生成される", k: "ばんごはんがせいせいされる" },
   { t: "個人の学習目的", k: "こじんのがくしゅうもくてき" },
   { t: "ソプラノになれない人たち", k: "そぷらのになれないひとたち" },
+  { t: "4年生4回", k: "4ねんせい4かい" },
+  { t: "足長いアピール", k: "あしながいあぴーる" },
+  { t: "朝までそれ正解", k: "あさまでそれせいかい" },
+  { t: "そこに10がありました", k: "そこに10がありました" },
 ];
 const WORDS_HARD = [
   { t: "星巡りの歌を歌う会", k: "ほしめぐりのうたをうたうかい" },
   { t: "音戦隊ヴォカレンジャー", k: "おとせんたいゔぉかれんじゃー" },
   { t: "モンスターリーグファクトリー", k: "もんすたーりーぐふぁくとりー" },
-  { t: "チケット3500円", k: "ちけっとさんぜんごひゃくえん" },
+  { t: "チケット3500円", k: "ちけっと3500えん" },
   { t: "キャリア教育基礎と私", k: "きゃりあきょういくきそとわたし" },
   { t: "好きなヒスイ発表ドラゴン", k: "すきなひすいはっぴょうどらごん" },
   { t: "川柳を検出しました！", k: "せんりゅうをけんしゅつしました！" },
@@ -389,6 +418,23 @@ const WORDS_HARD = [
   { t: "ういそるん・るんるん・人の誓約書同意うぃるせるん", k: "ういそるん・るんるん・ひとのせいやくしょどういうぃるせるん" },
   { t: "今日も彼女は電話に出ない。音ゲー中なのだろう", k: "きょうもかのじょはでんわにでない。おとげーちゅうなのだろう" },
   { t: "自転車をこいで、自転車をこいで、自転車をこいでたね～", k: "じてんしゃをこいで、じてんしゃをこいで、じてんしゃをこいでたね～" },
+  { t: "手を繋いでも浮気ではない", k: "てをつないでもうわきではない" },
+  { t: "ノーネクタイ白ワイシャツ男", k: "のーねくたいしろわいしゃつおとこ" },
+  { t: "明日は誰と友達になろうかな", k: "あしたはだれとともだちになろうかな" },
+  { t: "骨ばかりであまり美味しそうじゃない", k: "ほねばかりであまりおいしそうじゃない" },
+  { t: "Eはこの世界太陽になっ気体", k: "Eはこのせかいたいようになっきたい" },
+  { t: "新緑深き折いかが過ごし候", k: "しんりょくふかきおりいかがすごしそうろう" },
+  { t: "この世界には2種類のパスタがある。", k: "このせかいには2しゅるいのぱすたがある。" },
+  { t: "学生生活が長いので経験が豊富", k: "がくせいせいかつがながいのでけいけんがほうふ" },
+  { t: "新しい音楽の世界を開拓しましょう", k: "あたらしいおんがくのせかいをかいたくしましょう" },
+  { t: "僕になついて、お出かけに付いてきていたポテチ", k: "ぼくになついて、おでかけについてきていたぽてち" },
+  { t: "僕になついて、お出かけに付いてきていたライオン", k: "ぼくになついて、おでかけについてきていたらいおん" },
+  { t: "ウェンティさんから父の日のギフトが届きました", k: "うぇんてぃさんからちちのひのぎふとがとどきました" },
+  { t: "そんな部費部費言いたいなら豚小屋にでも行ってなさい", k: "そんなぶひぶひいいたいならぶたごやにでもいってなさい" },
+  { t: "電気通信学生証の交換が遅い大学", k: "でんきつうしんがくせいしょうのこうかんがおそいだいがく" },
+  { t: "彼女は感動のあまりシュワシュワと音を鳴らしていた。", k: "かのじょはかんどうのあまりしゅわしゅわとおとをならしていた。" },
+  { t: "お金を積めば身長が伸びるし顔もデカくなることを自慢している", k: "おかねをつめばしんちょうがのびるしかおもでかくなることをじまんしている" },
+  { t: "私は泣きながら、シュワシュワと泣いているソフィア365を飲み干した。", k: "わたしはなきながら、しゅわしゅわとないているそふぃあさんろくごをのみほした。" },
 ];
 /* ==================== ここまで ==================== */
 
@@ -489,7 +535,7 @@ function tokenize(kana){
     else if(one==="っ"){ chunks.push({kana:"っ", soku:true, alts:["xtu","ltu","ltsu"]}); i++; }
     else if(one==="ん"){ chunks.push({kana:"ん", nn:true, alts:["nn","xn"]}); i++; }
     else if(KANA[one]){ chunks.push({kana:one, alts:[...KANA[one]]}); i++; }
-    else { chunks.push({kana:one, alts:[one]}); i++; } // 想定外文字はそのまま
+    else { chunks.push({kana:one, alts:[one], literal:true}); i++; } // 数字・英字など、そのまま入力する文字
   }
   // 「っ」に次チャンク子音の重ね打ちを追加
   for(let c=0;c<chunks.length;c++){
@@ -517,14 +563,17 @@ function nextChunkStartsWith(key){
   return nc.alts.some(a=>a[0]===key);
 }
 /* 戻り値: "ok" | "done"(単語完了) | "miss" */
-function handleKey(key){
+function handleKey(rawKey){
   if(chunkIdx>=chunks.length) return "miss";
   const ch=chunks[chunkIdx];
+  // 数字・英字などの直接入力チャンクは大文字小文字を区別する(例: "E"はshift+Eが必要)
+  // かな入力チャンクは小文字化して判定する
+  const key = ch.literal ? rawKey : rawKey.toLowerCase();
   // 「ん」+ n: 次がナ行なら n単打で確定してキーを次チャンクへ(nna=んな のIME挙動)
   if(ch.nn && buf==="n" && key==="n" && nextChunkStartsWith("n")){
     completeChunk("n");
     nAmbig=true; // 後で「nnだった」と再解釈できるよう記録
-    return handleKey(key);
+    return handleKey(rawKey);
   }
   const newBuf=buf+key;
   const matches=ch.alts.filter(a=>a.startsWith(newBuf));
@@ -539,20 +588,20 @@ function handleKey(key){
   // 「ん」を n 1打で確定 → 次チャンクへキーを回す
   if(ch.nn && buf==="n" && !VOWEL_N_Y.has(key) && nextChunkStartsWith(key)){
     completeChunk("n");
-    return handleKey(key);
+    return handleKey(rawKey);
   }
   // 完成形と同じ長さまで打っていて、より長い候補待ちだった場合(nn待ちのn等)
   if(ch.alts.includes(buf)){
     if(ch.nn && VOWEL_N_Y.has(key)) return "miss"; // んの後に母音/y/nは nn 必須
     completeChunk(buf);
-    return handleKey(key);
+    return handleKey(rawKey);
   }
   // 直前の「ん」のnが実はnnの1打目だった場合の再解釈(nnna=んな 等)
   if(nAmbig && buf==="n"){
     nAmbig=false;
     typedRomaji+="n"; // んをnn扱いに訂正
     buf="";
-    return handleKey(key);
+    return handleKey(rawKey);
   }
   return "miss";
 }
@@ -624,6 +673,7 @@ let scene="title";
 function show(name){
   scene=name;
   for(const k in screens) screens[k].classList.toggle("active",k===name);
+  if(name==="title") refreshStatsLine();
 }
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
@@ -722,6 +772,7 @@ function startTimer(){
 }
 async function endGame(){
   clearInterval(timerId); running=false;
+  recordStats(score); // ランキング登録の有無に関係なく記録
   const best=await loadBest(diff);
   const isNew=score>best;
   if(isNew) await saveBest(diff,score);
@@ -766,8 +817,8 @@ document.addEventListener("keydown",e=>{
   // ゲーム中
   if(e.key==="Escape"){ clearInterval(timerId); running=false; show("title"); return; }
   if(!running) return;
-  const key=e.key.toLowerCase();
-  if(!/^[a-z\-'!?,.~\/]$/.test(key)) return;
+  const key=e.key;
+  if(!/^[a-zA-Z0-9\-'!?,.~\/]$/.test(key)) return;
   e.preventDefault();
   const r=handleKey(key);
   if(r==="miss"){
@@ -951,7 +1002,47 @@ $("dtab-normal").addEventListener("click",()=>openDict("normal"));
 $("dtab-hard").addEventListener("click",()=>openDict("hard"));
 $("dictBackBtn").addEventListener("click",()=>show("title"));
 
+/* ---------- 全体統計(総プレイ回数・抜いたネジ累計) ---------- */
+async function recordStats(screws){
+  // 端末ローカルにも記録(オフライン時のフォールバック用)
+  try{
+    let s={plays:0,screws:0};
+    try{
+      const r=await window.storage.get("stats");
+      if(r&&r.value) s=JSON.parse(r.value);
+    }catch(e){}
+    s.plays=(s.plays||0)+1;
+    s.screws=(s.screws||0)+screws;
+    await window.storage.set("stats",JSON.stringify(s));
+  }catch(e){}
+  // Firebaseに全プレイヤー合算で記録(ランキング登録不要)
+  if(db){
+    try{
+      db.ref("nejiuchi/stats/plays").transaction(v=>(v||0)+1);
+      db.ref("nejiuchi/stats/screws").transaction(v=>(v||0)+screws);
+    }catch(e){}
+  }
+}
+async function refreshStatsLine(){
+  const el=$("statsLine");
+  if(!el) return;
+  if(db){
+    try{
+      const snap=await db.ref("nejiuchi/stats").once("value");
+      const v=snap.val()||{};
+      el.textContent=`みんなの記録 — 総プレイ ${v.plays||0}回 / 抜かれたネジ 累計${v.screws||0}本`;
+      return;
+    }catch(e){}
+  }
+  try{
+    const r=await window.storage.get("stats");
+    const s=r&&r.value?JSON.parse(r.value):{plays:0,screws:0};
+    el.textContent=`この端末の記録 — 総プレイ ${s.plays||0}回 / 抜いたネジ 累計${s.screws||0}本`;
+  }catch(e){ el.textContent=""; }
+}
+
 refreshBestLine();
+refreshStatsLine();
 </script>
 </body>
 </html>
