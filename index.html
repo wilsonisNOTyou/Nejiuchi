@@ -1,4 +1,4 @@
-<!DOCTYPE html>　
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -404,18 +404,18 @@ const WORDS_NORMAL = [
   { t: "鳥じゃなくてもびっくり", k: "とりじゃなくてもびっくり" },
   { t: "アレクサぁ、電気消してぇ", k: "あれくさぁ、でんきけしてぇ" },
   { t: "アレクサぁ、3分タイマー", k: "あれくさぁ、3ぷんたいまー" },
+  { t: "チケット3500円", k: "ちけっと3500えん" },
 ];
 const WORDS_HARD = [
   { t: "星巡りの歌を歌う会", k: "ほしめぐりのうたをうたうかい" },
   { t: "音戦隊ヴォカレンジャー", k: "おとせんたいゔぉかれんじゃー" },
   { t: "モンスターリーグファクトリー", k: "もんすたーりーぐふぁくとりー" },
-  { t: "チケット3500円", k: "ちけっと3500えん" },
   { t: "キャリア教育基礎と私", k: "きゃりあきょういくきそとわたし" },
   { t: "好きなヒスイ発表ドラゴン", k: "すきなひすいはっぴょうどらごん" },
   { t: "川柳を検出しました！", k: "せんりゅうをけんしゅつしました！" },
   { t: "東雲ジョセフ概論第一", k: "しののめじょせふがいろんだいいち" },
   { t: "アラサー、アラフォーの次はアラフー", k: "あらさー、あらふぉーのつぎはあらふー" },
-  { t: "教室使用願がブロックブラスト", k: "きょうしつしようねがいがぶろっくぶらすと" },
+  { t: "教室使用願がブロックプラスト", k: "きょうしつしようねがいがぶろっくぷらすと" },
   { t: "今日のハーモニー、あってなかったーにー", k: "きょうのはーもにー、あってなかったーにー" },
   { t: "セロリオンライン・酒の誓約書同意", k: "せろりおんらいん・さけのせいやくしょどうい" },
   { t: "貴団の情宣を受け入れることについて", k: "きだんのじょうせんをうけいれることについて" },
@@ -907,7 +907,7 @@ document.addEventListener("keydown",e=>{
       score++; $("score").textContent=score;
       sndDone();
       removeScrew();
-      unlockWord(diff,currentWord.k);
+      unlockWord(currentWord.k);
       pickWord();
     }
   }
@@ -1013,37 +1013,45 @@ $("tab-normal").addEventListener("click",()=>openRanking("normal",playerName));
 $("tab-hard").addEventListener("click",()=>openRanking("hard",playerName));
 $("rankBackBtn").addEventListener("click",()=>show("title"));
 
-/* ---------- ネジ抜き辞典 ---------- */
-const unlocked={easy:new Set(),normal:new Set(),hard:new Set()};
+/* ---------- ネジ抜き辞典 ----------
+   開放記録は「読み(k)」単位のひとつの集合で管理する。
+   これにより単語の難易度を移動しても開放状態が引き継がれる。
+   旧形式(easy/normal/hardごとに別集合)のデータがあれば
+   初回読み込み時に自動でひとつの集合へ統合する。 */
+let unlocked=new Set();
 (async()=>{
   try{
     const r=await store.get("dict");
     if(r&&r.value){
       const o=JSON.parse(r.value);
-      for(const d of ["easy","normal","hard"]) unlocked[d]=new Set(o[d]||[]);
+      if(Array.isArray(o)){
+        unlocked=new Set(o); // 新形式: 配列そのまま
+      }else{
+        // 旧形式 {easy:[...],normal:[...],hard:[...]} → 統合
+        const merged=new Set();
+        for(const d of ["easy","normal","hard"]) for(const k of (o[d]||[])) merged.add(k);
+        unlocked=merged;
+        saveDict(); // 新形式で保存し直す
+      }
     }
   }catch(e){}
 })();
 async function saveDict(){
-  try{
-    await store.set("dict",JSON.stringify({
-      easy:[...unlocked.easy], normal:[...unlocked.normal], hard:[...unlocked.hard]
-    }));
-  }catch(e){}
+  try{ await store.set("dict",JSON.stringify([...unlocked])); }catch(e){}
 }
-function unlockWord(d,k){
-  if(!unlocked[d].has(k)){ unlocked[d].add(k); saveDict(); }
+function unlockWord(k){
+  if(!unlocked.has(k)){ unlocked.add(k); saveDict(); }
 }
 function openDict(d){
   $("dtab-easy").classList.toggle("active",d==="easy");
   $("dtab-normal").classList.toggle("active",d==="normal");
   $("dtab-hard").classList.toggle("active",d==="hard");
   show("dict");
-  const arr=WORD_SETS[d], set=unlocked[d];
-  const got=arr.filter(w=>set.has(w.k)).length;
+  const arr=WORD_SETS[d];
+  const got=arr.filter(w=>unlocked.has(w.k)).length;
   let allGot=0, allTotal=0;
   for(const dd of ["easy","normal","hard"]){
-    allGot+=WORD_SETS[dd].filter(w=>unlocked[dd].has(w.k)).length;
+    allGot+=WORD_SETS[dd].filter(w=>unlocked.has(w.k)).length;
     allTotal+=WORD_SETS[dd].length;
   }
   const pct=v=>Math.round(v*100);
@@ -1052,7 +1060,7 @@ function openDict(d){
   const list=$("dictList");
   list.innerHTML="";
   arr.forEach((w,i)=>{
-    const open=set.has(w.k);
+    const open=unlocked.has(w.k);
     const li=document.createElement("li");
     li.className="rank-row";
     li.innerHTML=`<span class="pos">${String(i+1).padStart(2,"0")}</span><span class="pname${open?"":" locked"}"></span>`;
