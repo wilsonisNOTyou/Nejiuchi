@@ -463,6 +463,39 @@ try{
 }catch(e){ db = null; }
 /* ==================== ここまで ==================== */
 
+/* ---------- 永続ストレージ ----------
+   GitHub Pages等の通常ブラウザでは localStorage に保存
+   (ブラウザを閉じても消えない)。使えない環境では
+   window.storage → メモリの順にフォールバック */
+const memStore={};
+const store={
+  async get(key){
+    try{
+      if(typeof localStorage!=="undefined"){
+        const v=localStorage.getItem("nejiuchi:"+key);
+        if(v!==null) return {value:v};
+      }
+    }catch(e){}
+    try{
+      if(window.storage){
+        const r=await window.storage.get(key);
+        if(r) return r;
+      }
+    }catch(e){}
+    return key in memStore ? {value:memStore[key]} : null;
+  },
+  async set(key,value){
+    memStore[key]=value;
+    try{
+      if(typeof localStorage!=="undefined"){
+        localStorage.setItem("nejiuchi:"+key,value);
+        return;
+      }
+    }catch(e){}
+    try{ if(window.storage) await window.storage.set(key,value); }catch(e){}
+  }
+};
+
 const GAME_SECONDS = 60;
 const SCREWS_PER_PLATE = 8;
 const WORD_SETS = { easy: WORDS_EASY, normal: WORDS_NORMAL, hard: WORDS_HARD };
@@ -657,13 +690,13 @@ const sndPlate=()=>beep(90,.3,"triangle",.12);
 const memBest={easy:0,normal:0,hard:0};
 async function loadBest(d){
   try{
-    const r=await window.storage.get("best-"+d);
+    const r=await store.get("best-"+d);
     return r?parseInt(r.value,10)||0:memBest[d];
   }catch(e){ return memBest[d]; }
 }
 async function saveBest(d,v){
   memBest[d]=v;
-  try{ await window.storage.set("best-"+d,String(v)); }catch(e){}
+  try{ await store.set("best-"+d,String(v)); }catch(e){}
 }
 
 /* ---------- 画面制御 ---------- */
@@ -859,7 +892,7 @@ $("titleBtn").addEventListener("click",()=>show("title"));
 let playerName="";
 (async()=>{
   try{
-    const r=await window.storage.get("playerName");
+    const r=await store.get("playerName");
     if(r&&r.value){ playerName=r.value; $("nameInput").value=playerName; }
   }catch(e){}
 })();
@@ -925,7 +958,7 @@ $("regBtn").addEventListener("click",async()=>{
   if(!name){ $("regStatus").textContent="プレイヤー名を入れてください"; return; }
   if(!db){ $("regStatus").textContent="※Firebase未設定のため登録できません"; return; }
   playerName=name;
-  try{ await window.storage.set("playerName",name); }catch(e){}
+  try{ await store.set("playerName",name); }catch(e){}
   $("regBtn").disabled=true;
   $("regStatus").textContent="登録中...";
   try{
@@ -953,7 +986,7 @@ $("rankBackBtn").addEventListener("click",()=>show("title"));
 const unlocked={easy:new Set(),normal:new Set(),hard:new Set()};
 (async()=>{
   try{
-    const r=await window.storage.get("dict");
+    const r=await store.get("dict");
     if(r&&r.value){
       const o=JSON.parse(r.value);
       for(const d of ["easy","normal","hard"]) unlocked[d]=new Set(o[d]||[]);
@@ -962,7 +995,7 @@ const unlocked={easy:new Set(),normal:new Set(),hard:new Set()};
 })();
 async function saveDict(){
   try{
-    await window.storage.set("dict",JSON.stringify({
+    await store.set("dict",JSON.stringify({
       easy:[...unlocked.easy], normal:[...unlocked.normal], hard:[...unlocked.hard]
     }));
   }catch(e){}
@@ -1008,12 +1041,12 @@ async function recordStats(screws){
   try{
     let s={plays:0,screws:0};
     try{
-      const r=await window.storage.get("stats");
+      const r=await store.get("stats");
       if(r&&r.value) s=JSON.parse(r.value);
     }catch(e){}
     s.plays=(s.plays||0)+1;
     s.screws=(s.screws||0)+screws;
-    await window.storage.set("stats",JSON.stringify(s));
+    await store.set("stats",JSON.stringify(s));
   }catch(e){}
   // Firebaseに全プレイヤー合算で記録(ランキング登録不要)
   if(db){
@@ -1035,7 +1068,7 @@ async function refreshStatsLine(){
     }catch(e){}
   }
   try{
-    const r=await window.storage.get("stats");
+    const r=await store.get("stats");
     const s=r&&r.value?JSON.parse(r.value):{plays:0,screws:0};
     el.textContent=`この端末の記録 — 総プレイ ${s.plays||0}回 / 抜いたネジ 累計${s.screws||0}本`;
   }catch(e){ el.textContent=""; }
