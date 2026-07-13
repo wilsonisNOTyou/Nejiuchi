@@ -955,7 +955,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){ clearInterval(timerId); running=false; show("title"); return; }
   if(!running) return;
   const key=e.key;
-  if(!/^[a-zA-Z0-9\-'!?,.~\/]$/.test(key)) return;
+  if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
   e.preventDefault();
   const r=handleKey(key);
   if(r==="miss"){
