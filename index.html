@@ -67,6 +67,9 @@ h1{
 .diff-btn:active{transform:translateY(2px); box-shadow:0 1px 0 #10131a}
 .diff-btn .name{font-size:1.5rem; color:var(--amber)}
 .diff-btn .desc{font-size:.85rem; color:var(--steel); margin-top:.35rem; line-height:1.5}
+.diff-btn.oneshot{border-color:#7a3b3b}
+.diff-btn.oneshot .name{color:#ff8a5c}
+.diff-btn.oneshot:hover,.diff-btn.oneshot:focus-visible{border-color:var(--miss)}
 .best-line{color:var(--steel); font-size:.9rem; min-height:1.4em}
 .hint{color:#6b7484; font-size:.8rem; margin-top:2rem; line-height:1.8}
 
@@ -163,7 +166,8 @@ h1{
 .register{margin-bottom:.6rem}
 .reg-status{color:var(--steel); font-size:.9rem; min-height:1.4em; margin-top:.6rem}
 h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; text-shadow:0 2px 0 #6b4e00}
-.rank-tabs{display:flex; gap:.8rem; justify-content:center; margin-bottom:1.2rem}
+.rank-tabs{display:flex; gap:.6rem; justify-content:center; margin-bottom:1.2rem; flex-wrap:wrap}
+.rank-tabs .btn{padding:.6rem 1.1rem; font-size:.95rem}
 .rank-tabs .btn.active{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
 .rank-list{list-style:none; width:min(460px,90vw); margin:0 auto; text-align:left; max-height:46vh; overflow-y:auto}
 .rank-row{
@@ -200,6 +204,13 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
 @keyframes scoreflash{0%,60%{color:var(--miss)}100%{color:var(--amber)}}
 .rank-row .pname.locked{color:#596170; letter-spacing:.25em}
 
+/* 一本勝負の終了演出 */
+.word-panel.fatal{animation:fatalflash .6s ease-out}
+@keyframes fatalflash{
+  0%{border-color:var(--miss); box-shadow:0 0 30px rgba(255,92,92,.7)}
+  100%{border-color:var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4)}
+}
+
 /* カウントダウン */
 #countdown{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -229,6 +240,10 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
         <div class="name">ハード</div>
         <div class="desc">14文字以上・60秒<br>5ミスでネジ-1本</div>
       </button>
+      <button class="diff-btn oneshot" data-diff="oneshot">
+        <div class="name">一本勝負</div>
+        <div class="desc">時間無制限・1ミスで即終了<br>進むほど長い語録が混ざる</div>
+      </button>
     </div>
     <p class="best-line" id="bestLine"></p>
     <p class="best-line" id="statsLine"></p>
@@ -236,7 +251,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
       <button class="btn" id="rankBtn">ランキングを見る</button>
       <button class="btn" id="dictBtn">ネジ抜き辞典</button>
     </div>
-    <p class="hint">難易度をクリックで開始(キー 1 / 2 / 3 でも可) / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
+    <p class="hint">難易度をクリックで開始(キー 1 / 2 / 3 / 4 でも可) / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
     <div class="hazard"></div>
   </section>
 
@@ -244,10 +259,10 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
   <section id="screen-game" class="screen">
     <div class="hud">
       <span>抜いたネジ <b id="score">0</b>本</span>
-      <span>ミス <b id="miss" style="color:var(--miss)">0</b></span>
-      <span>残り <b id="time">60</b>秒</span>
+      <span id="missWrap">ミス <b id="miss" style="color:var(--miss)">0</b></span>
+      <span><span id="timeLabel">残り </span><b id="time">60</b>秒</span>
     </div>
-    <div class="timebar"><i id="timefill"></i></div>
+    <div class="timebar" id="timebar"><i id="timefill"></i></div>
 
     <div class="word-panel" id="wordPanel">
       <span class="corner"></span>
@@ -265,7 +280,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
     <p class="subtitle" id="resultDiff"></p>
     <p class="result-sub">抜いたネジ</p>
     <div class="result-count"><span id="resultScore">0</span><span style="font-size:.35em">本</span></div>
-    <p class="result-sub">ミス <span id="resultMiss">0</span>回 / 自己ベスト <span id="resultBest">0</span>本</p>
+    <p class="result-sub" id="resultSubLine"></p>
     <p class="result-new" id="resultNew"></p>
     <div class="register" id="registerBox">
       <input id="nameInput" class="name-input" maxlength="10" placeholder="プレイヤー名" autocomplete="off">
@@ -287,6 +302,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
       <button class="btn" id="tab-easy">イージー</button>
       <button class="btn" id="tab-normal">ノーマル</button>
       <button class="btn" id="tab-hard">ハード</button>
+      <button class="btn" id="tab-oneshot">一本勝負</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
@@ -319,6 +335,8 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
    形式: { t: 画面に出す表記, k: ひらがな(入力判定用) }
   { t: "", k: "" },
    イージー: 8文字以下 / ノーマル: 9〜13文字 / ハード: 14文字以上
+   ※「一本勝負」モードは専用リストを持たず、この3つを
+     進行度に応じて混ぜて出題する(下の pickOneshotSet 参照)
 ===================================================== */
 const WORDS_EASY = [
   { t: "せもい", k: "せもい" },
@@ -579,6 +597,8 @@ const WORDS_HARD = [
   { t: "笑ったら痰が絡まっちゃうわ", k: "わらったらたんがからまっちゃうわ" },
   { t: "酔うとふわふわのこんぶになる", k: "ようとふわふわのこんぶになる" },
   { t: "れろれろれろパラレルワールド", k: "れろれろれろぱられるわーるど" },
+  { t: "先輩はトイレじゃありません", k: "せんぱいはといれじゃありません" },
+  { t: "私は胃薬ではありません。ういるそん先輩はトイレです", k: "わたしはいぐすりではありません。ういるそんせんぱいはといれです" },
 ];
 /* ==================== ここまで ==================== */
 
@@ -643,8 +663,16 @@ const store={
 const GAME_SECONDS = 60;
 const SCREWS_PER_PLATE = 8;
 const WORD_SETS = { easy: WORDS_EASY, normal: WORDS_NORMAL, hard: WORDS_HARD };
-const DIFF_LABEL = { easy: "イージー", normal: "ノーマル", hard: "ハード" };
+const DIFF_LABEL = { easy: "イージー", normal: "ノーマル", hard: "ハード", oneshot: "一本勝負" };
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
+const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度(一本勝負は専用語なし)
+const RANK_TABS = ["easy","normal","hard","oneshot"];  // ランキングのタブ
+
+/* 一本勝負の出題ミックス
+   抜いた本数が増えるほどノーマル→ハードの比率が上がり、
+   ONESHOT_FULL_MIX 本でイージー:ノーマル:ハード = 1:1:1 に到達する */
+const ONESHOT_FULL_MIX = 30;   // ここで1:1:1
+const ONESHOT_HARD_FROM = 10;  // ハードが混ざり始める本数
 
 /* ---------- ローマ字テーブル ---------- */
 const KANA = {
@@ -850,9 +878,10 @@ const sndDone=()=>{beep(700,.09,"square",.06); setTimeout(()=>beep(1050,.12,"squ
 const sndMiss=()=>beep(160,.12,"sawtooth",.07);
 const sndPenalty=()=>{beep(220,.18,"sawtooth",.09); setTimeout(()=>beep(150,.25,"sawtooth",.09),130);};
 const sndPlate=()=>beep(90,.3,"triangle",.12);
+const sndFatal=()=>{beep(300,.2,"sawtooth",.1); setTimeout(()=>beep(200,.25,"sawtooth",.1),160); setTimeout(()=>beep(110,.5,"sawtooth",.11),330);};
 
 /* ---------- 記録(ベスト) ---------- */
-const memBest={easy:0,normal:0,hard:0};
+const memBest={easy:0,normal:0,hard:0,oneshot:0};
 async function loadBest(d){
   try{
     const r=await store.get("best-"+d);
@@ -875,11 +904,12 @@ function show(name){
 }
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
-let timerId=null, lastWordIdx=-1, plateScrews=0, running=false, currentWord=null;
+let timerId=null, lastWordKey=null, plateScrews=0, running=false, currentWord=null;
+let elapsed=0; // 一本勝負の経過秒
 
 async function refreshBestLine(){
-  const e=await loadBest("easy"), n=await loadBest("normal"), h=await loadBest("hard");
-  $("bestLine").textContent=`自己ベスト — イージー: ${e}本 / ノーマル: ${n}本 / ハード: ${h}本`;
+  const e=await loadBest("easy"), n=await loadBest("normal"), h=await loadBest("hard"), o=await loadBest("oneshot");
+  $("bestLine").textContent=`自己ベスト — イージー: ${e}本 / ノーマル: ${n}本 / ハード: ${h}本 / 一本勝負: ${o}本`;
 }
 
 function buildPlate(){
@@ -919,11 +949,26 @@ function reviveScrew(){
   setTimeout(()=>s.classList.remove("back"),600);
 }
 
+/* 一本勝負: 抜いた本数に応じて出題元の難易度を抽選する
+   score=0 → イージー100% / score>=30 → 1:1:1 */
+function pickOneshotSet(){
+  const pn=Math.min(Math.max(score,0)/ONESHOT_FULL_MIX,1);
+  const ph=Math.min(Math.max(score-ONESHOT_HARD_FROM,0)/(ONESHOT_FULL_MIX-ONESHOT_HARD_FROM),1);
+  const wN=pn/3, wH=ph/3, wE=Math.max(1-wN-wH,0);
+  const r=Math.random()*(wE+wN+wH);
+  if(r<wE) return WORDS_EASY;
+  if(r<wE+wN) return WORDS_NORMAL;
+  return WORDS_HARD;
+}
+
 function pickWord(){
-  let i;
-  do{ i=Math.floor(Math.random()*words.length); }while(words.length>1 && i===lastWordIdx);
-  lastWordIdx=i;
-  const w=words[i];
+  const pool = (diff==="oneshot") ? pickOneshotSet() : words;
+  let w;
+  for(let tries=0;tries<12;tries++){
+    w=pool[Math.floor(Math.random()*pool.length)];
+    if(pool.length<=1 || w.k!==lastWordKey) break;
+  }
+  lastWordKey=w.k;
   currentWord=w;
   setWord(w.k);
   $("wordText").textContent=w.t;
@@ -934,13 +979,29 @@ function renderRomaji(){
   $("romaji").innerHTML=
     `<span class="done">${typedRomaji+buf}</span><span class="rest">${remainingRomaji()}</span>`;
 }
+/* カウントダウン中に前回の語が残らないよう、出題枠を空にする */
+function clearWordPanel(){
+  currentWord=null;
+  chunks=[]; chunkIdx=0; buf=""; typedRomaji=""; nAmbig=false;
+  $("wordText").innerHTML="&nbsp;";
+  $("wordKana").innerHTML="&nbsp;";
+  $("romaji").innerHTML="&nbsp;";
+}
 
 function startGame(d){
   diff=d;
-  words=WORD_SETS[d];
-  score=0; miss=0; timeLeft=GAME_SECONDS; lastWordIdx=-1; running=false;
+  const oneshot = (d==="oneshot");
+  words = oneshot ? [] : WORD_SETS[d];
+  score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false;
+  clearInterval(timerId);
+  clearWordPanel();                       // ← 前回の出題を消してからカウントダウン
+  $("wordPanel").classList.remove("fatal");
   $("score").textContent="0"; $("miss").textContent="0";
-  $("time").textContent=GAME_SECONDS;
+  // HUD/タイムバーをモードごとに切り替え
+  $("missWrap").style.display = oneshot ? "none" : "";
+  $("timebar").style.visibility = oneshot ? "hidden" : "visible";
+  $("timeLabel").textContent = oneshot ? "経過 " : "残り ";
+  $("time").textContent = oneshot ? 0 : GAME_SECONDS;
   $("timefill").style.width="100%"; $("timefill").classList.remove("low");
   buildPlate();
   show("game");
@@ -959,6 +1020,14 @@ function startGame(d){
 }
 function startTimer(){
   const t0=Date.now();
+  if(diff==="oneshot"){
+    // 時間無制限: 経過時間を数え上げるだけ
+    timerId=setInterval(()=>{
+      elapsed=(Date.now()-t0)/1000;
+      $("time").textContent=Math.floor(elapsed);
+    },100);
+    return;
+  }
   timerId=setInterval(()=>{
     timeLeft=GAME_SECONDS-(Date.now()-t0)/1000;
     if(timeLeft<=0){ timeLeft=0; endGame(); }
@@ -976,8 +1045,9 @@ async function endGame(){
   if(isNew) await saveBest(diff,score);
   $("resultDiff").textContent=`— ${DIFF_LABEL[diff]} —`;
   $("resultScore").textContent=score;
-  $("resultMiss").textContent=miss;
-  $("resultBest").textContent=isNew?score:best;
+  $("resultSubLine").textContent = diff==="oneshot"
+    ? `記録 ${elapsed.toFixed(1)}秒 / 自己ベスト ${isNew?score:best}本`
+    : `ミス ${miss}回 / 自己ベスト ${isNew?score:best}本`;
   $("resultNew").textContent=isNew?"★ 自己ベスト更新! ★":"";
   $("nameInput").value=playerName;
   $("regBtn").disabled=false;
@@ -997,6 +1067,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="1") startGame("easy");
     if(e.key==="2") startGame("normal");
     if(e.key==="3") startGame("hard");
+    if(e.key==="4") startGame("oneshot");
     return;
   }
   if(scene==="ranking"){
@@ -1013,7 +1084,7 @@ document.addEventListener("keydown",e=>{
     return;
   }
   // ゲーム中
-  if(e.key==="Escape"){ clearInterval(timerId); running=false; show("title"); return; }
+  if(e.key==="Escape"){ clearInterval(timerId); running=false; clearWordPanel(); show("title"); return; }
   if(!running) return;
   const key=e.key;
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
@@ -1021,9 +1092,17 @@ document.addEventListener("keydown",e=>{
   const r=handleKey(key);
   if(r==="miss"){
     miss++; $("miss").textContent=miss;
-    sndMiss();
     const p=$("wordPanel");
     p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
+    // 一本勝負: 1ミスで即終了
+    if(diff==="oneshot"){
+      running=false;
+      sndFatal();
+      p.classList.add("fatal");
+      endGame();
+      return;
+    }
+    sndMiss();
     // ミス上限でネジが1本戻る
     if(miss % MISS_PENALTY[diff]===0 && score>0){
       score--; $("score").textContent=score;
@@ -1062,23 +1141,37 @@ let playerName="";
   }catch(e){}
 })();
 
+/* 記録の優劣比較: 本数が多いほど上。
+   一本勝負のみ、同本数なら経過時間が短いほうが上。
+   それでも並んだら先に登録したほうが上(呼び出し側のソートで解決) */
+function betterRecord(a,b,d){
+  if(a.s!==b.s) return a.s-b.s;                  // 正なら a のほうが上位
+  if(d==="oneshot"){
+    const ae=(a.e==null)?Infinity:a.e, be=(b.e==null)?Infinity:b.e;
+    return be-ae;                                // 時間が短いほうが上位
+  }
+  return 0;
+}
+
 /* 登録: 1人(同名)につき MAX_ENTRIES_PER_PLAYER 件まで。
-   既に上限なら、自分の最低スコアを上回った時だけ入れ替える */
-async function submitScore(name,scoreVal,d){
+   既に上限なら、自分の一番弱い記録を上回った時だけ入れ替える */
+async function submitScore(name,scoreVal,d,extra){
   const ref=db.ref("nejiuchi/scores/"+d);
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
   const mine=[];
-  snap.forEach(c=>{ mine.push({key:c.key, s:c.val().s}); });
+  snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e}); });
+  const entry={n:name, s:scoreVal, t:Date.now()};
+  if(extra && extra.e!=null) entry.e=extra.e;
   if(mine.length>=MAX_ENTRIES_PER_PLAYER){
-    mine.sort((a,b)=>a.s-b.s); // 低い順
-    if(scoreVal<=mine[0].s) return {saved:false};
+    mine.sort((a,b)=>betterRecord(a,b,d)); // 弱い順
+    if(betterRecord(entry,mine[0],d)<=0) return {saved:false};
     await ref.child(mine[0].key).remove();
     // 万一3件以上あった場合の掃除
     for(let i=1;i<=mine.length-MAX_ENTRIES_PER_PLAYER;i++){
       await ref.child(mine[i].key).remove();
     }
   }
-  await ref.push({n:name, s:scoreVal, t:Date.now()});
+  await ref.push(entry);
   return {saved:true};
 }
 
@@ -1087,14 +1180,12 @@ async function fetchRanking(d){
     .orderByChild("s").limitToLast(RANKING_SIZE).once("value");
   const rows=[];
   snap.forEach(c=>{ rows.push(c.val()); });
-  rows.sort((a,b)=> b.s-a.s || a.t-b.t); // スコア降順、同点は先着順
+  rows.sort((a,b)=> -betterRecord(a,b,d) || a.t-b.t); // 本数降順→(一本勝負は)時間昇順→先着順
   return rows;
 }
 
 async function openRanking(d,highlight){
-  $("tab-easy").classList.toggle("active",d==="easy");
-  $("tab-normal").classList.toggle("active",d==="normal");
-  $("tab-hard").classList.toggle("active",d==="hard");
+  for(const t of RANK_TABS) $("tab-"+t).classList.toggle("active",d===t);
   show("ranking");
   const list=$("rankList");
   list.innerHTML="";
@@ -1109,7 +1200,10 @@ async function openRanking(d,highlight){
     rows.forEach((r,i)=>{
       const li=document.createElement("li");
       li.className="rank-row"+(i===0?" top1":"")+(highlight&&r.n===highlight?" me":"");
-      li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${r.s}本</span>`;
+      const scoreText = (d==="oneshot" && r.e!=null)
+        ? `${r.s}本 <span style="color:var(--steel);font-size:.85em">${Number(r.e).toFixed(1)}秒</span>`
+        : `${r.s}本`;
+      li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent=r.n; // XSS対策でtextContent
       list.appendChild(li);
     });
@@ -1127,12 +1221,14 @@ $("regBtn").addEventListener("click",async()=>{
   $("regBtn").disabled=true;
   $("regStatus").textContent="登録中...";
   try{
-    const res=await submitScore(name,score,diff);
+    const res=await submitScore(name,score,diff, diff==="oneshot" ? {e:Number(elapsed.toFixed(2))} : null);
     if(res.saved){
       $("regStatus").textContent="登録しました!";
       setTimeout(()=>openRanking(diff,name),500);
     }else{
-      $("regStatus").textContent="自分の既存記録2件より低いため掲載されませんでした(1人2件まで)";
+      $("regStatus").textContent = diff==="oneshot"
+        ? "自分の既存記録2件を超えられなかったため掲載されませんでした(同本数なら時間勝負)"
+        : "自分の既存記録2件より低いため掲載されませんでした(1人2件まで)";
       $("regBtn").disabled=false;
     }
   }catch(e){
@@ -1142,9 +1238,9 @@ $("regBtn").addEventListener("click",async()=>{
 });
 
 $("rankBtn").addEventListener("click",()=>openRanking("normal",playerName));
-$("tab-easy").addEventListener("click",()=>openRanking("easy",playerName));
-$("tab-normal").addEventListener("click",()=>openRanking("normal",playerName));
-$("tab-hard").addEventListener("click",()=>openRanking("hard",playerName));
+for(const t of RANK_TABS){
+  $("tab-"+t).addEventListener("click",()=>openRanking(t,playerName));
+}
 $("rankBackBtn").addEventListener("click",()=>show("title"));
 
 /* ---------- ネジ抜き辞典 ----------
@@ -1163,7 +1259,7 @@ let unlocked=new Set();
       }else{
         // 旧形式 {easy:[...],normal:[...],hard:[...]} → 統合
         const merged=new Set();
-        for(const d of ["easy","normal","hard"]) for(const k of (o[d]||[])) merged.add(k);
+        for(const d of DICT_TABS) for(const k of (o[d]||[])) merged.add(k);
         unlocked=merged;
         saveDict(); // 新形式で保存し直す
       }
@@ -1177,14 +1273,12 @@ function unlockWord(k){
   if(!unlocked.has(k)){ unlocked.add(k); saveDict(); }
 }
 function openDict(d){
-  $("dtab-easy").classList.toggle("active",d==="easy");
-  $("dtab-normal").classList.toggle("active",d==="normal");
-  $("dtab-hard").classList.toggle("active",d==="hard");
+  for(const t of DICT_TABS) $("dtab-"+t).classList.toggle("active",d===t);
   show("dict");
   const arr=WORD_SETS[d];
   const got=arr.filter(w=>unlocked.has(w.k)).length;
   let allGot=0, allTotal=0;
-  for(const dd of ["easy","normal","hard"]){
+  for(const dd of DICT_TABS){
     allGot+=WORD_SETS[dd].filter(w=>unlocked.has(w.k)).length;
     allTotal+=WORD_SETS[dd].length;
   }
@@ -1203,9 +1297,9 @@ function openDict(d){
   });
 }
 $("dictBtn").addEventListener("click",()=>openDict("easy"));
-$("dtab-easy").addEventListener("click",()=>openDict("easy"));
-$("dtab-normal").addEventListener("click",()=>openDict("normal"));
-$("dtab-hard").addEventListener("click",()=>openDict("hard"));
+for(const t of DICT_TABS){
+  $("dtab-"+t).addEventListener("click",()=>openDict(t));
+}
 $("dictBackBtn").addEventListener("click",()=>show("title"));
 
 /* ---------- 全体統計(総プレイ回数・抜いたネジ累計) ---------- */
