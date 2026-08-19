@@ -18,6 +18,7 @@
   --steel:#aeb8c6;
   --ok:#5fd08a;
   --miss:#ff5c5c;
+  --cyan:#5fc9d0;        /* タイムアタック */
   --ink:#e8ecf2;
   font-size:16px;
 }
@@ -31,10 +32,10 @@ body{
   font-family:'DotGothic16','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
   min-height:100vh;
   display:flex; align-items:center; justify-content:center;
-  overflow:hidden;
+  overflow-x:hidden;
   user-select:none;
 }
-#app{width:min(760px,94vw)}
+#app{width:min(760px,94vw); padding:2rem 0}
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -46,32 +47,46 @@ body{
   height:10px; width:min(520px,80vw); border-radius:2px; opacity:.9;
 }
 h1{
-  font-size:clamp(3rem,9vw,5rem);
+  font-size:clamp(2.6rem,8vw,4.4rem);
   letter-spacing:.12em;
   color:var(--amber);
   text-shadow:0 3px 0 #6b4e00, 0 6px 18px rgba(0,0,0,.6);
-  margin:.35em 0 .1em;
+  margin:.3em 0 .1em;
 }
-.subtitle{color:var(--steel); letter-spacing:.25em; margin-bottom:2.2rem}
-.diff-row{display:flex; gap:1.2rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.6rem}
+.subtitle{color:var(--steel); letter-spacing:.25em; margin-bottom:1.6rem}
+.mode-group{margin-bottom:1.3rem}
+.mode-head{
+  color:var(--steel); font-size:.95rem; letter-spacing:.3em;
+  margin-bottom:.6rem; display:flex; align-items:center; gap:.8rem; justify-content:center;
+}
+.mode-head::before,.mode-head::after{
+  content:''; height:1px; flex:1; max-width:110px; background:var(--line);
+}
+.mode-head .ta{color:var(--cyan)}
+.mode-head .sa{color:var(--amber)}
+.diff-row{display:flex; gap:.9rem; justify-content:center; flex-wrap:wrap}
 .diff-btn{
   font-family:inherit; cursor:pointer;
   background:linear-gradient(180deg,var(--panel-hi),var(--panel));
   border:2px solid var(--line); border-radius:8px;
-  color:var(--ink); padding:1rem 1.6rem; width:230px;
+  color:var(--ink); padding:.75rem 1.1rem; width:200px;
   box-shadow:0 4px 0 #10131a;
   transition:transform .08s, box-shadow .08s, border-color .15s;
   text-align:left;
 }
 .diff-btn:hover, .diff-btn:focus-visible{border-color:var(--amber); outline:none; transform:translateY(-2px)}
 .diff-btn:active{transform:translateY(2px); box-shadow:0 1px 0 #10131a}
-.diff-btn .name{font-size:1.5rem; color:var(--amber)}
-.diff-btn .desc{font-size:.85rem; color:var(--steel); margin-top:.35rem; line-height:1.5}
-.diff-btn.oneshot{border-color:#7a3b3b}
+.diff-btn .name{font-size:1.25rem; color:var(--amber)}
+.diff-btn .desc{font-size:.78rem; color:var(--steel); margin-top:.25rem; line-height:1.45}
+.diff-btn .kbd{float:right; color:#6b7484; font-size:.85rem}
+.diff-btn.ta{border-color:#33606b}
+.diff-btn.ta .name{color:var(--cyan)}
+.diff-btn.ta:hover,.diff-btn.ta:focus-visible{border-color:var(--cyan)}
+.diff-btn.oneshot{border-color:#7a3b3b; width:min(420px,90vw)}
 .diff-btn.oneshot .name{color:#ff8a5c}
 .diff-btn.oneshot:hover,.diff-btn.oneshot:focus-visible{border-color:var(--miss)}
-.best-line{color:var(--steel); font-size:.9rem; min-height:1.4em}
-.hint{color:#6b7484; font-size:.8rem; margin-top:2rem; line-height:1.8}
+.best-line{color:var(--steel); font-size:.85rem; min-height:1.3em; line-height:1.6}
+.hint{color:#6b7484; font-size:.78rem; margin-top:1.4rem; line-height:1.7}
 
 /* ---- ゲーム画面 ---- */
 .hud{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:.6rem; font-size:1rem; color:var(--steel)}
@@ -79,11 +94,12 @@ h1{
 .timebar{height:8px; background:#0d0f13; border-radius:4px; overflow:hidden; border:1px solid var(--line); margin-bottom:1.2rem}
 .timebar>i{display:block; height:100%; background:linear-gradient(90deg,var(--amber),#ffd75e); width:100%; transition:width .1s linear}
 .timebar>i.low{background:linear-gradient(90deg,#ff5c5c,#ff8a5c)}
+.timebar>i.ta{background:linear-gradient(90deg,var(--cyan),#9fe4e8); transition:width .25s ease}
 
 .word-panel{
   background:linear-gradient(180deg,#333a45,#262c36 55%,#2b323d);
   border:2px solid var(--line); border-radius:10px;
-  padding:1.6rem 1rem 1.4rem; margin-bottom:1.4rem;
+  padding:1.6rem 1rem 1.4rem; margin-bottom:1rem;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4);
   position:relative;
 }
@@ -106,6 +122,13 @@ h1{
 #romaji .rest{color:#7f8a9b}
 .word-panel.shake{animation:shake .18s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* 次の語録の先読み(タイムアタック) */
+#nextWord{
+  color:#6b7484; font-size:.9rem; min-height:1.4em; margin-bottom:.9rem;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#nextWord .lbl{color:#525a68; margin-right:.5em; letter-spacing:.15em}
 
 /* ---- ネジ板(シグネチャ) ---- */
 .plate{
@@ -143,6 +166,7 @@ h1{
 
 /* ---- リザルト ---- */
 .result-count{font-size:clamp(3.5rem,12vw,6rem); color:var(--amber); text-shadow:0 4px 0 #6b4e00; margin:.2em 0}
+.result-count.ta{color:var(--cyan); text-shadow:0 4px 0 #24555a}
 .result-sub{color:var(--steel); margin-bottom:.4rem}
 .result-new{color:var(--ok); font-size:1.1rem; min-height:1.4em; margin-bottom:1.4rem}
 .btn-row{display:flex; gap:1rem; justify-content:center; margin-top:1rem; flex-wrap:wrap}
@@ -165,11 +189,13 @@ h1{
 .name-input:focus{outline:none; border-color:var(--amber)}
 .register{margin-bottom:.6rem}
 .reg-status{color:var(--steel); font-size:.9rem; min-height:1.4em; margin-top:.6rem}
-h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; text-shadow:0 2px 0 #6b4e00}
-.rank-tabs{display:flex; gap:.6rem; justify-content:center; margin-bottom:1.2rem; flex-wrap:wrap}
-.rank-tabs .btn{padding:.6rem 1.1rem; font-size:.95rem}
+h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1rem; text-shadow:0 2px 0 #6b4e00}
+.rank-tabs{display:flex; gap:.45rem; justify-content:center; margin-bottom:.5rem; flex-wrap:wrap}
+.rank-tabs .btn{padding:.45rem .85rem; font-size:.85rem}
 .rank-tabs .btn.active{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
-.rank-list{list-style:none; width:min(460px,90vw); margin:0 auto; text-align:left; max-height:46vh; overflow-y:auto}
+.rank-tabs .btn.ta.active{color:#08282b; background:linear-gradient(180deg,#9fe4e8,var(--cyan)); border-color:#3d8d95}
+.tab-group-label{color:#6b7484; font-size:.75rem; letter-spacing:.2em; margin:.5rem 0 .3rem}
+.rank-list{list-style:none; width:min(460px,90vw); margin:0 auto; text-align:left; max-height:42vh; overflow-y:auto}
 .rank-row{
   display:flex; align-items:center; gap:.8rem;
   background:linear-gradient(180deg,var(--panel-hi),var(--panel));
@@ -204,10 +230,79 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
 @keyframes scoreflash{0%,60%{color:var(--miss)}100%{color:var(--amber)}}
 .rank-row .pname.locked{color:#596170; letter-spacing:.25em}
 
+/* ---- 一本勝負: 段階が上がるほど熱を帯びる演出 ----
+   本数に応じて body に os1〜os4 が付き、色味と発光だけが強まる。
+   振動や明滅は使わず、目に負担をかけないようにしている。 */
+#heatLayer{
+  position:fixed; inset:0; pointer-events:none; z-index:1;
+  opacity:0; transition:opacity 1.2s ease, background 1.2s ease;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,.55) 100%),
+    radial-gradient(ellipse at 50% 110%, rgba(255,120,40,.16) 0%, transparent 60%);
+}
+body.os1 #heatLayer{opacity:.45}
+body.os2 #heatLayer{
+  opacity:.7;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 38%, rgba(0,0,0,.62) 100%),
+    radial-gradient(ellipse at 50% 110%, rgba(255,100,30,.24) 0%, transparent 62%);
+}
+body.os3 #heatLayer{
+  opacity:.85;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 32%, rgba(6,0,0,.7) 100%),
+    radial-gradient(ellipse at 50% 110%, rgba(255,80,30,.32) 0%, transparent 65%);
+}
+body.os4 #heatLayer{
+  opacity:1;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 26%, rgba(10,0,0,.78) 100%),
+    radial-gradient(ellipse at 50% 112%, rgba(255,64,24,.4) 0%, transparent 68%);
+}
+/* 出題パネル: 段階ごとに枠が熱を持つ */
+body.os1 .word-panel{border-color:#6a5a3a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 18px rgba(245,179,1,.18), 0 10px 30px rgba(0,0,0,.4)}
+body.os2 .word-panel{border-color:#8a5a2a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 26px rgba(255,150,40,.28), 0 10px 30px rgba(0,0,0,.45)}
+body.os3 .word-panel{border-color:#a4522a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 34px rgba(255,110,40,.36), 0 10px 30px rgba(0,0,0,.5)}
+body.os4 .word-panel{border-color:#c2452a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 44px rgba(255,80,40,.46), 0 10px 30px rgba(0,0,0,.55)}
+.word-panel{transition:border-color 1s ease, box-shadow 1s ease}
+/* ネジ板と HUD の数字も段階に合わせて色づく */
+.plate{transition:box-shadow 1s ease, border-color 1s ease}
+body.os2 .plate{border-color:#6a5340; box-shadow:0 6px 0 #10131a, 0 0 20px rgba(255,140,50,.14)}
+body.os3 .plate{border-color:#7d5238; box-shadow:0 6px 0 #10131a, 0 0 28px rgba(255,110,45,.2)}
+body.os4 .plate{border-color:#94472f; box-shadow:0 6px 0 #10131a, 0 0 36px rgba(255,80,40,.28)}
+.hud b#score{transition:color .8s ease, text-shadow .8s ease}
+body.os2 .hud b#score{color:#ffc24a}
+body.os3 .hud b#score{color:#ff9a3c; text-shadow:0 0 12px rgba(255,140,50,.5)}
+body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
+/* ゲーム画面をオーバーレイより前面に置く */
+#app{position:relative; z-index:2}
+
+/* 段階到達テロップ */
+#stagePop{
+  position:fixed; left:50%; top:22%; transform:translateX(-50%);
+  z-index:11; pointer-events:none; opacity:0;
+  color:var(--amber); letter-spacing:.3em; white-space:nowrap;
+  font-size:clamp(1.6rem,5vw,2.6rem);
+  text-shadow:0 3px 0 #6b4e00, 0 0 24px rgba(245,179,1,.5);
+}
+#stagePop.show{animation:stagepop 1.6s ease-out}
+@keyframes stagepop{
+  0%{opacity:0; transform:translate(-50%,14px) scale(.92)}
+  18%{opacity:1; transform:translate(-50%,0) scale(1)}
+  75%{opacity:1}
+  100%{opacity:0; transform:translate(-50%,-10px) scale(1)}
+}
+
 /* 一本勝負の終了演出 */
 .word-panel.fatal{animation:fatalflash .6s ease-out}
 @keyframes fatalflash{
   0%{border-color:var(--miss); box-shadow:0 0 30px rgba(255,92,92,.7)}
+  100%{border-color:var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4)}
+}
+/* タイムアタックの完走演出 */
+.word-panel.clear{animation:clearflash .7s ease-out}
+@keyframes clearflash{
+  0%{border-color:var(--cyan); box-shadow:0 0 34px rgba(95,201,208,.75)}
   100%{border-color:var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4)}
 }
 
@@ -227,38 +322,67 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
     <div class="hazard"></div>
     <h1>ネジ打ち</h1>
     <p class="subtitle">— 打てば打つほど、ネジが抜ける —</p>
-    <div class="diff-row">
-      <button class="diff-btn" data-diff="easy">
-        <div class="name">イージー</div>
-        <div class="desc">8文字以下・60秒<br>10ミスでネジ-1本</div>
-      </button>
-      <button class="diff-btn" data-diff="normal">
-        <div class="name">ノーマル</div>
-        <div class="desc">9〜13文字・60秒<br>7ミスでネジ-1本</div>
-      </button>
-      <button class="diff-btn" data-diff="hard">
-        <div class="name">ハード</div>
-        <div class="desc">14文字以上・60秒<br>5ミスでネジ-1本</div>
-      </button>
-      <button class="diff-btn oneshot" data-diff="oneshot">
-        <div class="name">一本勝負</div>
-        <div class="desc">時間無制限・1ミスで即終了<br>進むほど長い語録が混ざる</div>
-      </button>
+
+    <div class="mode-group">
+      <div class="mode-head"><span class="sa">スコアアタック</span></div>
+      <div class="diff-row">
+        <button class="diff-btn" data-diff="easy">
+          <div class="name">イージー<span class="kbd">1</span></div>
+          <div class="desc">8文字以下・60秒<br>10ミスでネジ-1本</div>
+        </button>
+        <button class="diff-btn" data-diff="normal">
+          <div class="name">ノーマル<span class="kbd">2</span></div>
+          <div class="desc">9〜13文字・60秒<br>7ミスでネジ-1本</div>
+        </button>
+        <button class="diff-btn" data-diff="hard">
+          <div class="name">ハード<span class="kbd">3</span></div>
+          <div class="desc">14文字以上・60秒<br>5ミスでネジ-1本</div>
+        </button>
+      </div>
     </div>
+
+    <div class="mode-group">
+      <div class="mode-head"><span class="ta">タイムアタック</span></div>
+      <div class="diff-row">
+        <button class="diff-btn ta" data-diff="ta-easy">
+          <div class="name">イージー<span class="kbd">4</span></div>
+          <div class="desc">8文字以下を15本<br>ミスしてもOK</div>
+        </button>
+        <button class="diff-btn ta" data-diff="ta-normal">
+          <div class="name">ノーマル<span class="kbd">5</span></div>
+          <div class="desc">9〜13文字を10本<br>ミスしてもOK</div>
+        </button>
+        <button class="diff-btn ta" data-diff="ta-hard">
+          <div class="name">ハード<span class="kbd">6</span></div>
+          <div class="desc">14文字以上を5本<br>ミスしてもOK</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="mode-group">
+      <div class="diff-row">
+        <button class="diff-btn oneshot" data-diff="oneshot">
+          <div class="name">一本勝負<span class="kbd">7</span></div>
+          <div class="desc">時間無制限・1ミスで即終了 / 進むほど長い語録が混ざる</div>
+        </button>
+      </div>
+    </div>
+
     <p class="best-line" id="bestLine"></p>
+    <p class="best-line" id="bestLineTa"></p>
     <p class="best-line" id="statsLine"></p>
     <div class="btn-row" style="margin-top:.2rem">
       <button class="btn" id="rankBtn">ランキングを見る</button>
       <button class="btn" id="dictBtn">ネジ抜き辞典</button>
     </div>
-    <p class="hint">難易度をクリックで開始(キー 1 / 2 / 3 / 4 でも可) / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
+    <p class="hint">難易度をクリックで開始(キー 1〜7 でも可) / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
     <div class="hazard"></div>
   </section>
 
   <!-- ゲーム画面 -->
   <section id="screen-game" class="screen">
     <div class="hud">
-      <span>抜いたネジ <b id="score">0</b>本</span>
+      <span id="scoreWrap"><span id="scoreLabel">抜いたネジ </span><b id="score">0</b>本</span>
       <span id="missWrap">ミス <b id="miss" style="color:var(--miss)">0</b></span>
       <span><span id="timeLabel">残り </span><b id="time">60</b>秒</span>
     </div>
@@ -271,6 +395,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
       <div id="wordKana">&nbsp;</div>
       <div id="romaji">&nbsp;</div>
     </div>
+    <div id="nextWord">&nbsp;</div>
 
     <div class="plate" id="plate"></div>
   </section>
@@ -278,8 +403,8 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
   <!-- リザルト画面 -->
   <section id="screen-result" class="screen">
     <p class="subtitle" id="resultDiff"></p>
-    <p class="result-sub">抜いたネジ</p>
-    <div class="result-count"><span id="resultScore">0</span><span style="font-size:.35em">本</span></div>
+    <p class="result-sub" id="resultCaption">抜いたネジ</p>
+    <div class="result-count" id="resultCount"><span id="resultScore">0</span><span style="font-size:.35em" id="resultUnit">本</span></div>
     <p class="result-sub" id="resultSubLine"></p>
     <p class="result-new" id="resultNew"></p>
     <div class="register" id="registerBox">
@@ -298,10 +423,19 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
   <!-- ランキング画面 -->
   <section id="screen-ranking" class="screen">
     <h2 class="rank-title">ネジ抜きランキング</h2>
+    <p class="tab-group-label">スコアアタック(本数)</p>
     <div class="rank-tabs">
       <button class="btn" id="tab-easy">イージー</button>
       <button class="btn" id="tab-normal">ノーマル</button>
       <button class="btn" id="tab-hard">ハード</button>
+    </div>
+    <p class="tab-group-label">タイムアタック(タイム)</p>
+    <div class="rank-tabs">
+      <button class="btn ta" id="tab-ta-easy">イージー15本</button>
+      <button class="btn ta" id="tab-ta-normal">ノーマル10本</button>
+      <button class="btn ta" id="tab-ta-hard">ハード5本</button>
+    </div>
+    <div class="rank-tabs" style="margin-top:.6rem">
       <button class="btn" id="tab-oneshot">一本勝負</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
@@ -327,6 +461,8 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
   </section>
 </div>
 
+<div id="heatLayer"></div>
+<div id="stagePop"></div>
 <div id="countdown"></div>
 
 <script>
@@ -335,8 +471,8 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1.2rem; tex
    形式: { t: 画面に出す表記, k: ひらがな(入力判定用) }
   { t: "", k: "" },
    イージー: 8文字以下 / ノーマル: 9〜13文字 / ハード: 14文字以上
-   ※「一本勝負」モードは専用リストを持たず、この3つを
-     進行度に応じて混ぜて出題する(下の pickOneshotSet 参照)
+   ※「タイムアタック」は同じリストから規定本数を重複なしで出題
+   ※「一本勝負」は進行度に応じて3つを混ぜて出題(pickOneshotSet 参照)
 ===================================================== */
 const WORDS_EASY = [
   { t: "せもい", k: "せもい" },
@@ -666,16 +802,33 @@ const store={
 const GAME_SECONDS = 60;
 const SCREWS_PER_PLATE = 8;
 const WORD_SETS = { easy: WORDS_EASY, normal: WORDS_NORMAL, hard: WORDS_HARD };
-const DIFF_LABEL = { easy: "イージー", normal: "ノーマル", hard: "ハード", oneshot: "一本勝負" };
+const DIFF_LABEL = {
+  easy:"イージー", normal:"ノーマル", hard:"ハード",
+  "ta-easy":"タイムアタック イージー", "ta-normal":"タイムアタック ノーマル", "ta-hard":"タイムアタック ハード",
+  oneshot:"一本勝負"
+};
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
-const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度(一本勝負は専用語なし)
-const RANK_TABS = ["easy","normal","hard","oneshot"];  // ランキングのタブ
+const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
+/* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 の順 */
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot"];
+
+/* タイムアタック: モードごとの出題元と規定本数 */
+const TA_MODES = {
+  "ta-easy":   { set:"easy",   goal:15 },
+  "ta-normal": { set:"normal", goal:10 },
+  "ta-hard":   { set:"hard",   goal:5  },
+};
+const isTA = d => Object.prototype.hasOwnProperty.call(TA_MODES,d);
+/* タイム系(小さいほど良い)のモードか */
+const isTimeRanked = d => isTA(d);
 
 /* 一本勝負の出題ミックス
    抜いた本数が増えるほどノーマル→ハードの比率が上がり、
    ONESHOT_FULL_MIX 本でイージー:ノーマル:ハード = 1:1:1 に到達する */
 const ONESHOT_FULL_MIX = 30;   // ここで1:1:1
 const ONESHOT_HARD_FROM = 10;  // ハードが混ざり始める本数
+/* 一本勝負の緊張段階: この本数に到達するたびに色味と発光が一段強まる */
+const ONESHOT_STAGES = [10,20,30,40];
 
 /* ---------- ローマ字テーブル ---------- */
 const KANA = {
@@ -877,24 +1030,35 @@ function beep(freq,dur,type,gain){
   }catch(e){}
 }
 const sndType=()=>beep(1400,.04,"square",.03);
+/* 一本勝負は段階が上がるほど打鍵音のピッチが上がる */
+const sndTypeStage=()=>beep(1400+oneshotStage*130,.04,"square",.03);
+const sndStageUp=()=>{beep(660,.1,"square",.06); setTimeout(()=>beep(880,.1,"square",.06),100); setTimeout(()=>beep(1170,.22,"square",.07),210);};
 const sndDone=()=>{beep(700,.09,"square",.06); setTimeout(()=>beep(1050,.12,"square",.06),70);};
 const sndMiss=()=>beep(160,.12,"sawtooth",.07);
 const sndPenalty=()=>{beep(220,.18,"sawtooth",.09); setTimeout(()=>beep(150,.25,"sawtooth",.09),130);};
 const sndPlate=()=>beep(90,.3,"triangle",.12);
 const sndFatal=()=>{beep(300,.2,"sawtooth",.1); setTimeout(()=>beep(200,.25,"sawtooth",.1),160); setTimeout(()=>beep(110,.5,"sawtooth",.11),330);};
+const sndClear=()=>{beep(880,.1,"square",.07); setTimeout(()=>beep(1170,.1,"square",.07),110); setTimeout(()=>beep(1560,.28,"square",.08),220);};
 
-/* ---------- 記録(ベスト) ---------- */
-const memBest={easy:0,normal:0,hard:0,oneshot:0};
+/* ---------- 記録(ベスト) ----------
+   スコア系は本数(大きいほど良い)、タイム系は秒(小さいほど良い) */
 async function loadBest(d){
   try{
     const r=await store.get("best-"+d);
-    return r?parseInt(r.value,10)||0:memBest[d];
-  }catch(e){ return memBest[d]; }
+    if(!r) return null;
+    const v=parseFloat(r.value);
+    return isNaN(v)?null:v;
+  }catch(e){ return null; }
 }
 async function saveBest(d,v){
-  memBest[d]=v;
   try{ await store.set("best-"+d,String(v)); }catch(e){}
 }
+/* 新記録かどうか(モードの評価方向に応じて判定) */
+function isBetterValue(v,best,d){
+  if(best==null) return true;
+  return isTimeRanked(d) ? v<best : v>best;
+}
+const fmtTime = s => Number(s).toFixed(2)+"秒";
 
 /* ---------- 画面制御 ---------- */
 const $=id=>document.getElementById(id);
@@ -908,11 +1072,19 @@ function show(name){
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
 let timerId=null, lastWordKey=null, plateScrews=0, running=false, currentWord=null;
-let elapsed=0; // 一本勝負の経過秒
+let elapsed=0;          // 一本勝負/タイムアタックの経過秒
+let taQueue=[], taGoal=0, nextWord=null; // タイムアタック用の出題キュー
+let oneshotStage=0;     // 一本勝負の緊張段階(0〜4)
 
 async function refreshBestLine(){
-  const e=await loadBest("easy"), n=await loadBest("normal"), h=await loadBest("hard"), o=await loadBest("oneshot");
-  $("bestLine").textContent=`自己ベスト — イージー: ${e}本 / ノーマル: ${n}本 / ハード: ${h}本 / 一本勝負: ${o}本`;
+  const [e,n,h,o]=await Promise.all([loadBest("easy"),loadBest("normal"),loadBest("hard"),loadBest("oneshot")]);
+  const num=v=>(v==null?0:v);
+  $("bestLine").textContent=
+    `自己ベスト(本数) — イージー: ${num(e)}本 / ノーマル: ${num(n)}本 / ハード: ${num(h)}本 / 一本勝負: ${num(o)}本`;
+  const [te,tn,th]=await Promise.all([loadBest("ta-easy"),loadBest("ta-normal"),loadBest("ta-hard")]);
+  const tm=v=>(v==null?"--":fmtTime(v));
+  $("bestLineTa").textContent=
+    `自己ベスト(タイム) — イージー15本: ${tm(te)} / ノーマル10本: ${tm(tn)} / ハード5本: ${tm(th)}`;
 }
 
 function buildPlate(){
@@ -952,6 +1124,33 @@ function reviveScrew(){
   setTimeout(()=>s.classList.remove("back"),600);
 }
 
+/* ---------- 一本勝負の緊張段階 ---------- */
+function applyStageClass(){
+  const b=document.body;
+  b.classList.remove("os1","os2","os3","os4");
+  if(oneshotStage>0) b.classList.add("os"+oneshotStage);
+}
+function resetStage(){
+  oneshotStage=0;
+  applyStageClass();
+}
+function showStagePop(text){
+  const el=$("stagePop");
+  el.textContent=text;
+  el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+}
+/* 本数がしきい値を跨いだら段階を1つ上げる */
+function updateOneshotStage(){
+  let lv=0;
+  for(const th of ONESHOT_STAGES){ if(score>=th) lv++; }
+  if(lv>oneshotStage){
+    oneshotStage=lv;
+    applyStageClass();
+    showStagePop(ONESHOT_STAGES[lv-1]+"本");
+    sndStageUp();
+  }
+}
+
 /* 一本勝負: 抜いた本数に応じて出題元の難易度を抽選する
    score=0 → イージー100% / score>=30 → 1:1:1 */
 function pickOneshotSet(){
@@ -964,7 +1163,46 @@ function pickOneshotSet(){
   return WORDS_HARD;
 }
 
+/* タイムアタック: 出題する語を重複なしで goal 本ぶん先に決めておく */
+function buildTaQueue(d){
+  const conf=TA_MODES[d];
+  const pool=[...WORD_SETS[conf.set]];
+  for(let i=pool.length-1;i>0;i--){ // フィッシャー–イェーツ
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  taGoal=Math.min(conf.goal,pool.length);
+  taQueue=pool.slice(0,taGoal);
+}
+
+function setCurrentWord(w){
+  currentWord=w;
+  setWord(w.k);
+  $("wordText").textContent=w.t;
+  $("wordKana").textContent=w.t===w.k?"\u00a0":w.k;
+  renderRomaji();
+}
+function renderNextWord(){
+  const el=$("nextWord");
+  if(!isTA(diff)){ el.innerHTML="&nbsp;"; return; }
+  if(nextWord){
+    el.innerHTML='<span class="lbl">NEXT</span>';
+    el.appendChild(document.createTextNode(nextWord.t));
+  }else{
+    el.innerHTML='<span class="lbl">NEXT</span>— ラスト1本 —';
+  }
+}
+
 function pickWord(){
+  if(isTA(diff)){
+    // キューの先頭を出題し、その次を先読み表示する
+    const w=taQueue.shift();
+    if(!w){ finishTa(); return; }
+    setCurrentWord(w);
+    nextWord=taQueue[0]||null;
+    renderNextWord();
+    return;
+  }
   const pool = (diff==="oneshot") ? pickOneshotSet() : words;
   let w;
   for(let tries=0;tries<12;tries++){
@@ -972,11 +1210,7 @@ function pickWord(){
     if(pool.length<=1 || w.k!==lastWordKey) break;
   }
   lastWordKey=w.k;
-  currentWord=w;
-  setWord(w.k);
-  $("wordText").textContent=w.t;
-  $("wordKana").textContent=w.t===w.k?"\u00a0":w.k;
-  renderRomaji();
+  setCurrentWord(w);
 }
 function renderRomaji(){
   $("romaji").innerHTML=
@@ -984,28 +1218,37 @@ function renderRomaji(){
 }
 /* カウントダウン中に前回の語が残らないよう、出題枠を空にする */
 function clearWordPanel(){
-  currentWord=null;
+  currentWord=null; nextWord=null;
   chunks=[]; chunkIdx=0; buf=""; typedRomaji=""; nAmbig=false;
   $("wordText").innerHTML="&nbsp;";
   $("wordKana").innerHTML="&nbsp;";
   $("romaji").innerHTML="&nbsp;";
+  $("nextWord").innerHTML="&nbsp;";
 }
 
 function startGame(d){
   diff=d;
-  const oneshot = (d==="oneshot");
-  words = oneshot ? [] : WORD_SETS[d];
+  const ta=isTA(d), oneshot=(d==="oneshot");
+  words = (ta||oneshot) ? [] : WORD_SETS[d];
   score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false;
+  taQueue=[]; taGoal=0;
+  resetStage();
   clearInterval(timerId);
   clearWordPanel();                       // ← 前回の出題を消してからカウントダウン
-  $("wordPanel").classList.remove("fatal");
-  $("score").textContent="0"; $("miss").textContent="0";
+  $("wordPanel").classList.remove("fatal","clear");
+  if(ta) buildTaQueue(d);
   // HUD/タイムバーをモードごとに切り替え
+  $("scoreLabel").textContent = ta ? "残り " : "抜いたネジ ";
+  $("score").textContent = ta ? taGoal : 0;
   $("missWrap").style.display = oneshot ? "none" : "";
+  $("miss").textContent="0";
   $("timebar").style.visibility = oneshot ? "hidden" : "visible";
-  $("timeLabel").textContent = oneshot ? "経過 " : "残り ";
-  $("time").textContent = oneshot ? 0 : GAME_SECONDS;
-  $("timefill").style.width="100%"; $("timefill").classList.remove("low");
+  $("timeLabel").textContent = (ta||oneshot) ? "経過 " : "残り ";
+  $("time").textContent = (ta||oneshot) ? 0 : GAME_SECONDS;
+  const f=$("timefill");
+  f.style.width = ta ? "0%" : "100%";
+  f.classList.toggle("ta",ta);
+  f.classList.remove("low");
   buildPlate();
   show("game");
   // 3,2,1 カウントダウン
@@ -1023,11 +1266,11 @@ function startGame(d){
 }
 function startTimer(){
   const t0=Date.now();
-  if(diff==="oneshot"){
+  if(isTA(diff) || diff==="oneshot"){
     // 時間無制限: 経過時間を数え上げるだけ
     timerId=setInterval(()=>{
       elapsed=(Date.now()-t0)/1000;
-      $("time").textContent=Math.floor(elapsed);
+      $("time").textContent=elapsed.toFixed(1);
     },100);
     return;
   }
@@ -1040,17 +1283,39 @@ function startTimer(){
     f.classList.toggle("low",timeLeft<=10);
   },100);
 }
+/* タイムアタック: 規定本数を打ち切った */
+function finishTa(){
+  running=false;
+  sndClear();
+  $("wordPanel").classList.add("clear");
+  clearWordPanel();
+  endGame();
+}
 async function endGame(){
   clearInterval(timerId); running=false;
+  resetStage();   // 背景の熱演出を戻す
   recordStats(score); // ランキング登録の有無に関係なく記録
+  const ta=isTA(diff);
+  const value = ta ? Number(elapsed.toFixed(2)) : score;
   const best=await loadBest(diff);
-  const isNew=score>best;
-  if(isNew) await saveBest(diff,score);
+  const isNew=isBetterValue(value,best,diff);
+  if(isNew) await saveBest(diff,value);
+  const shownBest = isNew ? value : best;
   $("resultDiff").textContent=`— ${DIFF_LABEL[diff]} —`;
-  $("resultScore").textContent=score;
-  $("resultSubLine").textContent = diff==="oneshot"
-    ? `記録 ${elapsed.toFixed(1)}秒 / 自己ベスト ${isNew?score:best}本`
-    : `ミス ${miss}回 / 自己ベスト ${isNew?score:best}本`;
+  $("resultCount").classList.toggle("ta",ta);
+  if(ta){
+    $("resultCaption").textContent=`${taGoal}本タイム`;
+    $("resultScore").textContent=elapsed.toFixed(2);
+    $("resultUnit").textContent="秒";
+    $("resultSubLine").textContent=`ミス ${miss}回 / 自己ベスト ${fmtTime(shownBest)}`;
+  }else{
+    $("resultCaption").textContent="抜いたネジ";
+    $("resultScore").textContent=score;
+    $("resultUnit").textContent="本";
+    $("resultSubLine").textContent = diff==="oneshot"
+      ? `記録 ${elapsed.toFixed(1)}秒 / 自己ベスト ${shownBest==null?0:shownBest}本`
+      : `ミス ${miss}回 / 自己ベスト ${shownBest==null?0:shownBest}本`;
+  }
   $("resultNew").textContent=isNew?"★ 自己ベスト更新! ★":"";
   $("nameInput").value=playerName;
   $("regBtn").disabled=false;
@@ -1060,6 +1325,7 @@ async function endGame(){
 }
 
 /* ---------- 入力 ---------- */
+const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
 document.addEventListener("keydown",e=>{
   // 名前入力中はゲーム操作を無効化(Enterで登録)
   if(e.target && e.target.tagName==="INPUT"){
@@ -1067,10 +1333,7 @@ document.addEventListener("keydown",e=>{
     return;
   }
   if(scene==="title"){
-    if(e.key==="1") startGame("easy");
-    if(e.key==="2") startGame("normal");
-    if(e.key==="3") startGame("hard");
-    if(e.key==="4") startGame("oneshot");
+    if(START_KEYS[e.key]) startGame(START_KEYS[e.key]);
     return;
   }
   if(scene==="ranking"){
@@ -1087,7 +1350,7 @@ document.addEventListener("keydown",e=>{
     return;
   }
   // ゲーム中
-  if(e.key==="Escape"){ clearInterval(timerId); running=false; clearWordPanel(); show("title"); return; }
+  if(e.key==="Escape"){ clearInterval(timerId); running=false; resetStage(); clearWordPanel(); show("title"); return; }
   if(!running) return;
   const key=e.key;
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
@@ -1106,6 +1369,8 @@ document.addEventListener("keydown",e=>{
       return;
     }
     sndMiss();
+    // タイムアタックはミスしてもペナルティ無し(回数だけ記録)
+    if(isTA(diff)) return;
     // ミス上限でネジが1本戻る
     if(miss % MISS_PENALTY[diff]===0 && score>0){
       score--; $("score").textContent=score;
@@ -1117,13 +1382,23 @@ document.addEventListener("keydown",e=>{
       pop.classList.remove("show"); void pop.offsetWidth; pop.classList.add("show");
     }
   } else {
-    sndType();
+    if(diff==="oneshot") sndTypeStage(); else sndType();
     renderRomaji();
     if(r==="done"){
-      score++; $("score").textContent=score;
+      score++;
       sndDone();
       removeScrew();
       unlockWord(currentWord.k);
+      if(isTA(diff)){
+        // 残り本数とゲージを更新
+        const remain=Math.max(taGoal-score,0);
+        $("score").textContent=remain;
+        $("timefill").style.width=(score/taGoal*100)+"%";
+        if(remain<=0){ finishTa(); return; }
+      }else{
+        $("score").textContent=score;
+        if(diff==="oneshot") updateOneshotStage();
+      }
       pickWord();
     }
   }
@@ -1144,27 +1419,36 @@ let playerName="";
   }catch(e){}
 })();
 
-/* 記録の優劣比較: 本数が多いほど上。
-   一本勝負のみ、同本数なら経過時間が短いほうが上。
-   それでも並んだら先に登録したほうが上(呼び出し側のソートで解決) */
+/* 記録の優劣比較(正なら a のほうが上位)
+   タイムアタック: タイムが短いほど上、同タイムはミスが少ないほど上
+   一本勝負: 本数が多いほど上、同本数はタイムが短いほど上
+   スコアアタック: 本数が多いほど上 */
 function betterRecord(a,b,d){
-  if(a.s!==b.s) return a.s-b.s;                  // 正なら a のほうが上位
+  if(isTimeRanked(d)){
+    const at=(a.e==null)?Infinity:a.e, bt=(b.e==null)?Infinity:b.e;
+    if(at!==bt) return bt-at;
+    const am=(a.m==null)?Infinity:a.m, bm=(b.m==null)?Infinity:b.m;
+    if(am!==bm) return bm-am;
+    return 0;
+  }
+  if(a.s!==b.s) return a.s-b.s;
   if(d==="oneshot"){
     const ae=(a.e==null)?Infinity:a.e, be=(b.e==null)?Infinity:b.e;
-    return be-ae;                                // 時間が短いほうが上位
+    return be-ae;
   }
   return 0;
 }
 
 /* 登録: 1人(同名)につき MAX_ENTRIES_PER_PLAYER 件まで。
    既に上限なら、自分の一番弱い記録を上回った時だけ入れ替える */
-async function submitScore(name,scoreVal,d,extra){
+async function submitScore(name,d,extra){
   const ref=db.ref("nejiuchi/scores/"+d);
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
   const mine=[];
-  snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e}); });
-  const entry={n:name, s:scoreVal, t:Date.now()};
-  if(extra && extra.e!=null) entry.e=extra.e;
+  snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e, m:v.m}); });
+  const entry={n:name, s:extra.s, t:Date.now()};
+  if(extra.e!=null) entry.e=extra.e;
+  if(extra.m!=null) entry.m=extra.m;
   if(mine.length>=MAX_ENTRIES_PER_PLAYER){
     mine.sort((a,b)=>betterRecord(a,b,d)); // 弱い順
     if(betterRecord(entry,mine[0],d)<=0) return {saved:false};
@@ -1179,11 +1463,14 @@ async function submitScore(name,scoreVal,d,extra){
 }
 
 async function fetchRanking(d){
-  const snap=await db.ref("nejiuchi/scores/"+d)
-    .orderByChild("s").limitToLast(RANKING_SIZE).once("value");
+  // タイム系は昇順に並べたいので、取得は全件から上位を選ぶ
+  const ref=db.ref("nejiuchi/scores/"+d);
+  const snap = isTimeRanked(d)
+    ? await ref.orderByChild("e").limitToFirst(RANKING_SIZE).once("value")
+    : await ref.orderByChild("s").limitToLast(RANKING_SIZE).once("value");
   const rows=[];
   snap.forEach(c=>{ rows.push(c.val()); });
-  rows.sort((a,b)=> -betterRecord(a,b,d) || a.t-b.t); // 本数降順→(一本勝負は)時間昇順→先着順
+  rows.sort((a,b)=> -betterRecord(a,b,d) || a.t-b.t); // 優劣→同値なら先着順
   return rows;
 }
 
@@ -1203,9 +1490,15 @@ async function openRanking(d,highlight){
     rows.forEach((r,i)=>{
       const li=document.createElement("li");
       li.className="rank-row"+(i===0?" top1":"")+(highlight&&r.n===highlight?" me":"");
-      const scoreText = (d==="oneshot" && r.e!=null)
-        ? `${r.s}本 <span style="color:var(--steel);font-size:.85em">${Number(r.e).toFixed(1)}秒</span>`
-        : `${r.s}本`;
+      let scoreText;
+      if(isTimeRanked(d)){
+        const missText = (r.m==null) ? "" : ` <span style="color:var(--steel);font-size:.85em">ミス${r.m}</span>`;
+        scoreText = `${r.e==null?"--":fmtTime(r.e)}${missText}`;
+      }else if(d==="oneshot" && r.e!=null){
+        scoreText = `${r.s}本 <span style="color:var(--steel);font-size:.85em">${Number(r.e).toFixed(1)}秒</span>`;
+      }else{
+        scoreText = `${r.s}本`;
+      }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent=r.n; // XSS対策でtextContent
       list.appendChild(li);
@@ -1224,14 +1517,19 @@ $("regBtn").addEventListener("click",async()=>{
   $("regBtn").disabled=true;
   $("regStatus").textContent="登録中...";
   try{
-    const res=await submitScore(name,score,diff, diff==="oneshot" ? {e:Number(elapsed.toFixed(2))} : null);
+    const extra={s:score};
+    if(isTA(diff)){ extra.e=Number(elapsed.toFixed(2)); extra.m=miss; }
+    else if(diff==="oneshot"){ extra.e=Number(elapsed.toFixed(2)); }
+    const res=await submitScore(name,diff,extra);
     if(res.saved){
       $("regStatus").textContent="登録しました!";
       setTimeout(()=>openRanking(diff,name),500);
     }else{
-      $("regStatus").textContent = diff==="oneshot"
-        ? "自分の既存記録2件を超えられなかったため掲載されませんでした(同本数なら時間勝負)"
-        : "自分の既存記録2件より低いため掲載されませんでした(1人2件まで)";
+      $("regStatus").textContent = isTA(diff)
+        ? "自分の既存記録2件より遅かったため掲載されませんでした(1人2件まで)"
+        : (diff==="oneshot"
+            ? "自分の既存記録2件を超えられなかったため掲載されませんでした(同本数なら時間勝負)"
+            : "自分の既存記録2件より低いため掲載されませんでした(1人2件まで)");
       $("regBtn").disabled=false;
     }
   }catch(e){
