@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ネジ打ち</title>
-<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho:wght@500;700;800&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
@@ -82,7 +82,7 @@ h1{
 .diff-btn.ta{border-color:#33606b}
 .diff-btn.ta .name{color:var(--cyan)}
 .diff-btn.ta:hover,.diff-btn.ta:focus-visible{border-color:var(--cyan)}
-.diff-btn.oneshot{border-color:#7a3b3b; width:min(300px,90vw)}
+.diff-btn.oneshot{border-color:#7a3b3b; width:min(220px,90vw)}
 .diff-btn.oneshot .name{color:#ff8a5c}
 .diff-btn.oneshot:hover,.diff-btn.oneshot:focus-visible{border-color:var(--miss)}
 .best-line{color:var(--steel); font-size:.85rem; min-height:1.3em; line-height:1.6}
@@ -180,6 +180,22 @@ h1{
 .btn:active{transform:translateY(2px); box-shadow:0 1px 0 #10131a}
 .btn.primary{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
 
+/* タイトルに出す庭のようす */
+.gstat{
+  display:inline-block; margin:-1rem 0 1.3rem; padding:.45rem 1rem; cursor:pointer;
+  border:1px solid var(--line); border-radius:999px; background:rgba(0,0,0,.18);
+  color:var(--steel); font-size:.9rem; line-height:1.6;
+}
+.gstat b{color:var(--amber); font-weight:400; margin:0 .1em}
+.gstat small{color:#6b7484; margin-left:.3em}
+.gstat.todo{border-color:#8fbf5a; box-shadow:0 0 12px rgba(143,191,90,.35)}
+.gstat .todoi{color:#b8e08a}
+.kbdh{
+  display:inline-block; min-width:1.4em; padding:0 .35em; margin-left:.3em;
+  border-radius:4px; background:rgba(255,255,255,.12); color:var(--steel); font-size:.8em;
+}
+.keynav{color:#6b7484; font-size:.78rem; margin-top:.8rem; line-height:1.7}
+.keynav b{color:var(--steel); background:rgba(255,255,255,.08); border-radius:4px; padding:0 .35em; font-weight:400}
 /* ---- ランキング ---- */
 .name-input{
   font-family:inherit; font-size:1.05rem; color:var(--ink);
@@ -317,7 +333,7 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 /* タイトル画面のボタン */
 .diff-btn.poem{
   font-family:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif;
-  width:min(300px,90vw);
+  width:min(220px,90vw);
   background:
     repeating-linear-gradient(90deg, rgba(120,90,50,.035) 0 1px, transparent 1px 6px),
     linear-gradient(180deg,#f7efdf,#e7d9bd);
@@ -328,6 +344,19 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 .diff-btn.poem .desc{color:var(--sumi-l)}
 .diff-btn.poem .kbd{color:#a08a70; letter-spacing:0}
 .diff-btn.poem:hover,.diff-btn.poem:focus-visible{border-color:#d9503a}
+
+.diff-btn.garden{
+  font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif;
+  width:min(220px,90vw); color:#2f2a1f;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,.1) 0 3px, transparent 3px 11px),
+    linear-gradient(180deg,#a7c96a,#7fa94a);
+  border:2px solid #4f7428; box-shadow:0 4px 0 #3b5a1c;
+}
+.diff-btn.garden .name{color:#fff8e0; font-weight:800; text-shadow:0 2px 0 rgba(40,60,15,.6)}
+.diff-btn.garden .desc{color:#253316}
+.diff-btn.garden .kbd{color:#e8f3d0}
+.diff-btn.garden:hover,.diff-btn.garden:focus-visible{border-color:#f4c542}
 
 /* 詩の画面ではページ全体を夜の座敷に */
 body.washi{
@@ -461,7 +490,324 @@ body.washi{
 
 /* ランキングの詩タブ */
 .rank-tabs .btn.poem{font-family:'Shippori Mincho','Hiragino Mincho ProN',serif; font-weight:700; letter-spacing:.1em}
+.rank-tabs .btn.gtab{font-family:'M PLUS Rounded 1c',sans-serif; font-weight:700}
+.rank-tabs .btn.gtab.active{color:#1f2a10; background:linear-gradient(180deg,#b9dc7c,#8fbf5a); border-color:#5f8f32}
 .rank-tabs .btn.poem.active{color:#fbf1dc; background:linear-gradient(180deg,#cf4a38,var(--shu)); border-color:var(--shu-d)}
+
+/* =====================================================
+   ネジ抜きの庭 — 庭の画面(#screen-garden)の中だけに効くスタイル
+===================================================== */
+body.garden{
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(111,154,62,.35), transparent 60%),
+    linear-gradient(180deg,#cfe6ee 0%,#e3efd8 55%,#d3e4b8 100%);
+  align-items:flex-start;
+}
+body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
+#screen-garden{text-align:left; color:#2f2a1f; font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;}
+#screen-garden.active{animation:g-fade .25s ease}
+@keyframes g-fade{from{opacity:0}to{opacity:1}}
+#screen-garden{
+  --sky:#cfe6ee;
+  --grass:#9cc862;
+  --grass-d:#6f9a3e;
+  --soil:#9a6a40;
+  --soil-d:#7a5130;
+  --wet:#573a24;
+  --wood:#c08a4e;
+  --wood-d:#7a5230;
+  --sun:#f4c542;
+  --water:#4a9fd6;
+  --ink:#2f2a1f;
+  --ink-l:#6b604e;
+  --paper:#fbf7ee;
+  --alert:#d25a3c;
+  --k:min(74px,8.3vw);   
+  --g:min(8px,.9vw);
+}
+#screen-garden .top{display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.9rem}
+#screen-garden .sign{
+  font-weight:800; font-size:clamp(1.4rem,3.2vw,2rem); letter-spacing:.12em; color:#fff8e6;
+  padding:.35rem 1.1rem .45rem; border-radius:6px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.07) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg,#b27a42,#8c5b2e);
+  box-shadow:0 3px 0 #5c3a1c, 0 6px 12px rgba(60,40,20,.25);
+  text-shadow:0 2px 0 rgba(60,35,15,.6);
+}
+#screen-garden .money{
+  font-weight:800; font-size:1.35rem; color:var(--ink);
+  background:var(--paper); border-radius:999px; padding:.3rem .9rem;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.08);
+}
+#screen-garden .money small{font-size:.75rem; color:var(--ink-l); margin-left:.25rem}
+#screen-garden .top .sp{flex:1}
+#screen-garden .tbtn{
+  font-family:inherit; font-weight:700; font-size:.95rem; cursor:pointer;
+  background:var(--paper); color:var(--ink); border:2px solid var(--wood-d);
+  border-radius:8px; padding:.45rem .9rem; box-shadow:0 3px 0 var(--wood-d);
+}
+#screen-garden .tbtn:hover, #screen-garden .tbtn:focus-visible{background:#fff; outline:none}
+#screen-garden .tbtn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--wood-d)}
+#screen-garden .tbtn .kb{color:var(--ink-l); font-size:.78rem; margin-left:.3rem}
+#screen-garden .tbtn.shop{background:var(--sun); border-color:#a8801c; box-shadow:0 3px 0 #a8801c}
+#screen-garden .bar-row{display:flex; align-items:stretch; gap:.6rem; flex-wrap:wrap; margin-bottom:.9rem}
+#screen-garden .slot{
+  display:flex; align-items:center; gap:.45rem; cursor:pointer;
+  background:rgba(251,247,238,.85); border:2px solid transparent; border-radius:10px;
+  padding:.35rem .75rem .35rem .45rem; font-weight:700;
+}
+#screen-garden .slot .n{
+  width:1.45rem; height:1.45rem; border-radius:5px; display:grid; place-items:center;
+  background:#e7dfcc; color:var(--ink-l); font-size:.8rem;
+}
+#screen-garden .slot .ic{font-size:1.35rem}
+#screen-garden .slot.on{border-color:var(--wood-d); background:#fff; box-shadow:0 3px 0 var(--wood-d)}
+#screen-garden .slot.on .n{background:var(--wood-d); color:#fff}
+#screen-garden .seedsel{display:flex; align-items:center; gap:.4rem; font-weight:700}
+#screen-garden .seedsel .arr{color:var(--ink-l); font-size:.85rem}
+#screen-garden .seedsel .cnt{color:var(--ink-l); font-size:.85rem}
+#screen-garden .fieldsel{
+  margin-left:auto; display:flex; align-items:center; gap:.5rem; font-weight:800;
+  background:rgba(251,247,238,.85); border-radius:10px; padding:.35rem .8rem;
+}
+#screen-garden .fieldsel .arr{color:var(--ink-l); font-size:.8rem; font-weight:700}
+#screen-garden .planter{
+  padding:calc(var(--g)*2.4);
+  border-radius:16px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 2px, transparent 2px 23px),
+    linear-gradient(180deg,#c89458,#a8743d);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.25), inset 0 -4px 0 rgba(0,0,0,.2), 0 8px 0 #6a4524, 0 14px 24px rgba(60,40,20,.25);
+}
+#screen-garden .krow{display:flex; gap:var(--g); margin-bottom:var(--g)}
+#screen-garden .krow:last-child{margin-bottom:0}
+#screen-garden .krow.r2{padding-left:calc(var(--k)*.38)}
+#screen-garden .krow.r3{padding-left:calc(var(--k)*.95)}
+#screen-garden .plot{
+  width:var(--k); height:var(--k); flex:none; border-radius:9px; position:relative; overflow:hidden; cursor:pointer;
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.18), 0 2px 0 rgba(0,0,0,.22);
+  transition:transform .08s ease;
+}
+#screen-garden .plot.grass{
+  background:
+    radial-gradient(circle at 22% 30%, #b5da78 0 3px, transparent 4px),
+    radial-gradient(circle at 70% 55%, #83b44c 0 3px, transparent 4px),
+    radial-gradient(circle at 42% 78%, #b5da78 0 2px, transparent 3px),
+    radial-gradient(circle at 82% 22%, #83b44c 0 2px, transparent 3px),
+    linear-gradient(180deg,#a3cd68,#86b24e);
+}
+#screen-garden .plot.soil{
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,.13) 0 3px, transparent 3px 11px),
+    linear-gradient(180deg,#a7764a,#8b5e37);
+}
+#screen-garden .plot.soil.wet{
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,.18) 0 3px, transparent 3px 11px),
+    radial-gradient(ellipse at 30% 22%, rgba(150,200,235,.28), transparent 60%),
+    linear-gradient(180deg,#6c4a2e,#523520);
+}
+#screen-garden .plot .lbl{
+  position:absolute; left:6px; top:3px; z-index:2;
+  font-weight:800; font-size:.78rem; color:rgba(255,255,255,.92);
+  text-shadow:0 1px 0 rgba(0,0,0,.45);
+}
+#screen-garden .plot .drop{position:absolute; right:5px; top:3px; font-size:.72rem; display:none; z-index:2}
+#screen-garden .plot.wet .drop{display:block}
+#screen-garden .plot .crop{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:calc(var(--k)*.46); line-height:1; padding-top:4px;
+}
+#screen-garden .plot .crop.st1{font-size:calc(var(--k)*.3)}
+#screen-garden .plot .crop.st2{font-size:calc(var(--k)*.38)}
+#screen-garden .plot .pb{
+  position:absolute; left:8px; right:8px; bottom:6px; height:5px; border-radius:3px;
+  background:rgba(0,0,0,.28); display:none; z-index:2;
+}
+#screen-garden .plot .pb i{display:block; height:100%; border-radius:3px; background:#9bd96a; width:0}
+#screen-garden .plot.growing .pb{display:block}
+#screen-garden .plot.growing:not(.wet) .pb i{background:#c8b48a}
+#screen-garden .plot.ripe{box-shadow:0 0 0 3px var(--sun), 0 0 16px rgba(244,197,66,.85), inset 0 -4px 0 rgba(0,0,0,.18)}
+#screen-garden .plot.ripe .crop{animation:g-bob 1.6s ease-in-out infinite}
+@keyframes g-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+#screen-garden .plot.sel{outline:3px solid #fff; outline-offset:1px}
+#screen-garden .plot.hit{transform:translateY(2px) scale(.96)}
+#screen-garden .plot.nope{animation:g-nope .22s ease}
+@keyframes g-nope{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){#screen-garden .plot.ripe .crop{animation:none}}
+#screen-garden .float{
+  position:fixed; z-index:30; pointer-events:none; font-weight:800; font-size:1.1rem;
+  color:var(--ink); text-shadow:0 1px 0 #fff, 0 0 6px #fff;
+  animation:g-floatup .9s ease-out forwards;
+}
+@keyframes g-floatup{0%{opacity:0; transform:translate(-50%,6px)}20%{opacity:1}100%{opacity:0; transform:translate(-50%,-34px)}}
+#screen-garden .under{display:grid; grid-template-columns:1.3fr 1fr; gap:.8rem; margin-top:1.3rem}
+#screen-garden .card{background:rgba(251,247,238,.9); border-radius:12px; padding:.8rem 1rem; min-height:5.2rem}
+#screen-garden .card h3{font-size:.85rem; color:var(--ink-l); font-weight:700; margin-bottom:.35rem}
+#screen-garden #g-info .big{font-weight:800; font-size:1.1rem}
+#screen-garden #g-info .sub{color:var(--ink-l); font-size:.9rem; margin-top:.2rem; line-height:1.6}
+#screen-garden #g-basket{display:flex; flex-wrap:wrap; gap:.4rem}
+#screen-garden .chip{background:#fff; border-radius:999px; padding:.2rem .6rem; font-weight:700; font-size:.92rem}
+#screen-garden .empty{color:var(--ink-l); font-size:.9rem}
+#screen-garden .help{margin-top:1rem; color:var(--ink-l); font-size:.82rem; line-height:1.8; text-align:center}
+#screen-garden .help b{color:var(--ink); background:rgba(255,255,255,.7); border-radius:4px; padding:0 .3em; font-weight:700}
+#screen-garden #g-toasts{position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:40; display:flex; flex-direction:column; gap:.4rem; align-items:center; pointer-events:none}
+#screen-garden .toast{
+  background:var(--paper); border:2px solid var(--wood-d); border-radius:10px; padding:.5rem 1rem;
+  font-weight:700; box-shadow:0 4px 0 var(--wood-d); max-width:90vw; text-align:center; line-height:1.55;
+  animation:g-toastin .25s ease-out;
+}
+#screen-garden .toast.good{border-color:#5f8f32; box-shadow:0 4px 0 #5f8f32}
+#screen-garden .toast.warn{border-color:var(--alert); box-shadow:0 4px 0 var(--alert)}
+#screen-garden .toast.out{animation:g-toastout .3s ease-in forwards}
+@keyframes g-toastin{from{opacity:0; transform:translateY(-8px)}to{opacity:1; transform:none}}
+@keyframes g-toastout{to{opacity:0; transform:translateY(-8px)}}
+#screen-garden .modal{position:fixed; inset:0; z-index:35; display:none; align-items:center; justify-content:center; background:rgba(40,30,15,.45)}
+#screen-garden .modal.open{display:flex}
+#screen-garden .panel{
+  width:min(720px,94vw); max-height:88vh; overflow:auto;
+  background:var(--paper); border-radius:14px; border:3px solid var(--wood-d);
+  box-shadow:0 8px 0 var(--wood-d), 0 18px 40px rgba(0,0,0,.3);
+  padding:1rem 1.2rem 1.2rem;
+}
+#screen-garden .phead{display:flex; align-items:center; gap:.8rem; margin-bottom:.8rem}
+#screen-garden .phead h2{font-size:1.3rem; font-weight:800}
+#screen-garden .phead .money{margin-left:auto; font-size:1.1rem; background:#fff}
+#screen-garden .tabs{display:flex; gap:.4rem; margin-bottom:.8rem}
+#screen-garden .tab{
+  font-family:inherit; font-weight:700; cursor:pointer; font-size:.95rem;
+  background:#efe6d2; color:var(--ink-l); border:none; border-radius:8px 8px 0 0; padding:.45rem 1rem;
+}
+#screen-garden .tab.on{background:var(--wood); color:#fff}
+#screen-garden .rowi{
+  display:grid; grid-template-columns:2.2rem 1fr auto; align-items:center; gap:.7rem;
+  padding:.6rem .4rem; border-bottom:1px dashed #d9ccb0;
+}
+#screen-garden .rowi:last-child{border-bottom:none}
+#screen-garden .rowi .ic{font-size:1.7rem; text-align:center}
+#screen-garden .rowi .nm{font-weight:800}
+#screen-garden .rowi .ds{color:var(--ink-l); font-size:.82rem; line-height:1.55; margin-top:.1rem}
+#screen-garden .rowi.locked{opacity:.55}
+#screen-garden .rowi.locked .ic{filter:grayscale(1)}
+#screen-garden .acts{display:flex; gap:.35rem; flex-wrap:wrap; justify-content:flex-end}
+#screen-garden .sbtn{
+  font-family:inherit; font-weight:700; font-size:.85rem; cursor:pointer;
+  background:#fff; border:2px solid var(--wood-d); color:var(--ink); border-radius:7px; padding:.3rem .6rem;
+}
+#screen-garden .sbtn:hover:not(:disabled){background:#fff5d6}
+#screen-garden .sbtn:disabled{opacity:.4; cursor:not-allowed}
+#screen-garden .sbtn.main{background:var(--sun); border-color:#a8801c}
+#screen-garden .pfoot{display:flex; justify-content:space-between; align-items:center; margin-top:.9rem; gap:.6rem; flex-wrap:wrap}
+#screen-garden .pfoot .note{color:var(--ink-l); font-size:.82rem}
+#screen-garden textarea.code{
+  width:100%; height:6.5rem; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.75rem;
+  border:2px solid #d9ccb0; border-radius:8px; padding:.5rem; resize:vertical; background:#fff; color:var(--ink);
+  user-select:text;
+}
+#screen-garden .savebox p{color:var(--ink-l); font-size:.88rem; margin:.3rem 0 .5rem; line-height:1.6}
+#screen-garden .savebox h3{font-size:1rem; margin-top:.8rem}
+
+/* ---- 庭 第2段階: 選択カーソル・図鑑・設置物 ---- */
+#screen-garden .rate{
+  font-weight:700; font-size:.85rem; color:var(--ink-l);
+  background:rgba(251,247,238,.7); border-radius:999px; padding:.25rem .7rem;
+}
+#screen-garden .slot .cnt{color:var(--ink-l); font-size:.82rem; margin-left:.15rem}
+#screen-garden .seedsel .arr{visibility:hidden}
+#screen-garden .slot.on .seedsel .arr{visibility:visible}
+#screen-garden .plist{max-height:52vh; overflow:auto; padding-right:.2rem}
+#screen-garden .rowi{border-radius:8px; border-bottom:1px dashed #d9ccb0}
+#screen-garden .rowi.cur{
+  background:#fff; border-bottom-color:transparent;
+  box-shadow:0 0 0 3px var(--sun), 0 3px 0 3px #a8801c;
+}
+#screen-garden .rowi .keyk{color:var(--ink-l); font-size:.78rem; text-align:right; white-space:nowrap; line-height:1.6}
+#screen-garden .rowi .keyk b{
+  color:var(--ink); background:#efe6d2; border-radius:4px; padding:0 .3em; font-weight:700;
+}
+#screen-garden .keyhint{
+  margin-top:.8rem; padding-top:.6rem; border-top:1px solid #e3d7bd;
+  color:var(--ink-l); font-size:.82rem; text-align:center; line-height:1.8;
+}
+#screen-garden .keyhint b{color:var(--ink); background:#efe6d2; border-radius:4px; padding:0 .35em}
+#screen-garden .tabs .tab{position:relative}
+#screen-garden .tabs::before{content:'◀'; color:var(--ink-l); font-size:.75rem; align-self:center; margin-right:.2rem}
+#screen-garden .tabs::after{content:'▶'; color:var(--ink-l); font-size:.75rem; align-self:center; margin-left:.2rem}
+
+/* 設置物が置かれた区画 */
+#screen-garden .plot.obj{
+  background:
+    radial-gradient(circle at 50% 55%, rgba(255,255,255,.18), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,.06) 0 4px, transparent 4px 9px),
+    linear-gradient(180deg,#b9a07a,#9b835e);
+}
+#screen-garden .plot.obj .crop{font-size:calc(var(--k)*.44)}
+#screen-garden .plot.obj.spr2 .crop{filter:drop-shadow(0 0 4px rgba(255,220,120,.9))}
+/* スプリンクラーで水が届いている区画 */
+#screen-garden .plot.cov .drop{display:block}
+
+/* 図鑑 */
+#screen-garden .book{display:grid; grid-template-columns:1fr 1.25fr; gap:1rem}
+#screen-garden .booklist .rowi{grid-template-columns:2rem 1fr; padding:.45rem .5rem}
+#screen-garden .booklist .ic{font-size:1.4rem}
+#screen-garden .bookdetail{
+  background:#fff; border-radius:12px; padding:1rem 1.1rem; min-height:18rem;
+  box-shadow:inset 0 0 0 2px #eadfc6;
+}
+#screen-garden .bookdetail .bic{font-size:4rem; line-height:1.1; text-align:center}
+#screen-garden .bookdetail .bnm{font-weight:800; font-size:1.3rem; text-align:center; margin:.2rem 0 .6rem}
+#screen-garden .bookdetail dl{display:grid; grid-template-columns:auto 1fr; gap:.25rem .8rem; font-size:.9rem; margin-bottom:.7rem}
+#screen-garden .bookdetail dt{color:var(--ink-l)}
+#screen-garden .bookdetail dd{font-weight:700}
+#screen-garden .bookdetail .lore{line-height:1.9; font-size:.95rem; border-top:1px dashed #d9ccb0; padding-top:.6rem}
+#screen-garden .bookdetail .lore.unknown{color:var(--ink-l)}
+
+/* ---- 庭 第3段階: 村人・番付・閉じるボタン ---- */
+#screen-garden .plot .vb{position:absolute; left:3px; bottom:1px; font-size:.78rem; display:none; z-index:3}
+#screen-garden .plot.vil .vb{display:block}
+#screen-garden .plot.vil{box-shadow:inset 0 0 0 3px rgba(111,179,201,.85), inset 0 -4px 0 rgba(0,0,0,.18), 0 2px 0 rgba(0,0,0,.22)}
+#screen-garden .plot.vil.ripe{box-shadow:inset 0 0 0 3px rgba(111,179,201,.85), 0 0 0 3px var(--sun)}
+#screen-garden .xbtn{margin-left:.4rem}
+#screen-garden .modal{cursor:pointer}
+#screen-garden .modal .panel{cursor:default}
+#screen-garden .rk-input{
+  font-family:inherit; font-size:1.05rem; color:var(--ink); background:#fff;
+  border:2px solid var(--wood-d); border-radius:8px; padding:.55rem .9rem; width:min(300px,80vw);
+  user-select:text;
+}
+#screen-garden .rk-input:focus{outline:none; border-color:var(--sun)}
+#g-rankNow b{font-size:1.1rem}
+
+/* ---- 庭 第4段階: 3×3のまとまり・案山子置き場・品質 ---- */
+#screen-garden .plot.gap{margin-right:calc(var(--g)*1.8)}
+#screen-garden .plot.post{
+  cursor:pointer;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0 2px, transparent 2px 12px),
+    linear-gradient(180deg,#d8b27a,#b88c52);
+  box-shadow:inset 0 0 0 2px rgba(122,82,48,.55), inset 0 -4px 0 rgba(0,0,0,.18), 0 2px 0 rgba(0,0,0,.22);
+}
+#screen-garden .plot.post:not(.hascrow)::after{
+  content:'案山子'; position:absolute; left:0; right:0; bottom:6px; text-align:center;
+  font-size:.62rem; font-weight:700; color:rgba(90,58,28,.75); letter-spacing:.05em;
+}
+#screen-garden .plot.post .crop{font-size:calc(var(--k)*.46)}
+#screen-garden .plot .qb{
+  position:absolute; right:4px; bottom:2px; z-index:3; font-size:.7rem; font-weight:800;
+  color:#ffd84a; text-shadow:0 1px 0 rgba(0,0,0,.55), 0 0 4px rgba(0,0,0,.35);
+}
+#screen-garden .chip.q1{box-shadow:inset 0 0 0 2px #f4c542}
+#screen-garden .chip.q2{box-shadow:inset 0 0 0 2px #f4c542, 0 0 8px rgba(244,197,66,.6); background:#fffaf0}
+#screen-garden .booklist .rowi.q1, #screen-garden .booklist .rowi.q2{padding-left:1.4rem}
+#screen-garden .booklist .rowi.q1 .nm, #screen-garden .booklist .rowi.q2 .nm{color:#8a6a10}
+#screen-garden .bookdetail .bic{position:relative; display:inline-block; width:100%}
+#screen-garden .bookdetail .bic.q1{filter:drop-shadow(0 0 6px rgba(244,197,66,.55))}
+#screen-garden .bookdetail .bic.q2{filter:drop-shadow(0 0 12px rgba(244,197,66,.95))}
+#screen-garden .bookdetail .bq{
+  position:absolute; left:50%; top:0; margin-left:1.3rem; font-size:1.2rem; font-weight:800;
+  color:#e0a800; text-shadow:0 1px 0 #fff;
+}
 
 /* カウントダウン */
 #countdown{
@@ -479,6 +825,7 @@ body.washi{
     <div class="hazard"></div>
     <h1>ネジ打ち</h1>
     <p class="subtitle">— 打てば打つほど、ネジが抜ける —</p>
+    <div class="gstat" id="gardenStat"></div>
 
     <div class="mode-group">
       <div class="mode-head"><span class="sa">スコアアタック</span></div>
@@ -526,6 +873,10 @@ body.washi{
           <div class="name">ネジの詩<span class="kbd">8</span></div>
           <div class="desc">詩を一行ずつ詠み上げる<br>読み終えるまでのタイム勝負</div>
         </button>
+        <button class="diff-btn garden" data-diff="garden">
+          <div class="name">ネジ抜きの庭<span class="kbd">9</span></div>
+          <div class="desc">作物を育ててネジを増やす<br>ここで打つほど庭の時間が進む</div>
+        </button>
       </div>
     </div>
 
@@ -534,10 +885,10 @@ body.washi{
     <p class="best-line" id="bestLinePoem"></p>
     <p class="best-line" id="statsLine"></p>
     <div class="btn-row" style="margin-top:.2rem">
-      <button class="btn" id="rankBtn">ランキングを見る</button>
-      <button class="btn" id="dictBtn">ネジ抜き辞典</button>
+      <button class="btn" id="rankBtn">ランキングを見る <span class="kbdh">R</span></button>
+      <button class="btn" id="dictBtn">ネジ抜き辞典 <span class="kbdh">D</span></button>
     </div>
-    <p class="hint">難易度をクリックで開始(キー 1〜8 でも可) / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 辞典 / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
     <div class="hazard"></div>
   </section>
 
@@ -572,13 +923,15 @@ body.washi{
     <div class="register" id="registerBox">
       <input id="nameInput" class="name-input" maxlength="10" placeholder="プレイヤー名" autocomplete="off">
       <div class="btn-row" style="margin-top:.8rem">
-        <button class="btn primary" id="regBtn">ランキングに登録</button>
+        <button class="btn primary" id="regBtn">ランキングに登録 <span class="kbdh">Enter</span></button>
       </div>
       <p class="reg-status" id="regStatus"></p>
     </div>
+    <p class="keynav"><b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる</p>
     <div class="btn-row">
       <button class="btn primary" id="retryBtn">もう一回 (Enter)</button>
       <button class="btn" id="titleBtn">タイトルへ (Esc)</button>
+      <button class="btn" id="toGardenBtn">庭へ (G)</button>
     </div>
   </section>
 
@@ -602,8 +955,14 @@ body.washi{
     </div>
     <p class="tab-group-label">ネジの詩(タイム)</p>
     <div class="rank-tabs" id="poemRankTabs"></div>
+    <p class="tab-group-label">ネジ抜きの庭</p>
+    <div class="rank-tabs">
+      <button class="btn gtab" id="tab-g-money">所持ネジ</button>
+      <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
+    </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
+    <p class="keynav"><b>← →</b> 切り替え ・ <b>↑ ↓</b> スクロール ・ <b>Esc</b> タイトルへ</p>
     <div class="btn-row">
       <button class="btn" id="rankBackBtn">タイトルへ (Esc)</button>
     </div>
@@ -635,13 +994,130 @@ body.washi{
           <button class="w-btn primary" id="poemRegBtn">番付に載せる</button>
         </div>
         <p class="w-status" id="poemRegStatus"></p>
+        <p class="poem-hint" style="margin-top:.3rem">N で名を記す → Enter で番付に載せる</p>
         <div class="btn-row">
           <button class="w-btn" id="poemRetryBtn">もう一度詠む (Enter)</button>
           <button class="w-btn" id="poemBackBtn">戻る (Esc)</button>
+          <button class="w-btn" id="poemGardenBtn">庭へ (G)</button>
         </div>
       </div>
       <p class="poem-hint" id="poemHint">一行ずつ詠み上げよ ・ Esc で戻る</p>
     </div>
+  </section>
+
+  <!-- ネジ抜きの庭 -->
+  <section id="screen-garden" class="screen">
+  <div>
+    <div class="top">
+      <div class="sign">ネジ抜きの庭</div>
+      <div class="money">🔩 <span id="g-money">0</span><small>ネジ</small></div>
+      <div class="rate" id="g-rate"></div>
+      <div class="sp"></div>
+      <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
+      <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
+      <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
+      <button class="tbtn" id="g-saveBtn">記録<span class="kb">0</span></button>
+      <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
+    </div>
+
+    <div class="bar-row">
+      <div class="slot" data-tool="1"><span class="n">1</span><span class="ic">✋</span>素手</div>
+      <div class="slot" data-tool="2"><span class="n">2</span><span class="ic">⛏️</span><span id="g-hoeName">クワ</span></div>
+      <div class="slot" data-tool="3"><span class="n">3</span><span class="ic">💧</span><span id="g-canName">じょうろ</span></div>
+      <div class="slot" data-tool="4"><span class="n">4</span>
+        <div class="seedsel"><span class="arr" id="g-seedArrL">◀</span><span class="ic" id="g-seedIc">🌱</span><span id="g-seedNm">種</span><span class="cnt" id="g-seedCnt"></span><span class="arr" id="g-seedArrR">▶</span></div>
+      </div>
+      <div class="slot" data-tool="5"><span class="n">5</span><span class="ic">🍂</span>肥料<span class="cnt" id="g-fertCnt"></span></div>
+      <div class="slot" data-tool="6"><span class="n">6</span>
+        <div class="seedsel"><span class="arr" id="g-objArrL">◀</span><span class="ic" id="g-objIc">📦</span><span id="g-objNm">設置</span><span class="cnt" id="g-objCnt"></span><span class="arr" id="g-objArrR">▶</span></div>
+      </div>
+      <div class="fieldsel"><span class="arr">▲▼</span>畑 <span id="g-fieldNo">1</span> / <span id="g-fieldMax">1</span></div>
+    </div>
+
+    <div class="planter" id="g-planter"></div>
+
+    <div class="under">
+      <div class="card" id="g-info">
+        <h3>区画のようす</h3>
+        <div class="big" id="g-infoBig">キーを押すと、その区画のようすが表示されます</div>
+        <div class="sub" id="g-infoSub"></div>
+      </div>
+      <div class="card">
+        <h3>収穫かご</h3>
+        <div id="g-basket"></div>
+      </div>
+    </div>
+
+    <p class="help">
+      <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
+      <b>Tab</b> お店 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>0</b> 記録 ・ <b>Esc</b> タイトルへ<br>
+      作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
+    </p>
+  </div>
+
+  <!-- お店 -->
+  <div class="modal" id="g-shop">
+    <div class="panel">
+      <div class="phead">
+        <h2>お店</h2>
+        <div class="money">🔩 <span id="g-shopMoney">0</span><small>ネジ</small></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <div class="tabs" id="g-shopTabs">
+        <button class="tab" data-tab="0">種</button>
+        <button class="tab" data-tab="1">道具・土地</button>
+        <button class="tab" data-tab="2">売る</button>
+      </div>
+      <div id="g-shopBody" class="plist"></div>
+      <div class="keyhint" id="g-shopHint"></div>
+    </div>
+  </div>
+
+  <!-- 図鑑 -->
+  <div class="modal" id="g-book">
+    <div class="panel">
+      <div class="phead">
+        <h2>作物図鑑</h2>
+        <div class="money" id="g-bookRate"></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <div class="book">
+        <div id="g-bookList" class="plist booklist"></div>
+        <div id="g-bookDetail" class="bookdetail"></div>
+      </div>
+      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <!-- 記録(セーブデータのコピー) -->
+  <div class="modal" id="g-save">
+    <div class="panel savebox">
+      <div class="phead"><h2>記録</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
+      <p>庭のデータはこのブラウザに自動で保存されています。別のパソコンやブラウザに移すときは、記録文字列をコピーして、移動先で読み込んでください。</p>
+      <h3>この庭の記録文字列</h3>
+      <textarea class="code" id="g-exportCode" readonly tabindex="-1"></textarea>
+      <div class="pfoot"><span class="note" id="g-copyNote"></span><button class="sbtn main" id="g-copyBtn">コピーする(C)</button></div>
+      <h3>記録文字列から読み込む</h3>
+      <p>読み込むと、今この庭にあるデータは上書きされます。</p>
+      <textarea class="code" id="g-importCode" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
+      <div class="pfoot"><span class="note" id="g-importNote"></span><button class="sbtn" id="g-importBtn">読み込む(Enter)</button></div>
+      <div class="keyhint"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>0</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <!-- 番付に載せる -->
+  <div class="modal" id="g-rank">
+    <div class="panel savebox">
+      <div class="phead"><h2>番付に載せる</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
+      <p id="g-rankNow"></p>
+      <p>所持ネジと累計収穫数の番付(ランキング)に載せます。名前ごとに1件で、一度載せると庭を出るたびに自動で更新されます。</p>
+      <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
+      <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">載せる(Enter)</button></div>
+      <div class="keyhint">名前を入れて <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <div id="g-toasts"></div>
   </section>
 
   <!-- ネジ抜き辞典画面 -->
@@ -654,6 +1130,7 @@ body.washi{
       <button class="btn" id="dtab-hard">ハード</button>
     </div>
     <ol class="rank-list" id="dictList"></ol>
+    <p class="keynav"><b>← →</b> 切り替え ・ <b>↑ ↓</b> スクロール ・ <b>Esc</b> タイトルへ</p>
     <div class="btn-row">
       <button class="btn" id="dictBackBtn">タイトルへ (Esc)</button>
     </div>
@@ -1033,7 +1510,9 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 → ネジの詩 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY)];
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY), "g-money","g-harvest"];
+const isGardenRank = d => d==="g-money" || d==="g-harvest";
+DIFF_LABEL["g-money"]="ネジ抜きの庭 所持ネジ"; DIFF_LABEL["g-harvest"]="ネジ抜きの庭 累計収穫";
 for(const p of POEMS) DIFF_LABEL[POEM_KEY(p)] = "ネジの詩「"+p.title+"」";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
@@ -1292,13 +1771,14 @@ const fmtTime = s => Number(s).toFixed(2)+"秒";
 
 /* ---------- 画面制御 ---------- */
 const $=id=>document.getElementById(id);
-const screens={title:$("screen-title"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),poem:$("screen-poem")};
+const screens={title:$("screen-title"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),poem:$("screen-poem"),garden:$("screen-garden")};
 let scene="title";
 function show(name){
   scene=name;
   for(const k in screens) screens[k].classList.toggle("active",k===name);
   document.body.classList.toggle("washi", name==="poem");
-  if(name==="title") refreshStatsLine();
+  document.body.classList.toggle("garden", name==="garden");
+  if(name==="title"){ refreshStatsLine(); refreshGardenStat(); }
 }
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
@@ -1306,6 +1786,20 @@ let timerId=null, lastWordKey=null, plateScrews=0, running=false, currentWord=nu
 let elapsed=0;          // 一本勝負/タイムアタックの経過秒
 let taQueue=[], taGoal=0, nextWord=null; // タイムアタック用の出題キュー
 let oneshotStage=0;     // 一本勝負の緊張段階(0〜4)
+let gardenKeys=0;       // このプレイで正しく打った打鍵数(ネジ抜きの庭の時短に使う)
+
+/* ネジ抜きの庭へ「正しい打鍵数」と「抜いたネジ」を届ける(庭を開いたときに受け取られる) */
+function sendToGarden(keys,screws){
+  keys=keys|0; screws=screws|0;
+  if(keys<=0 && screws<=0) return;
+  try{
+    const K="nejiuchi:garden:inbox";
+    const cur=JSON.parse(localStorage.getItem(K)||"{}")||{};
+    cur.keys=(cur.keys|0)+Math.max(0,keys);
+    cur.screws=(cur.screws|0)+Math.max(0,screws);
+    localStorage.setItem(K,JSON.stringify(cur));
+  }catch(e){}
+}
 
 async function refreshBestLine(){
   const [e,n,h,o]=await Promise.all([loadBest("easy"),loadBest("normal"),loadBest("hard"),loadBest("oneshot")]);
@@ -1466,6 +1960,7 @@ function startGame(d){
   words = (ta||oneshot) ? [] : WORD_SETS[d];
   score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false;
   taQueue=[]; taGoal=0;
+  gardenKeys=0;
   resetStage();
   clearInterval(timerId);
   clearWordPanel();                       // ← 前回の出題を消してからカウントダウン
@@ -1561,36 +2056,54 @@ async function endGame(){
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
 document.addEventListener("keydown",e=>{
+  if(scene==="garden"){ Garden.onKey(e); return; }
   // 名前入力中はゲーム操作を無効化(Enterで登録)
   if(e.target && e.target.tagName==="INPUT"){
     if(e.key==="Enter"){
       e.preventDefault();
       if(e.target.id==="poemName") $("poemRegBtn").click(); else $("regBtn").click();
     }
-    if(e.key==="Escape" && e.target.id==="poemName"){ stopPoem(); show("title"); }
+    if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
     return;
   }
   if(scene==="title"){
     if(START_KEYS[e.key]) startGame(START_KEYS[e.key]);
     if(e.key==="8") startPoem(POEMS[0]);
+    if(e.key==="r"||e.key==="R") openRanking(rankCur,playerName);
+    if(e.key==="d"||e.key==="D") openDict(dictCur);
+    if(e.key==="9"||e.key==="g"||e.key==="G") openGarden();
     return;
   }
   if(scene==="poem"){ poemKey(e); return; }
   if(scene==="ranking"){
     if(e.key==="Escape") show("title");
+    else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
+      e.preventDefault();
+      const i=RANK_TABS.indexOf(rankCur), n=RANK_TABS.length;
+      openRanking(RANK_TABS[(i+(e.key==="ArrowRight"?1:-1)+n)%n], playerName);
+    }
+    else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("rankList").scrollBy(0,e.key==="ArrowDown"?60:-60); }
     return;
   }
   if(scene==="dict"){
     if(e.key==="Escape") show("title");
+    else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
+      e.preventDefault();
+      const i=DICT_TABS.indexOf(dictCur), n=DICT_TABS.length;
+      openDict(DICT_TABS[(i+(e.key==="ArrowRight"?1:-1)+n)%n]);
+    }
+    else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("dictList").scrollBy(0,e.key==="ArrowDown"?60:-60); }
     return;
   }
   if(scene==="result"){
     if(e.key==="Enter") startGame(diff);
     if(e.key==="Escape") show("title");
+    if(e.key==="n"||e.key==="N"){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
+    if(e.key==="g"||e.key==="G") openGarden();
     return;
   }
   // ゲーム中
-  if(e.key==="Escape"){ clearInterval(timerId); running=false; resetStage(); clearWordPanel(); show("title"); return; }
+  if(e.key==="Escape"){ clearInterval(timerId); running=false; resetStage(); clearWordPanel(); sendToGarden(gardenKeys,0); gardenKeys=0; show("title"); return; }
   if(!running) return;
   const key=e.key;
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
@@ -1622,6 +2135,7 @@ document.addEventListener("keydown",e=>{
       pop.classList.remove("show"); void pop.offsetWidth; pop.classList.add("show");
     }
   } else {
+    gardenKeys++;
     if(diff==="oneshot") sndTypeStage(); else sndType();
     renderRomaji();
     if(r==="done"){
@@ -1647,6 +2161,7 @@ document.addEventListener("keydown",e=>{
 document.querySelectorAll(".diff-btn").forEach(b=>{
   b.addEventListener("click",()=>{
     if(b.dataset.diff==="poem") startPoem(POEMS[0]);
+    else if(b.dataset.diff==="garden") openGarden();
     else startGame(b.dataset.diff);
   });
 });
@@ -1707,7 +2222,7 @@ async function submitScore(name,d,extra){
 
 async function fetchRanking(d){
   // タイム系は昇順に並べたいので、取得は全件から上位を選ぶ
-  const ref=db.ref("nejiuchi/scores/"+d);
+  const ref = isGardenRank(d) ? db.ref("nejiuchi/garden/"+d.slice(2)) : db.ref("nejiuchi/scores/"+d);
   const snap = isTimeRanked(d)
     ? await ref.orderByChild("e").limitToFirst(RANKING_SIZE).once("value")
     : await ref.orderByChild("s").limitToLast(RANKING_SIZE).once("value");
@@ -1717,7 +2232,9 @@ async function fetchRanking(d){
   return rows;
 }
 
+let rankCur="normal", dictCur="easy";
 async function openRanking(d,highlight){
+  rankCur=d;
   for(const t of RANK_TABS) $("tab-"+t).classList.toggle("active",d===t);
   show("ranking");
   const list=$("rankList");
@@ -1734,7 +2251,9 @@ async function openRanking(d,highlight){
       const li=document.createElement("li");
       li.className="rank-row"+(i===0?" top1":"")+(highlight&&r.n===highlight?" me":"");
       let scoreText;
-      if(isTimeRanked(d)){
+      if(isGardenRank(d)){
+        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + (d==="g-money"?"ネジ":"個");
+      }else if(isTimeRanked(d)){
         const missText = (r.m==null) ? "" : ` <span style="color:var(--steel);font-size:.85em">ミス${r.m}</span>`;
         scoreText = `${r.e==null?"--":fmtTime(r.e)}${missText}`;
       }else if(d==="oneshot" && r.e!=null){
@@ -1806,6 +2325,7 @@ let poemRows=[];                 // 各行の {row, pr} 要素
 let poemCdTimers=[];
 
 function stopPoem(){
+  if(poemState==="play"){ sendToGarden(gardenKeys,0); gardenKeys=0; }
   clearInterval(poemTimer);
   poemCdTimers.forEach(clearTimeout); poemCdTimers=[];
   poemState="idle";
@@ -1856,7 +2376,7 @@ function startPoem(p){
   clearInterval(timerId); running=false; resetStage(); clearWordPanel();
   stopPoem();
   poem=p||POEMS[0];
-  poemIdx=0; poemMiss=0; poemElapsed=0;
+  poemIdx=0; poemMiss=0; poemElapsed=0; gardenKeys=0;
   poemState="countdown";
   diff=POEM_KEY(poem);
   $("poemTitleHud").textContent=poem.title;
@@ -1900,6 +2420,8 @@ function poemKey(e){
   if(e.key==="Escape"){ stopPoem(); show("title"); return; }
   if(poemState==="done"){
     if(e.key==="Enter") startPoem(poem);
+    if(e.key==="n"||e.key==="N"){ e.preventDefault(); $("poemName").focus(); $("poemName").select&&$("poemName").select(); }
+    if(e.key==="g"||e.key==="G"){ stopPoem(); openGarden(); }
     return;
   }
   if(poemState!=="play") return;
@@ -1914,6 +2436,7 @@ function poemKey(e){
     row.classList.remove("ink"); void row.offsetWidth; row.classList.add("ink");
     return;
   }
+  gardenKeys++;
   sndBrush();
   renderPoemRomaji();
   if(r==="done"){
@@ -2007,6 +2530,7 @@ function unlockWord(k){
   if(!unlocked.has(k)){ unlocked.add(k); saveDict(); }
 }
 function openDict(d){
+  dictCur=d;
   for(const t of DICT_TABS) $("dtab-"+t).classList.toggle("active",d===t);
   show("dict");
   const arr=WORD_SETS[d];
@@ -2038,6 +2562,7 @@ $("dictBackBtn").addEventListener("click",()=>show("title"));
 
 /* ---------- 全体統計(総プレイ回数・抜いたネジ累計) ---------- */
 async function recordStats(screws){
+  sendToGarden(gardenKeys, screws); gardenKeys=0;
   // 端末ローカルにも記録(オフライン時のフォールバック用)
   try{
     let s={plays:0,screws:0};
@@ -2075,8 +2600,1214 @@ async function refreshStatsLine(){
   }catch(e){ el.textContent=""; }
 }
 
+/* =====================================================
+   ネジ抜きの庭(同じページ内の一画面として動く)
+   本編の変数と混ざらないよう、まるごと Garden の中に閉じ込めている
+   第2段階: 大きなクワ / 肥料 / スプリンクラー / 案山子とカラス / 作物図鑑
+   すべての操作はキーボードだけで完結する
+===================================================== */
+const Garden=(()=>{
+
+/* ---------- 調整用の数値 ---------- */
+const MIN_PER_KEY = 5;              // 正しい1打鍵で進む分数(案山子1体ごとに+1)
+const HOUR = 3600e3;
+const SAVE_KEY  = "nejiuchi:garden:save";
+const INBOX_KEY = "nejiuchi:garden:inbox";   // ネジ打ち本編から届く {keys, screws}
+const START_MONEY = 30;
+const CROW_AFTER    = 12*HOUR;  // 実ってからこれだけ放置された作物がカラスに狙われる
+const CROW_CHANCE   = 0.5;      // 狙われたときに実際に持っていかれる確率
+const CROW_INTERVAL = 24*HOUR;  // 同じ畑にカラスが来る間隔
+const FERT_BOOST    = 0.25;     // 肥料1つで進む割合(必要時間の25%)
+const REVERT_AFTER  = 24*HOUR;  // 何も植えずに放っておくと、耕した土はこの時間で草むらに戻る
+const VIL_COST      = 3000;     // 村人1人を雇う値段(にんじん専門)
+const VIL_SLOTS     = 5;        // 村人1人が世話できる区画数
+const RANK_PATH     = "nejiuchi/garden";   // 番付(Firebase)の保存先
+
+/* 畑の区画(キーボードの並び)
+   P は案山子置き場(畑ではない)。, と . は K・L の真下にあり、JIS配列でもUS配列でも同じ位置。
+   これで各段9区画ずつになり、QWE/ASD/ZXC・RTY/FGH/VBN・UIO/JKL/M,. の 3×3 が3つ並ぶ */
+const KEY_ROWS = [
+  ["Q","W","E","R","T","Y","U","I","O","P"],
+  ["A","S","D","F","G","H","J","K","L"],
+  ["Z","X","C","V","B","N","M",",","."],
+];
+const POST = "P";   // 案山子置き場
+const KEYS = KEY_ROWS.flat();
+const POS = {}; KEY_ROWS.forEach((row,r)=>row.forEach((k,i)=>POS[k]=[r,i]));
+const keyAt=(r,i)=>KEY_ROWS[r]&&KEY_ROWS[r][i];
+/* 周りの区画: row3=左右 / cross=上下左右 / ring=周り8つ
+   上下は同じ並び位置どうし(Q の下は A、A の下は Z)とみなす */
+function around(k,area){
+  const [r,i]=POS[k], out=[];
+  const add=(rr,ii)=>{ const x=keyAt(rr,ii); if(x) out.push(x); };
+  if(area==="row3"||area==="cross"||area==="ring"){ add(r,i-1); add(r,i+1); }
+  if(area==="cross"||area==="ring"){ add(r-1,i); add(r+1,i); }
+  if(area==="ring"){ add(r-1,i-1); add(r-1,i+1); add(r+1,i-1); add(r+1,i+1); }
+  return out;
+}
+
+/* 作物
+   hours: 水が効いている間に必要な成長時間 / cost: 種1つ / price: 収穫物1つの売値
+   unlock: 店に並ぶ条件 {sales:累計売上, fields:畑の枚数, harvest:累計収穫数}
+   desc: お店での一言 / lore: 図鑑の説明文(初めて収穫すると読める) */
+const CROPS = [
+  { id:"carrot", name:"にんじん", icon:"🥕", cost:5, hours:6, price:12,
+    desc:"最初の一本。6時間で抜ける手軽さ。",
+    lore:"ネジ抜きの庭で最初に抜かれるもの。引き抜くときの手応えがネジに似ていると言い出した者がいて、それ以来この庭では「一本目」と呼ばれている。" },
+  { id:"potato", name:"じゃがいも", icon:"🥔", cost:10, hours:12, price:26,
+    desc:"半日で育つ。地味だが裏切らない。",
+    lore:"掘るまで何個ついているか分からない。期待しすぎず、がっかりもしない。庭仕事の心構えは全部こいつから教わった。" },
+  { id:"tomato", name:"トマト", icon:"🍅", cost:20, hours:24, price:55,
+    unlock:{sales:100}, desc:"赤くなるまで一日。",
+    lore:"一日かけて赤くなる。朝に植えて、夜にネジ打ちで時間を進めて、寝る前に収穫する。そういう生活リズムを作った元凶。" },
+  { id:"corn", name:"とうもろこし", icon:"🌽", cost:40, hours:36, price:110,
+    unlock:{sales:400}, desc:"背が伸びるほど嬉しくなる。",
+    lore:"キーボードの上で一番背が高くなる作物。隣の区画を覗き込むように育つので、置き場所を考えるのが楽しい。" },
+  { id:"eggplant", name:"なす", icon:"🍆", cost:60, hours:48, price:170,
+    unlock:{fields:2}, desc:"畑を広げた人のための夏野菜。",
+    lore:"畑を二枚持った者だけが種を買える。広い畑を見渡して「なすでも植えるか」と言えるのは、ちょっとした贅沢である。" },
+  { id:"strawberry", name:"いちご", icon:"🍓", cost:120, hours:72, price:360,
+    unlock:{sales:2000}, desc:"三日待つ価値のある甘さ。",
+    lore:"三日待つ。その間に何度水をやり忘れたかで、甘さが変わると信じている者もいる(実際は変わらない)。" },
+  { id:"pumpkin", name:"かぼちゃ", icon:"🎃", cost:250, hours:96, price:780,
+    unlock:{sales:5000, fields:2}, desc:"四日かけて重たく育つ。",
+    lore:"四日かけて、区画いっぱいに膨らむ。収穫した日はなんとなく打鍵が丁寧になる。重いものを持った後の手のように。" },
+  { id:"melon", name:"メロン", icon:"🍈", cost:600, hours:120, price:1900,
+    unlock:{sales:15000, fields:3}, desc:"五日がかりの高級品。",
+    lore:"五日がかりの高級品。網目が一本ずつ入っていく様子を、スプリンクラーの音を聞きながら眺めるのが通の楽しみ方。" },
+  { id:"nejitree", name:"ネジの木", icon:"🔩", cost:2000, hours:168, price:7000,
+    unlock:{sales:50000, harvest:300}, desc:"一週間で実るネジ。抜くのが本業。",
+    lore:"一週間かけて、枝先に一本のネジが実る。抜いたネジを植えるとネジが実る。この庭がネジ抜きの庭と呼ばれる理由の、最後のひとつ。" },
+];
+const CROP = Object.fromEntries(CROPS.map(c=>[c.id,c]));
+
+/* 品質: 同じ作物をたくさん収穫すると、次から穫れるものの品質が上がる
+   need: その品質が穫れるようになる累計収穫数 / mult: 売値の倍率 */
+const QUALITY = [
+  { mark:"",   mult:1.00, need:0   },
+  { mark:"☆",  mult:1.10, need:10  },
+  { mark:"☆☆", mult:1.25, need:100 },
+];
+const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0); };
+const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult);
+const qName   = (id,t) => CROP[id].name+QUALITY[t].mark;
+/* 品質ごとの図鑑の説明文(ふつうの品質は CROPS の lore) */
+const LORE_Q = {
+  carrot:     ["十本抜いたあたりで、抜く角度がわかってくる。そうして穫れたにんじんは、先までまっすぐ伸びている。",
+               "百本目を越えると、土の上からでも太さがわかる。この庭の者はこれを「一本目の完成形」と呼ぶ。"],
+  potato:     ["掘るたびに数が揃ってくる。裏切らないうえに、期待にも応え始めた。",
+               "皮まで薄く、形が丸い。百回掘った手にしか見えない芋のつき方がある。"],
+  tomato:     ["赤みにむらがない。一日の水やりを十回繰り返すと、トマトも生活リズムを覚えるらしい。",
+               "へたの緑まで艶がある。夜のネジ打ちで熟させたものは特に甘い、という噂がある。"],
+  corn:       ["粒の並びが揃ってきた。隣の区画を覗き込む角度も、心なしか品が良い。",
+               "一粒の欠けもない。キーボードの上に立つ黄金の柱。"],
+  eggplant:   ["皮の紫が深い。二枚目の畑の主にふさわしい落ち着き。",
+               "撫でると鏡のように光る。広い畑を見渡すときの誇らしさが、そのまま色になった。"],
+  strawberry: ["粒が大きく、へたが反り返る。三日待つことにも慣れてきた証。",
+               "先まで赤い。水やりを忘れた日は一度もない、と言い張れる者だけが手にする。"],
+  pumpkin:    ["持ち上げると、ずしりと手首にくる。四日分の重さが詰まっている。",
+               "叩くと澄んだ音がする。収穫した日の打鍵は、いつもより一段丁寧になる。"],
+  melon:      ["網目が細かく均一になった。スプリンクラーの音を聞き分けられるようになった者の品。",
+               "網目の一本一本に迷いがない。五日を百回重ねた者にだけ許された香り。"],
+  nejitree:   ["実ったネジの溝がまっすぐ切れている。抜くのが気持ちいい。",
+               "締めても抜いても手応えが変わらない、理想のネジ。ネジ抜きの庭の、終わりのない終わり。"],
+};
+
+/* じょうろ(水が保つ時間) */
+const CANS = [
+  { lv:1, name:"じょうろ",     hours:24, area:"self",  cost:0,    what:"1区画" },
+  { lv:2, name:"銅のじょうろ", hours:36, area:"row3",  cost:300,  what:"横3区画" },
+  { lv:3, name:"銀のじょうろ", hours:48, area:"cross", cost:1500, what:"十字5区画" },
+  { lv:4, name:"金のじょうろ", hours:72, area:"ring",  cost:6000, what:"周り9区画" },
+];
+/* クワ(一度に耕せる範囲) */
+const HOES = [
+  { lv:1, name:"クワ",       area:"self",  cost:0,    what:"1区画" },
+  { lv:2, name:"広いクワ",   area:"row3",  cost:400,  what:"左右と合わせて横3区画" },
+  { lv:3, name:"大きなクワ", area:"cross", cost:2000, what:"上下左右と合わせて十字5区画" },
+  { lv:4, name:"巨大なクワ", area:"ring",  cost:8000, what:"周り8区画と合わせて9区画" },
+];
+/* 設置物(区画に置く。素手で拾える) */
+const OBJS = {
+  spr:  { id:"spr",  name:"スプリンクラー",       icon:"⛲", area:"ring",  cost:1000, unlock:{sales:1000},
+          what:"周り8区画の耕した区画に、ずっと水が効きます" },
+  crow: { id:"crow", name:"案山子",               icon:"🧑‍🌾", area:null, cost:1000, unlock:{sales:300},
+          what:"各畑の P(案山子置き場)に置くと、その畑にカラスが来なくなり、1打の時短が+1分" },
+};
+const OBJ_ORDER = ["spr","crow"];
+const FERT = { name:"肥料", icon:"🍂", cost:60, unlock:{sales:200} };
+/* 畑の追加チケット(n枚目を買う値段) */
+const FIELD_PRICES = [0, 500, 3000, 12000, 40000];
+
+/* ---------- 状態 ---------- */
+function makeField(){
+  const f={};
+  for(const k of KEYS) f[k]={ s:(k===POST?"post":"grass"), crop:null, wet:0, obj:null, vil:false, emptySince:0 };
+  return f;
+}
+function newState(){
+  return {
+    v:4,
+    money:START_MONEY, totalSales:0, totalHarvest:0,
+    fields:[makeField()], cur:0,
+    tool:1, seedId:"carrot", objSel:"spr",
+    seeds:{ carrot:4 }, inv:{}, canLv:1, hoeLv:1, fert:0, objs:{},
+    harvestBy:{}, harvestQ:{}, known:["carrot","potato"], lastCrow:[],
+    lastTick:Date.now(), created:Date.now(),
+    fromTypingMin:0, fromTypingScrews:0,
+    villagers:0, vLog:{},
+    owner:Math.random().toString(36).slice(2)+Date.now().toString(36),  // 番付で自分の記録を見分ける印
+    rankName:"",
+  };
+}
+let S = newState();
+
+/* ---------- 保存 ---------- */
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function isValidState(o){
+  return o && typeof o==="object" && typeof o.money==="number" && Array.isArray(o.fields) && o.fields.length>0;
+}
+/* 古い記録(第1段階)にも足りない項目を補って読み込む */
+function normalize(o){
+  const s=Object.assign(newState(),o);
+  s.fields=s.fields.map(f=>{ const g=makeField(); for(const k of KEYS) if(f&&f[k]) g[k]=Object.assign(g[k],f[k]); return g; });
+  if(s.cur>=s.fields.length) s.cur=0;
+  for(const key of ["seeds","inv","harvestBy","objs"]) s[key]=s[key]||{};
+  s.known=s.known||[]; s.lastCrow=s.lastCrow||[];
+  s.hoeLv=s.hoeLv||1; s.canLv=s.canLv||1; s.fert=s.fert||0;
+  // 旧「高性能スプリンクラー」はスプリンクラーにまとめる
+  if(s.objs.spr2){ s.objs.spr=(s.objs.spr||0)+s.objs.spr2; delete s.objs.spr2; }
+  for(const f of s.fields) for(const k of KEYS){ if(f[k].obj==="spr2") f[k].obj="spr"; }
+  if(s.objSel!=="vil" && !OBJ_ORDER.includes(s.objSel)) s.objSel="spr";
+  s.villagers=s.villagers||0; s.vLog=s.vLog||{};
+  if(!s.owner) s.owner=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  s.rankName=s.rankName||"";
+  // 収穫かごを品質別に([ふつう, ☆, ☆☆])
+  for(const id of Object.keys(s.inv)){ if(typeof s.inv[id]==="number") s.inv[id]=[s.inv[id],0,0]; }
+  s.harvestQ=s.harvestQ||{};
+  for(const id of Object.keys(s.harvestBy)){ if(!s.harvestQ[id]) s.harvestQ[id]=[s.harvestBy[id],0,0]; }
+  // P を案山子置き場に。P にあったものは手持ちに戻し、ほかの区画の案山子は P へ移す
+  for(const f of s.fields){
+    const P=f[POST];
+    if(P.s!=="post"){
+      if(P.crop){
+        const c=CROP[P.crop.id];
+        if(c && P.crop.grown>=c.hours*HOUR){ s.inv[c.id]=s.inv[c.id]||[0,0,0]; s.inv[c.id][0]++; }
+        else if(c){ s.seeds[c.id]=(s.seeds[c.id]||0)+1; }
+      }
+      if(P.obj && P.obj!=="crow") s.objs[P.obj]=(s.objs[P.obj]||0)+1;
+      f[POST]={ s:"post", crop:null, wet:0, obj:(P.obj==="crow"?"crow":null), vil:false, emptySince:0 };
+    }
+    for(const k of KEYS){
+      if(k===POST || f[k].obj!=="crow") continue;
+      f[k].obj=null;
+      if(!f[POST].obj) f[POST].obj="crow"; else s.objs.crow=(s.objs.crow||0)+1;
+    }
+  }
+  s.v=4;
+  return s;
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(raw){ const o=JSON.parse(raw); if(isValidState(o)){ S=normalize(o); return true; } }
+  }catch(e){}
+  return false;
+}
+
+/* ---------- 水と時間の進行 ---------- */
+const need = c => CROP[c.id].hours*HOUR;
+const isRipe = p => p.crop && p.crop.grown>=need(p.crop);
+/* その畑でスプリンクラーの水が届いている区画 */
+function covered(fi){
+  const f=S.fields[fi], set=new Set();
+  for(const k of KEYS){
+    const o=f[k].obj;
+    if(o && OBJS[o].area) for(const n of around(k,OBJS[o].area)) set.add(n);
+  }
+  return set;
+}
+function isWet(fi,k,now,cov){
+  const p=S.fields[fi][k];
+  if(p.vil) return true;
+  if(p.s!=="soil" || p.obj) return false;
+  if(p.wet>now) return true;
+  return (cov||covered(fi)).has(k);
+}
+/* 前回の計算時刻 lastTick から今までのうち、水が効いていた時間だけ成長させる */
+function grow(p,add,base){
+  const before=p.crop.grown, n=need(p.crop);
+  p.crop.grown=Math.min(n, before+add);
+  if(p.crop.grown>=n && !p.crop.ripeAt) p.crop.ripeAt=base+(n-before);
+}
+function tick(now=Date.now()){
+  const last=S.lastTick;
+  if(now>last){
+    const dt=now-last;
+    S.fields.forEach((f,fi)=>{
+      const cov=covered(fi);
+      for(const k of KEYS){
+        const p=f[k];
+        if(p.vil){ villagerAdvance(p,dt); continue; }
+        if(p.crop && !isRipe(p)){
+          const add = (p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last);
+          if(add>0) grow(p,add,last);
+        }
+        // 何も植わっていない耕した土は、24時間で草むらに戻る
+        if(p.s==="soil" && !p.crop && !p.obj){
+          if(!p.emptySince) p.emptySince=now;
+          else if(now-p.emptySince>=REVERT_AFTER){ p.s="grass"; p.wet=0; p.emptySince=0; }
+        }
+      }
+    });
+  }
+  S.lastTick=now;
+}
+
+/* ---------- 村人 ----------
+   指定された区画で「その時に入荷している一番高級な作物」を
+   植える → 水やり(いつも水あり) → 収穫 → 売却 まで自動で繰り返す。
+   庭を閉じていた時間も、次に開いたときの tick() でまとめて処理される。 */
+const vilUsed = () => S.fields.reduce((a,f)=>a+KEYS.filter(k=>f[k].vil).length,0);
+const vilFree = () => S.villagers*VIL_SLOTS - vilUsed();
+const VIL_CROP = "carrot";   // 村人が育てるのはにんじんだけ
+function villagerAdvance(p,dt){
+  let t=dt, guard=0;
+  while(guard++<100000){
+    if(!p.crop){
+      const c=CROP[VIL_CROP];
+      if(S.money<c.cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
+      S.money-=c.cost;
+      S.vLog.spent=(S.vLog.spent||0)+c.cost;
+      p.crop={ id:c.id, grown:0 }; p.vWait=false;
+    }
+    const n=need(p.crop), rem=n-p.crop.grown;
+    if(t<rem){ p.crop.grown+=t; break; }
+    t-=rem;
+    const c=CROP[p.crop.id];
+    p.crop=null;
+    const q=tierOf(c.id), price=priceOf(c.id,q);   // q: 品質(t は残り時間なので別名に)
+    S.money+=price; S.totalSales+=price;
+    recordHarvest(c.id,q,true);
+    S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+1;
+    S.vLog.earn=(S.vLog.earn||0)+price;
+  }
+}
+/* 収穫を記録する(品質別の数・品質が上がったらお知らせ) */
+function recordHarvest(id,t,quiet){
+  const before=tierOf(id);
+  S.harvestBy[id]=(S.harvestBy[id]||0)+1;
+  S.harvestQ[id]=S.harvestQ[id]||[0,0,0];
+  S.harvestQ[id][t]++;
+  S.totalHarvest++;
+  const after=tierOf(id);
+  if(after>before){
+    const msg=`${CROP[id].icon} ${CROP[id].name}の品質が上がりました。これからは「${qName(id,after)}」が穫れます(売値 ${priceOf(id,after)}ネジ)`;
+    if(quiet){ S.vLog.up=S.vLog.up||[]; S.vLog.up.push(msg); } else { toast(msg,"good",5200); sfx.vil(); }
+  }
+}
+/* 村人の仕事ぶりをまとめて知らせる */
+function reportVillagers(){
+  const L=S.vLog; if(!L || (!L.h && !L.up)) return;
+  const parts=Object.entries(L.h||{}).map(([id,n])=>`${CROP[id].icon}×${n}`);
+  if(parts.length){
+    toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} ネジ)`,"good",6000);
+    sfx.vil();
+  }
+  for(const m of (L.up||[])) toast(m,"good",5200);
+  S.vLog={}; checkUnlocks(); save();
+}
+/* 案山子のいる畑の数(1打あたりの時短が増える) */
+const crowFields = () => S.fields.filter(f=>KEYS.some(k=>f[k].obj==="crow")).length;
+const minPerKey  = () => MIN_PER_KEY + crowFields();
+/* タイピングで得た時間を、水の効いている作物にまとめて足す */
+function applySkip(minutes){
+  const now=Date.now();
+  tick(now);
+  let n=0;
+  S.fields.forEach((f,fi)=>{
+    const cov=covered(fi);
+    for(const k of KEYS){
+      const p=f[k];
+      if(p.vil){ villagerAdvance(p,minutes*60000); n++; continue; }
+      if(!p.crop || isRipe(p) || !isWet(fi,k,now,cov)) continue;
+      grow(p,minutes*60000,now);
+      if(isRipe(p)) p.crop.ripeAt=now;
+      n++;
+    }
+  });
+  return n;
+}
+/* ネジ打ち本編から届いた分を受け取る */
+function consumeInbox(){
+  let box;
+  try{ box=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); }catch(e){ box=null; }
+  if(!box) return;
+  const keys=Math.max(0, box.keys|0), screws=Math.max(0, box.screws|0);
+  if(!keys && !screws) return;
+  try{ localStorage.setItem(INBOX_KEY, JSON.stringify({keys:0,screws:0})); }catch(e){}
+  const minutes=keys*minPerKey();
+  const n=minutes>0 ? applySkip(minutes) : 0;
+  S.money+=screws;
+  S.fromTypingMin+=minutes; S.fromTypingScrews+=screws;
+  save();
+  const parts=[];
+  if(minutes>0) parts.push(`時間が ${fmtDur(minutes*60000)} 進みました(水の効いている${n}区画)`);
+  if(screws>0) parts.push(`抜いたネジ ${screws}本 が届きました`);
+  toast("ネジ打ちから — "+parts.join(" / "), "good", 5200);
+  if(minutes>0 && n===0) toast("水の効いている作物が無かったので、時間は使われませんでした", "warn", 5200);
+  renderAll();
+}
+/* カラス: 案山子のいない畑で、実ったまま長く放置された作物を持っていくことがある */
+function crowVisit(){
+  const now=Date.now(), taken=[];
+  S.fields.forEach((f,fi)=>{
+    if(KEYS.some(k=>f[k].obj==="crow")) return;
+    if(now-(S.lastCrow[fi]||0) < CROW_INTERVAL) return;
+    const targets=KEYS.filter(k=>{ const p=f[k]; return p.crop && isRipe(p) && p.crop.ripeAt && now-p.crop.ripeAt>=CROW_AFTER; });
+    if(!targets.length) return;
+    S.lastCrow[fi]=now;
+    if(Math.random()<CROW_CHANCE){
+      const k=targets[Math.floor(Math.random()*targets.length)];
+      const c=CROP[f[k].crop.id];
+      f[k].crop=null; f[k].emptySince=now;
+      taken.push(`畑${fi+1}の ${k} の ${c.icon}${c.name}`);
+    }
+  });
+  if(taken.length){
+    toast(`カラスが ${taken.join("、")} を持っていきました。実ったら早めに収穫するか、案山子を置きましょう`,"warn",7000);
+    save();
+  }
+}
+
+/* ---------- 効果音(本編の beep を使う) ---------- */
+const seq=(notes,gap,type,gain,dur)=>notes.forEach((f,i)=>setTimeout(()=>beep(f,dur,type,gain),i*gap));
+const sfx={
+  till:   ()=>{ beep(170,.09,"triangle",.09); setTimeout(()=>beep(120,.12,"triangle",.07),50); },
+  water:  ()=>seq([1500,1250,1050,1350],35,"sine",.035,.05),
+  plant:  ()=>{ beep(520,.06,"sine",.07); setTimeout(()=>beep(780,.08,"sine",.06),60); },
+  harvest:()=>seq([660,880,1320],55,"triangle",.07,.09),
+  fert:   ()=>seq([1600,2000,2400],45,"sine",.03,.07),
+  place:  ()=>{ beep(200,.08,"triangle",.08); setTimeout(()=>beep(990,.1,"sine",.05),70); },
+  pick:   ()=>{ beep(990,.06,"sine",.05); setTimeout(()=>beep(660,.08,"sine",.05),60); },
+  nope:   ()=>beep(140,.1,"square",.04),
+  cursor: ()=>beep(1250,.025,"sine",.03),
+  tab:    ()=>beep(880,.05,"sine",.045),
+  tool:   ()=>beep(740,.04,"sine",.04),
+  field:  ()=>{ beep(440,.06,"sine",.05); setTimeout(()=>beep(660,.07,"sine",.05),60); },
+  buy:    ()=>{ beep(1320,.06,"square",.035); setTimeout(()=>beep(1760,.1,"square",.035),60); },
+  sell:   ()=>seq([1320,1760,2090],50,"square",.03,.07),
+  open:   ()=>beep(620,.06,"sine",.05),
+  close:  ()=>beep(480,.06,"sine",.05),
+  vil:    ()=>seq([523,659,784],70,"sine",.05,.09),
+};
+
+/* ---------- 表示用の小道具 ---------- */
+const $=id=>document.getElementById(id);
+const root=$("screen-garden");
+const fmtNum=n=>Math.floor(n).toLocaleString("ja-JP");
+function fmtDur(ms){
+  ms=Math.max(0,ms);
+  const m=Math.ceil(ms/60000);
+  const d=Math.floor(m/1440), h=Math.floor((m%1440)/60), mi=m%60;
+  if(d>0) return `${d}日${h}時間`;
+  if(h>0) return mi ? `${h}時間${mi}分` : `${h}時間`;
+  return `${mi}分`;
+}
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function toast(text,kind="",ms=2600){
+  const t=document.createElement("div");
+  t.className="toast "+kind;
+  t.textContent=text;
+  $("g-toasts").appendChild(t);
+  setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),320); }, ms);
+}
+function floatAt(k,text){
+  const el=plotEls[k]; if(!el) return;
+  const r=el.getBoundingClientRect();
+  const f=document.createElement("div");
+  f.className="float"; f.textContent=text;
+  f.style.left=(r.left+r.width/2)+"px"; f.style.top=(r.top+4)+"px";
+  root.appendChild(f);
+  setTimeout(()=>f.remove(),950);
+}
+const field=()=>S.fields[S.cur];
+const canInfo=()=>CANS[S.canLv-1];
+const hoeInfo=()=>HOES[S.hoeLv-1];
+
+/* ---------- 解放条件 ---------- */
+function meets(u){
+  if(!u) return true;
+  if(u.sales   && S.totalSales  <u.sales)   return false;
+  if(u.fields  && S.fields.length<u.fields) return false;
+  if(u.harvest && S.totalHarvest<u.harvest) return false;
+  return true;
+}
+const isUnlocked = c => meets(c.unlock);
+function unlockText(u){
+  const a=[];
+  if(u.sales)   a.push(`累計売上 ${fmtNum(u.sales)}ネジ`);
+  if(u.fields)  a.push(`畑 ${u.fields}枚`);
+  if(u.harvest) a.push(`累計収穫 ${fmtNum(u.harvest)}個`);
+  return a.join("・")+" で入荷";
+}
+/* 新しく店に並んだものを知らせる */
+function checkUnlocks(){
+  const items=[
+    ...CROPS.map(c=>({key:c.id, ok:isUnlocked(c), label:`${c.icon} ${c.name}の種`})),
+    {key:"fert", ok:meets(FERT.unlock), label:`${FERT.icon} ${FERT.name}`},
+    ...OBJ_ORDER.map(id=>({key:"obj:"+id, ok:meets(OBJS[id].unlock), label:`${OBJS[id].icon} ${OBJS[id].name}`})),
+  ];
+  for(const it of items){
+    if(it.ok && !S.known.includes(it.key)){
+      S.known.push(it.key);
+      if(!["carrot","potato"].includes(it.key)) toast(`お店に ${it.label} が並びました`, "good", 4200);
+    }
+  }
+}
+
+/* ---------- 畑の描画 ---------- */
+let plotEls={}, selKey=null;
+function buildPlanter(){
+  const pl=$("g-planter"); pl.innerHTML=""; plotEls={};
+  KEY_ROWS.forEach((row,ri)=>{
+    const r=document.createElement("div");
+    r.className="krow r"+(ri+1);
+    row.forEach((k,ci)=>{
+      const el=document.createElement("div");
+      el.className="plot grass";
+      el.innerHTML=`<span class="lbl">${k}</span><span class="drop">💧</span><span class="vb">👩‍🌾</span><span class="qb"></span><span class="crop"></span><div class="pb"><i></i></div>`;
+      if(ci===2||ci===5) el.dataset.gap="1";   // 3区画ごとにすき間(3×3のまとまりが見えるように)
+      el.addEventListener("click",()=>act(k));
+      r.appendChild(el);
+      plotEls[k]=el;
+    });
+    pl.appendChild(r);
+  });
+}
+function cropStageIcon(p){
+  const c=CROP[p.crop.id];
+  if(isRipe(p)) return {ic:c.icon, st:""};
+  return p.crop.grown/need(p.crop)<0.4 ? {ic:"🌱", st:"st1"} : {ic:"🌿", st:"st2"};
+}
+function renderField(){
+  const now=Date.now(), f=field(), cov=covered(S.cur);
+  for(const k of KEYS){
+    const el=plotEls[k], p=f[k]; if(!el) continue;
+    const cropEl=el.querySelector(".crop");
+    const qb=el.querySelector(".qb");
+    const gap=el.dataset&&el.dataset.gap?" gap":"";
+    if(p.s==="post"){
+      el.className="plot post"+(p.obj?" hascrow":"")+gap+(k===selKey?" sel":"");
+      cropEl.textContent=p.obj?OBJS[p.obj].icon:""; cropEl.className="crop";
+      qb.textContent="";
+      continue;
+    }
+    if(p.obj){
+      el.className="plot obj "+p.obj+gap+(k===selKey?" sel":"");
+      cropEl.textContent=OBJS[p.obj].icon; cropEl.className="crop";
+      qb.textContent="";
+      continue;
+    }
+    const wet=isWet(S.cur,k,now,cov);
+    const growing=p.crop && !isRipe(p);
+    el.className="plot "+p.s+(wet?" wet":"")+(growing?" growing":"")+(p.crop&&isRipe(p)?" ripe":"")+(p.vil?" vil":"")+gap+(k===selKey?" sel":"");
+    qb.textContent=(p.crop&&isRipe(p)) ? QUALITY[tierOf(p.crop.id)].mark : "";
+    if(p.crop){
+      const {ic,st}=cropStageIcon(p);
+      cropEl.textContent=ic; cropEl.className="crop "+st;
+      el.querySelector(".pb i").style.width=Math.min(100,p.crop.grown/need(p.crop)*100)+"%";
+    }else{
+      cropEl.textContent=""; cropEl.className="crop";
+    }
+  }
+}
+function renderInfo(){
+  if(!selKey) return;
+  const p=field()[selKey], now=Date.now();
+  let big, sub=[];
+  if(p.s==="post"){
+    big=`${selKey} ・ 案山子置き場`;
+    if(p.obj){ sub.push("🧑‍🌾 案山子がこの畑を見張っています(カラスが来ない・1打の時短+1分)"); sub.push("素手(1)で拾うと、手持ちに戻ります"); }
+    else sub.push("6 で案山子を持って押すと置けます。ここは畑ではないので、作物は育てられません");
+  }else if(p.obj){
+    const o=OBJS[p.obj];
+    big=`${selKey} ・ ${o.icon} ${o.name}`;
+    sub.push(o.what);
+    sub.push("素手(1)で拾うと、手持ちに戻ります");
+  }else if(p.vil){
+    big=`${selKey} ・ 👩‍🌾 村人が世話をしています`;
+    if(p.crop){
+      const c=CROP[p.crop.id];
+      sub.push(`${c.icon} ${c.name} 育成 ${Math.floor(p.crop.grown/need(p.crop)*100)}% ・ あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
+    }else if(p.vWait){
+      const c=CROP[VIL_CROP];
+      sub.push(`種代(${c?c.cost:"?"}ネジ)が足りず、ネジが貯まるのを待っています`);
+    }
+    sub.push("植える・水やり・収穫・売却まで自動 ・ 6 で村人を持ってこの区画を押すと外せます");
+  }else if(p.s==="grass"){
+    big=`${selKey} ・ 草むら`;
+    sub.push("クワ(2)で耕すと種を植えられます");
+  }else if(!p.crop){
+    big=`${selKey} ・ 耕した土`;
+    sub.push("種(4)を植えられます");
+  }else{
+    const c=CROP[p.crop.id];
+    if(isRipe(p)){
+      const t=tierOf(c.id);
+      big=`${selKey} ・ ${c.icon} ${qName(c.id,t)} 収穫できます`;
+      sub.push(`素手(1)で収穫 ・ 売値 ${priceOf(c.id,t)}ネジ`);
+      if(t<2){ const left=QUALITY[t+1].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,t+1)}」が穫れるようになります`); }
+    }else{
+      const pct=Math.floor(p.crop.grown/need(p.crop)*100);
+      big=`${selKey} ・ ${c.icon} ${c.name} 育成 ${pct}%`;
+      sub.push(`実るまで 水が効いていれば あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
+    }
+  }
+  if(!p.obj && !p.vil && p.s==="soil" && !p.crop && p.emptySince){
+    sub.push(`草むらに戻るまで あと ${fmtDur(REVERT_AFTER-(now-p.emptySince))}`);
+  }
+  if(!p.obj && !p.vil && p.s==="soil"){
+    if(covered(S.cur).has(selKey)) sub.push("スプリンクラーの水が届いています");
+    else sub.push(p.wet>now ? `水 あと ${fmtDur(p.wet-now)}` : (p.crop&&!isRipe(p) ? "水切れ — 成長が止まっています" : "水 なし"));
+  }
+  $("g-infoBig").textContent=big;
+  $("g-infoSub").innerHTML=sub.map(esc).join("<br>");
+}
+/* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
+const invN = (id,t) => (S.inv[id]&&S.inv[id][t])||0;
+const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(let t=0;t<3;t++){ const m=invN(c.id,t); n+=m; v+=m*priceOf(c.id,t); } return {n,v}; };
+function renderBasket(){
+  const b=$("g-basket"); b.innerHTML="";
+  let any=false;
+  for(const c of CROPS) for(let t=0;t<3;t++){
+    const n=invN(c.id,t); if(n<=0) continue;
+    any=true;
+    const s=document.createElement("span"); s.className="chip"+(t?" q"+t:"");
+    s.textContent=`${c.icon} ${qName(c.id,t)} ×${n}`;
+    b.appendChild(s);
+  }
+  if(!any) b.innerHTML='<span class="empty">まだ何もありません。実った作物を素手(1)で収穫しましょう</span>';
+}
+/* 手持ちの種・設置物(1つ以上あるもの) */
+const ownedSeeds=()=>CROPS.filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id);
+const ownedObjs =()=>OBJ_ORDER.filter(id=>(S.objs[id]||0)>0).concat(S.villagers>0?["vil"]:[]);
+function renderBar(){
+  root.querySelectorAll(".slot").forEach(s=>s.classList.toggle("on", +s.dataset.tool===S.tool));
+  $("g-canName").textContent=canInfo().name;
+  $("g-hoeName").textContent=hoeInfo().name;
+  // 種
+  const owned=ownedSeeds();
+  if(!owned.includes(S.seedId) && owned.length) S.seedId=owned[0];
+  const n=S.seeds[S.seedId]||0;
+  if(n>0){ const c=CROP[S.seedId]; $("g-seedIc").textContent=c.icon; $("g-seedNm").textContent=c.name+"の種"; $("g-seedCnt").textContent="×"+n; }
+  else   { $("g-seedIc").textContent="🌱"; $("g-seedNm").textContent="種がありません"; $("g-seedCnt").textContent=""; }
+  // 肥料
+  $("g-fertCnt").textContent="×"+S.fert;
+  // 設置物
+  const oo=ownedObjs();
+  if(!oo.includes(S.objSel) && oo.length) S.objSel=oo[0];
+  const on=S.objs[S.objSel]||0;
+  if(S.objSel==="vil" && S.villagers>0){ $("g-objIc").textContent="👩‍🌾"; $("g-objNm").textContent="村人"; $("g-objCnt").textContent=`あと${vilFree()}区画`; }
+  else if(on>0){ const o=OBJS[S.objSel]; $("g-objIc").textContent=o.icon; $("g-objNm").textContent=o.name; $("g-objCnt").textContent="×"+on; }
+  else    { $("g-objIc").textContent="📦"; $("g-objNm").textContent="設置物なし"; $("g-objCnt").textContent=""; }
+  $("g-fieldNo").textContent=S.cur+1; $("g-fieldMax").textContent=S.fields.length;
+  $("g-money").textContent=fmtNum(S.money);
+  $("g-rate").textContent=`ネジ打ち1打で ${minPerKey()}分 進む`;
+}
+function renderAll(){
+  renderBar(); renderField(); renderInfo(); renderBasket();
+  if(modal==="shop") renderShop();
+  if(modal==="book") renderBook();
+}
+
+/* ---------- 作業 ---------- */
+function nope(k,msg){
+  sfx.nope();
+  const el=plotEls[k];
+  if(el){ el.classList.remove("nope"); void el.offsetWidth; el.classList.add("nope"); }
+  if(msg) toast(msg,"warn",1800);
+}
+function hit(k){
+  const el=plotEls[k]; if(!el) return;
+  el.classList.add("hit"); setTimeout(()=>el.classList.remove("hit"),90);
+}
+function act(k){
+  tick();
+  const f=field(), p=f[k];
+  selKey=k;
+  // P(案山子置き場)は、案山子を置く・拾うだけ
+  if(p.s==="post" && !(S.tool===1 && p.obj) && !(S.tool===6 && S.objSel==="crow")){
+    nope(k,"P は案山子置き場です。6 で案山子を持って置けます");
+    save(); renderAll(); return;
+  }
+  // 村人の区画は、肥料と「村人を外す」以外は触れない
+  if(p.vil && S.tool!==5 && !(S.tool===6 && S.objSel==="vil")){
+    nope(k,"村人が世話をしている区画です(6 で村人を持って押すと外せます)");
+    save(); renderAll(); return;
+  }
+  switch(S.tool){
+    case 1: // 素手: 収穫 / 設置物を拾う
+      if(p.obj){
+        const o=OBJS[p.obj];
+        S.objs[p.obj]=(S.objs[p.obj]||0)+1; p.obj=null;
+        S.objSel=o.id; floatAt(k,"拾った"); hit(k); sfx.pick();
+      }else if(p.crop && isRipe(p)){
+        const c=CROP[p.crop.id];
+        const t=tierOf(c.id);
+        const first=!((S.harvestQ[c.id]||[])[t]>0);
+        p.crop=null; p.emptySince=Date.now();
+        S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]++;
+        recordHarvest(c.id,t,false);
+        floatAt(k,"+"+c.icon+QUALITY[t].mark); hit(k); sfx.harvest();
+        if(first) toast(`${c.icon} ${qName(c.id,t)} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000);
+        checkUnlocks();
+      }else if(p.crop) nope(k,"まだ実っていません");
+      else nope(k);
+      break;
+    case 2: { // クワ: 範囲内の草むらをまとめて耕す
+      const targets=[k, ...around(k,hoeInfo().area)].filter(x=>f[x].s==="grass" && !f[x].obj && !f[x].vil);
+      if(!targets.length){ nope(k, p.crop?"作物が植わっています":null); break; }
+      const now=Date.now();
+      for(const x of targets){ f[x].s="soil"; f[x].emptySince=now; hit(x); }
+      sfx.till();
+      floatAt(k, targets.length>1?`${targets.length}区画 耕した`:"耕した");
+      break;
+    }
+    case 3: { // じょうろ: 範囲内の耕した土に水やり(何度やっても期限が今から延びるだけ)
+      const targets=[k, ...around(k,canInfo().area)].filter(x=>f[x].s==="soil" && !f[x].obj && !f[x].vil);
+      if(!targets.length){ nope(k, p.obj?"設置物があります":(p.s==="grass"?"先にクワ(2)で耕しましょう":null)); break; }
+      const until=Date.now()+canInfo().hours*HOUR;
+      for(const x of targets){ f[x].wet=until; hit(x); }
+      floatAt(k, targets.length>1?`💧×${targets.length}`:"💧");
+      sfx.water();
+      break;
+    }
+    case 4: { // 種: 植える
+      const n=S.seeds[S.seedId]||0;
+      if(p.obj){ nope(k,"設置物があります"); break; }
+      if(p.s==="grass"){ nope(k,"先にクワ(2)で耕しましょう"); break; }
+      if(p.crop){ nope(k,"もう植わっています"); break; }
+      if(n<=0){ nope(k,"種がありません。Tab でお店へ"); break; }
+      S.seeds[S.seedId]=n-1;
+      p.crop={ id:S.seedId, grown:0 }; p.emptySince=0;
+      hit(k); floatAt(k,"🌱"); sfx.plant();
+      break;
+    }
+    case 5: { // 肥料: 育成中の作物を一気に進める
+      if(S.fert<=0){ nope(k,"肥料がありません。Tab でお店へ"); break; }
+      if(!p.crop){ nope(k,"作物が植わっていません"); break; }
+      if(isRipe(p)){ nope(k,"もう実っています"); break; }
+      S.fert--;
+      grow(p, need(p.crop)*FERT_BOOST, Date.now());
+      if(isRipe(p)) p.crop.ripeAt=Date.now();
+      hit(k); floatAt(k,"🍂 ぐんぐん"); sfx.fert();
+      break;
+    }
+    case 6: { // 設置: スプリンクラーや案山子を置く / 村人に区画をまかせる
+      const id=S.objSel;
+      if(id==="vil"){
+        if(S.villagers<=0){ nope(k,"村人がいません。Tab でお店へ"); break; }
+        if(p.vil){
+          p.vil=false; p.vWait=false; if(!p.crop) p.emptySince=Date.now();
+          floatAt(k,"村人 外した"); hit(k); sfx.pick();
+          break;
+        }
+        if(vilFree()<=0){ nope(k,`村人の手が空いていません(村人1人につき${VIL_SLOTS}区画)`); break; }
+        if(p.obj){ nope(k,"設置物があります"); break; }
+        if(p.s==="post"){ nope(k,"P は案山子置き場です"); break; }
+        p.vil=true; p.emptySince=0; if(p.s==="grass") p.s="soil";
+        villagerAdvance(p,0);   // すぐに植える
+        floatAt(k,"👩‍🌾 おまかせ"); hit(k); sfx.vil();
+        break;
+      }
+      if(p.vil){ nope(k,"村人が世話をしている区画です"); break; }
+      if(id==="crow" && p.s!=="post"){ nope(k,"案山子は P の案山子置き場に置きます"); break; }
+      if(id!=="crow" && p.s==="post"){ nope(k,"P には案山子しか置けません"); break; }
+      const n=S.objs[id]||0;
+      if(n<=0){ nope(k,"置けるものがありません。Tab でお店へ"); break; }
+      if(p.obj){ nope(k,"もう何か置いてあります"); break; }
+      if(p.crop){ nope(k,"作物の上には置けません"); break; }
+      if(id==="crow" && p.obj){ nope(k,"案山子はこの畑にもういます(畑1枚につき1体)"); break; }
+      p.obj=id; S.objs[id]=n-1; p.emptySince=0;
+      hit(k); floatAt(k,OBJS[id].icon); sfx.place();
+      break;
+    }
+  }
+  save();
+  renderAll();
+}
+function setTool(t){ S.tool=t; sfx.tool(); save(); renderBar(); }
+/* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
+function cycleSel(dir){
+  if(S.tool===6){
+    const o=ownedObjs();
+    if(!o.length){ toast("置けるものがありません。Tab でお店へ","warn"); return; }
+    let i=o.indexOf(S.objSel); if(i<0) i=0;
+    S.objSel=o[(i+dir+o.length)%o.length];
+  }else{
+    const o=ownedSeeds();
+    if(!o.length){ toast("種がありません。Tab でお店へ","warn"); return; }
+    let i=o.indexOf(S.seedId); if(i<0) i=0;
+    S.seedId=o[(i+dir+o.length)%o.length]; S.tool=4;
+  }
+  sfx.cursor(); save(); renderBar();
+}
+function switchField(dir){
+  if(S.fields.length<=1){ toast("畑は1枚です。お店で畑を増やせます"); return; }
+  S.cur=(S.cur+dir+S.fields.length)%S.fields.length;
+  sfx.field(); save(); renderAll();
+}
+
+/* ---------- ウィンドウ共通 ---------- */
+let modal=null;   // null | "shop" | "book" | "save"
+function openModal(name){
+  closeModal(true);
+  modal=name;
+  sfx.open();
+  $("g-"+name).classList.add("open");
+  if(name==="shop") renderShop();
+  if(name==="book") renderBook();
+  if(name==="save") prepareSave();
+  if(name==="rank") prepareRank();
+}
+function closeModal(silent){
+  if(!modal) return;
+  if(!silent) sfx.close();
+  $("g-"+modal).classList.remove("open");
+  const ae=document.activeElement; if(ae && ae.blur) ae.blur();
+  modal=null;
+}
+/* 選択中の行が見えるようにスクロール */
+function keepVisible(listEl){
+  const cur=listEl.querySelector(".rowi.cur");
+  if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+}
+
+/* ---------- お店(キーボード操作) ----------
+   ← → タブ / ↑ ↓ 品物 / Enter 1つ買う・1つ売る / Shift+Enter 10買う・全部売る / A すべて売る */
+const SHOP_TABS=["種","道具・土地","売る"];
+let shopTab=0, shopCur=[0,0,0];
+function shopRows(){
+  const rows=[];
+  const money=S.money;
+  const btn=(label,ok)=>`<button class="sbtn" ${ok?"":"disabled"} tabindex="-1">${label}</button>`;
+  if(shopTab===0){
+    for(const c of CROPS){
+      const ok=isUnlocked(c), have=S.seeds[c.id]||0;
+      rows.push({
+        locked:!ok,
+        ic: ok?c.icon:"❔",
+        nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${c.cost}ネジ</span>`:"？？？",
+        ds: ok?`育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}ネジ(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
+        keys: ok?`<b>Enter</b> 1つ ${money>=c.cost?"":"(不足)"}<br><b>Shift+Enter</b> 10個`:"",
+        enter: ()=>ok && buySeed(c.id,1),
+        shift: ()=>ok && buySeed(c.id,10),
+      });
+    }
+  }else if(shopTab===1){
+    const nc=CANS[S.canLv];
+    rows.push({ ic:"💧", nm: nc?`${nc.name} <span style="color:var(--ink-l)">${fmtNum(nc.cost)}ネジ</span>`:canInfo().name,
+      ds: nc?`一度に ${nc.what} に水やりでき、水が ${nc.hours}時間 保ちます(今は ${canInfo().what}・${canInfo().hours}時間)`:`最高のじょうろです。一度に ${canInfo().what}、水は ${canInfo().hours}時間 保ちます`,
+      keys: nc?"<b>Enter</b> 買う":"", enter:()=>nc&&buyCan(), shift:()=>nc&&buyCan() });
+    const nh=HOES[S.hoeLv];
+    rows.push({ ic:"⛏️", nm: nh?`${nh.name} <span style="color:var(--ink-l)">${fmtNum(nh.cost)}ネジ</span>`:hoeInfo().name,
+      ds: nh?`一度に ${nh.what} を耕せます(今は ${hoeInfo().what})`:`最高のクワです。${hoeInfo().what}を一度に耕せます`,
+      keys: nh?"<b>Enter</b> 買う":"", enter:()=>nh&&buyHoe(), shift:()=>nh&&buyHoe() });
+    const fOk=meets(FERT.unlock);
+    rows.push({ locked:!fOk, ic: fOk?FERT.icon:"❔",
+      nm: fOk?`${FERT.name} <span style="color:var(--ink-l)">${FERT.cost}ネジ</span>`:"？？？",
+      ds: fOk?`育成中の作物にまくと、必要な時間の${FERT_BOOST*100}%ぶん一気に育ちます(5 で持つ) ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
+      keys: fOk?"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個":"", enter:()=>fOk&&buyFert(1), shift:()=>fOk&&buyFert(10) });
+    for(const id of OBJ_ORDER){
+      const o=OBJS[id], ok=meets(o.unlock);
+      rows.push({ locked:!ok, ic: ok?o.icon:"❔",
+        nm: ok?`${o.name} <span style="color:var(--ink-l)">${fmtNum(o.cost)}ネジ</span>`:"？？？",
+        ds: ok?`${esc(o.what)}(6 で持って区画に置く) ・ 手持ち ${S.objs[id]||0}`:unlockText(o.unlock),
+        keys: ok?"<b>Enter</b> 買う":"", enter:()=>ok&&buyObj(id), shift:()=>ok&&buyObj(id) });
+    }
+    rows.push({ ic:"👩‍🌾", nm:`村人 <span style="color:var(--ink-l)">${fmtNum(VIL_COST)}ネジ</span>`,
+      ds:`指定した${VIL_SLOTS}区画で、にんじんを植え・水やり・収穫・売却まで自動で行います。6 で村人を持って区画を押して指定(もう一度押すと外す)。庭を閉じている間の分も、次に開いたときにまとめて処理されます ・ 雇っている村人 ${S.villagers}人(あと ${vilFree()}区画)`,
+      keys:"<b>Enter</b> 雇う", enter:()=>buyVil(), shift:()=>buyVil() });
+    const nf=S.fields.length, price=FIELD_PRICES[nf];
+    rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}ネジ</span>`:"畑チケット",
+      ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
+      keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
+  }else{
+    for(const c of CROPS) for(let t=0;t<3;t++){
+      const n=invN(c.id,t); if(n<=0) continue;
+      const pr=priceOf(c.id,t);
+      rows.push({ ic:c.icon, nm:`${qName(c.id,t)} ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
+        keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
+        enter:()=>sell(c.id,t,1), shift:()=>sell(c.id,t,"all") });
+    }
+  }
+  return rows;
+}
+let shopRowCache=[];
+function renderShop(){
+  $("g-shopMoney").textContent=fmtNum(S.money);
+  root.querySelectorAll("#g-shopTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tab===shopTab));
+  const rows=shopRows(); shopRowCache=rows;
+  if(shopCur[shopTab]>=rows.length) shopCur[shopTab]=Math.max(0,rows.length-1);
+  const cur=shopCur[shopTab];
+  const body=$("g-shopBody");
+  if(!rows.length){
+    body.innerHTML=`<p class="empty" style="padding:1rem .4rem">売れる作物がありません。実った作物を素手(1)で収穫してから来てください。</p>`;
+  }else{
+    body.innerHTML=rows.map((r,i)=>`<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
+      <div class="ic">${r.ic}</div>
+      <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
+      <div class="keyk">${i===cur?r.keys:""}</div></div>`).join("");
+  }
+  const total=invTotal().v;
+  $("g-shopHint").innerHTML =
+    `<b>← →</b> ${SHOP_TABS.map((t,i)=>i===shopTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
+    (shopTab===2 && total>0 ? ` ・ <b>A</b> すべて売る(${fmtNum(total)}ネジ)` : "")+
+    ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
+  keepVisible(body);
+}
+function shopKey(e){
+  const k=e.key;
+  if(k==="Escape"||k==="Tab"){ e.preventDefault(); closeModal(); return; }
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=(shopTab+(k==="ArrowRight"?1:-1)+3)%3; sfx.tab(); renderShop(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){
+    e.preventDefault();
+    const n=shopRowCache.length; if(!n) return;
+    shopCur[shopTab]=(shopCur[shopTab]+(k==="ArrowDown"?1:-1)+n)%n;
+    sfx.cursor(); renderShop(); return;
+  }
+  if(k==="Enter"){
+    e.preventDefault();
+    const r=shopRowCache[shopCur[shopTab]]; if(!r) return;
+    if(r.locked){ sfx.nope(); toast("まだお店に並んでいません","warn"); return; }
+    (e.shiftKey?r.shift:r.enter)();
+    return;
+  }
+  if(shopTab===2 && (k==="a"||k==="A")){ sellAll(); return; }
+}
+function spend(cost){
+  if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return false; }
+  S.money-=cost; sfx.buy(); return true;
+}
+function buyVil(){
+  if(!spend(VIL_COST)) return;
+  S.villagers++; S.objSel="vil";
+  toast(`村人を雇いました。6 で村人を持って、まかせたい区画を${VIL_SLOTS}つ押してください`,"good",5000);
+  save(); renderAll();
+}
+function buySeed(id,n){
+  const c=CROP[id]; if(!c||!isUnlocked(c)) return;
+  if(!spend(c.cost*n)) return;
+  S.seeds[id]=(S.seeds[id]||0)+n;
+  if(!(S.seeds[S.seedId]>0)) S.seedId=id;
+  toast(`${c.icon} ${c.name}の種を ${n}つ 買いました`);
+  save(); renderAll();
+}
+function buyCan(){
+  const next=CANS[S.canLv]; if(!next||!spend(next.cost)) return;
+  S.canLv++;
+  toast(`${next.name} を手に入れました。水が ${next.hours}時間 保ちます`,"good",3600);
+  save(); renderAll();
+}
+function buyHoe(){
+  const next=HOES[S.hoeLv]; if(!next||!spend(next.cost)) return;
+  S.hoeLv++;
+  toast(`${next.name} を手に入れました。一度に ${next.what} を耕せます`,"good",3600);
+  save(); renderAll();
+}
+function buyFert(n){
+  if(!meets(FERT.unlock)||!spend(FERT.cost*n)) return;
+  S.fert+=n;
+  toast(`${FERT.icon} 肥料を ${n}つ 買いました`);
+  save(); renderAll();
+}
+function buyObj(id){
+  const o=OBJS[id]; if(!o||!meets(o.unlock)||!spend(o.cost)) return;
+  S.objs[id]=(S.objs[id]||0)+1; S.objSel=id;
+  toast(`${o.icon} ${o.name} を買いました。6 で持って区画に置けます`,"good",3600);
+  save(); renderAll();
+}
+function buyField(){
+  const price=FIELD_PRICES[S.fields.length]; if(price==null||!spend(price)) return;
+  S.fields.push(makeField()); S.cur=S.fields.length-1;
+  toast(`畑が ${S.fields.length}枚 になりました。↑↓ で行き来できます`,"good",3600);
+  checkUnlocks();
+  save(); renderAll();
+}
+function sell(id,t,n){
+  const c=CROP[id]; const have=invN(id,t); if(!c||have<=0) return;
+  const k = n==="all" ? have : Math.min(have, n);
+  S.inv[id][t]=have-k;
+  const gain=k*priceOf(id,t);
+  S.money+=gain; S.totalSales+=gain; sfx.sell();
+  toast(`${c.icon} ${qName(id,t)}を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good");
+  checkUnlocks();
+  save(); renderAll();
+}
+function sellAll(){
+  let gain=0;
+  for(const c of CROPS) for(let t=0;t<3;t++){ const n=invN(c.id,t); if(n>0){ gain+=n*priceOf(c.id,t); S.inv[c.id][t]=0; } }
+  if(!gain){ sfx.nope(); toast("売れる作物がありません","warn"); return; }
+  S.money+=gain; S.totalSales+=gain; sfx.sell();
+  toast(`すべて売りました(+${fmtNum(gain)}ネジ)`,"good");
+  checkUnlocks();
+  save(); renderAll();
+}
+/* マウスでも使えるように(キーボードだけで完結するのが基本) */
+$("g-shopBody").addEventListener("click",e=>{
+  const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
+  shopCur[shopTab]=+row.dataset.i; renderShop();
+});
+root.querySelectorAll("#g-shopTabs .tab").forEach(t=>t.addEventListener("click",()=>{ shopTab=+t.dataset.tab; renderShop(); }));
+
+/* ---------- 図鑑 ----------
+   作物ごとに ふつう / ☆ / ☆☆ の3項目(全27項目)。
+   その品質を初めて収穫すると、説明文が読めるようになる。
+   ↑↓ で1項目ずつ、← → で作物ごとに移動 */
+const BOOK = CROPS.flatMap(c=>[0,1,2].map(t=>({c,t})));
+let bookCur=0;
+const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
+const loreOf = (c,t) => t===0 ? c.lore : LORE_Q[c.id][t-1];
+function renderBook(){
+  const got=BOOK.filter(e=>qCount(e.c.id,e.t)>0).length;
+  $("g-bookRate").textContent=`図鑑 ${got} / ${BOOK.length} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
+  $("g-bookList").innerHTML=BOOK.map((e,i)=>{
+    const {c,t}=e, known=isUnlocked(c)||S.harvestBy[c.id]>0, had=qCount(c.id,t)>0;
+    const label = known ? qName(c.id,t) : "？？？";
+    return `<div class="rowi ${had?"":"locked"} ${i===bookCur?"cur":""} ${t?"q"+t:""}" data-i="${i}">
+      <div class="ic">${known?c.icon:"❔"}</div><div class="nm">${label}${had?"":` <span style="color:var(--ink-l);font-weight:500">未収穫</span>`}</div></div>`;
+  }).join("");
+  const {c,t}=BOOK[bookCur];
+  const known=isUnlocked(c)||S.harvestBy[c.id]>0, n=qCount(c.id,t), total=S.harvestBy[c.id]||0;
+  if(!known){
+    $("g-bookDetail").innerHTML=`<div class="bic">❔</div><div class="bnm">？？？</div>
+      <div class="lore unknown">${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。</div>`;
+  }else{
+    const cond = t===0 ? "種を植えて育てれば穫れます"
+      : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
+                                : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
+    $("g-bookDetail").innerHTML=`
+      <div class="bic q${t}">${c.icon}${t?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
+      <div class="bnm">${qName(c.id,t)}</div>
+      <dl>
+        <dt>この品質の収穫</dt><dd>${fmtNum(n)}個</dd>
+        <dt>売値</dt><dd>${priceOf(c.id,t)}ネジ${t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:""}</dd>
+        <dt>育つまで</dt><dd>${fmtDur(c.hours*HOUR)}</dd>
+        <dt>穫れる条件</dt><dd>${cond}</dd>
+      </dl>
+      <div class="lore ${n>0?"":"unknown"}">${n>0?esc(loreOf(c,t)):`まだ「${esc(qName(c.id,t))}」を収穫したことがありません。初めて収穫すると、ここに説明が書き込まれます。`}</div>`;
+  }
+  keepVisible($("g-bookList"));
+}
+function bookKey(e){
+  const k=e.key;
+  if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
+  const N=BOOK.length;
+  if(k==="ArrowUp"||k==="ArrowDown"){
+    e.preventDefault();
+    bookCur=(bookCur+(k==="ArrowDown"?1:-1)+N)%N;
+    sfx.cursor(); renderBook();
+  }else if(k==="ArrowLeft"||k==="ArrowRight"){
+    e.preventDefault();
+    const crop=Math.floor(bookCur/3), t=bookCur%3, C=CROPS.length;
+    bookCur=((crop+(k==="ArrowRight"?1:-1)+C)%C)*3+t;
+    sfx.tab(); renderBook();
+  }
+}
+$("g-bookList").addEventListener("click",e=>{
+  const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
+  bookCur=+row.dataset.i; renderBook();
+});
+
+/* ---------- 記録(セーブデータのコピー) ---------- */
+function encodeSave(){ return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); }
+function decodeSave(str){ return JSON.parse(decodeURIComponent(escape(atob(str.trim())))); }
+function prepareSave(){
+  tick(); save();
+  $("g-exportCode").value=encodeSave();
+  $("g-importCode").value=""; $("g-copyNote").textContent=""; $("g-importNote").textContent="";
+}
+async function copySave(){
+  const ta=$("g-exportCode");
+  try{ await navigator.clipboard.writeText(ta.value); $("g-copyNote").textContent="コピーしました"; }
+  catch(e){ ta.focus(); ta.select(); try{ document.execCommand("copy"); $("g-copyNote").textContent="コピーしました"; }catch(_){ $("g-copyNote").textContent="選択しました。Ctrl+C でコピーしてください"; } }
+}
+function doImport(){
+  const str=$("g-importCode").value;
+  if(!str.trim()){ $("g-importNote").textContent="記録文字列を貼り付けてください(I で貼り付け欄へ)"; return; }
+  let o;
+  try{ o=decodeSave(str); }catch(e){ $("g-importNote").textContent="読み込めませんでした。文字列が途中で切れていないか確認してください"; return; }
+  if(!isValidState(o)){ $("g-importNote").textContent="庭の記録ではないようです"; return; }
+  if(!confirm("今の庭を上書きして読み込みます。よろしいですか?")) return;
+  S=normalize(o);
+  tick(); save(); buildPlanter(); closeModal(); renderAll();
+  toast("記録を読み込みました","good");
+}
+function saveKey(e){
+  const k=e.key;
+  if(k==="Escape"||k==="0"){ e.preventDefault(); closeModal(); return; }
+  if(k==="c"||k==="C"){ e.preventDefault(); copySave(); return; }
+  if(k==="i"||k==="I"){ e.preventDefault(); $("g-importCode").focus(); return; }
+  if(k==="Enter"){ e.preventDefault(); doImport(); }
+}
+$("g-copyBtn").addEventListener("click",copySave);
+$("g-importBtn").addEventListener("click",doImport);
+
+/* ---------- 番付(所持ネジ・累計収穫) ----------
+   名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
+const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
+async function pushRank(name){
+  const key=rankKey(name);
+  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`);
+  const old=(await refM.once("value")).val();
+  if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
+  const t=(old&&old.t)||Date.now();
+  await refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t });
+  await refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t });
+  return {ok:true};
+}
+const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
+function prepareRank(){
+  tick();
+  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個`+
+    (S.rankName?`<br>「${esc(S.rankName)}」として載っています。庭を出るたびに自動で更新されます`:"");
+  let nm=S.rankName; try{ nm=nm||playerName||""; }catch(e){}
+  $("g-rankName").value=nm;
+  $("g-rankNote").textContent=hasDb()?"":"※Firebase未設定のため載せられません";
+  setTimeout(()=>{ const i=$("g-rankName"); i.focus(); i.select&&i.select(); },30);
+}
+async function submitRank(){
+  const name=$("g-rankName").value.trim(), note=$("g-rankNote");
+  if(!name){ note.textContent="名前を入れてください"; sfx.nope(); return; }
+  if(!hasDb()){ note.textContent="※Firebase未設定のため載せられません"; return; }
+  note.textContent="記しています…";
+  try{
+    const r=await pushRank(name);
+    if(!r.ok){ note.textContent=r.msg; sfx.nope(); return; }
+    S.rankName=name; save(); sfx.buy();
+    try{ playerName=name; store.set("playerName",name); }catch(e){}
+    note.textContent="載りました。庭を出るたびに自動で更新されます";
+    setTimeout(()=>{ leave(); openRanking("g-money",name); },700);
+  }catch(e){ note.textContent="載せられませんでした。通信環境を確認してください"; }
+}
+$("g-rankBtn").addEventListener("click",submitRank);
+
+/* ---------- キー操作(本編の keydown から呼ばれる) ---------- */
+function onKey(e){
+  const tag=(e.target&&e.target.tagName)||"";
+  // 貼り付け欄の中: Enter で読み込み、Esc で欄から抜ける
+  if(tag==="TEXTAREA"||tag==="INPUT"){
+    if(e.key==="Enter" && e.target.id==="g-importCode"){ e.preventDefault(); doImport(); }
+    else if(e.key==="Enter" && e.target.id==="g-rankName"){ e.preventDefault(); submitRank(); }
+    else if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
+    return;
+  }
+  if(modal==="shop"){ shopKey(e); return; }
+  if(modal==="book"){ bookKey(e); return; }
+  if(modal==="save"){ saveKey(e); return; }
+  if(modal==="rank"){ if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); } else if(e.key==="Enter"){ e.preventDefault(); submitRank(); } return; }
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  const k=e.key;
+  if(k==="Process"){ toast("入力モードを半角英数にしてください","warn"); return; }
+  if(k==="Tab"){ e.preventDefault(); openModal("shop"); return; }
+  if(k===" "){ e.preventDefault(); openModal("book"); return; }
+  if(k==="0"){ e.preventDefault(); openModal("save"); return; }
+  if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
+  if(k==="Escape"){ backToTitle(); return; }
+  if(/^[1-6]$/.test(k)){ setTool(+k); return; }
+  if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
+  if(k==="ArrowRight"){ e.preventDefault(); cycleSel(1); return; }
+  if(k==="ArrowUp"){ e.preventDefault(); switchField(-1); return; }
+  if(k==="ArrowDown"){ e.preventDefault(); switchField(1); return; }
+  if(k.length===1){
+    const up=k.toUpperCase();
+    if(KEYS.includes(up)){ e.preventDefault(); act(up); }
+  }
+}
+root.querySelectorAll(".slot").forEach(s=>s.addEventListener("click",()=>setTool(+s.dataset.tool)));
+$("g-shopBtn").addEventListener("click",()=>openModal("shop"));
+$("g-bookBtn").addEventListener("click",()=>openModal("book"));
+$("g-saveBtn").addEventListener("click",()=>openModal("save"));
+$("g-backBtn").addEventListener("click",()=>backToTitle());
+$("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
+// マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
+root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
+root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) closeModal(); }));
+// ボタンにフォーカスが残って Enter/Space が二重に効かないようにする
+root.querySelectorAll("button").forEach(b=>b.setAttribute("tabindex","-1"));
+
+/* ---------- 画面の出入り(ネジ打ち本編から呼ばれる) ---------- */
+let loopId=null, saveId=null, welcomed=false;
+const hadSave=load();
+tick(); checkUnlocks(); buildPlanter();
+function enter(){
+  tick(); checkUnlocks(); renderAll(); save();
+  if(!hadSave && !welcomed){
+    welcomed=true;
+    toast("ようこそ。クワ(2)で耕し、種(4)を植え、じょうろ(3)で水をあげましょう","good",6000);
+  }
+  consumeInbox();   // ネジ打ちで遊んだ分をここで受け取る
+  reportVillagers();
+  crowVisit();
+  clearInterval(loopId); clearInterval(saveId);
+  loopId=setInterval(()=>{ tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); },1000);
+  saveId=setInterval(save,15000);
+}
+function leave(){
+  clearInterval(loopId); clearInterval(saveId); loopId=saveId=null;
+  closeModal(true);
+  tick(); save();
+  // 番付に載せている人は、庭を出るたびに記録を更新
+  if(S.rankName && hasDb()) pushRank(S.rankName).catch(()=>{});
+}
+/* タイトル画面に出す庭のようす */
+function summary(){
+  tick(); save();
+  const now=Date.now();
+  let ripe=0, dry=0;
+  S.fields.forEach((f,fi)=>{
+    const cov=covered(fi);
+    for(const k of KEYS){
+      const p=f[k];
+      if(p.vil || !p.crop) continue;
+      if(isRipe(p)) ripe++;
+      else if(!isWet(fi,k,now,cov)) dry++;
+    }
+  });
+  let pending=0;
+  try{ const b=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); pending=b?(b.screws|0):0; }catch(e){}
+  return { money:S.money, pending, ripe, dry, villagers:S.villagers };
+}
+function backToTitle(){ leave(); show("title"); }
+window.addEventListener("beforeunload",()=>{ tick(); save(); });
+return { enter, leave, onKey, summary };
+})();
+
+function openGarden(){ show("garden"); Garden.enter(); }
+/* タイトル画面に、所持ネジと庭でやること(収穫・水切れ)を出す */
+function refreshGardenStat(){
+  const el=$("gardenStat"); if(!el) return;
+  let s; try{ s=Garden.summary(); }catch(e){ return; }
+  const fmt=n=>Math.floor(n).toLocaleString("ja-JP");
+  let t=`🔩 所持ネジ<b>${fmt(s.money)}</b>`;
+  if(s.pending) t+=`<small>(+${fmt(s.pending)} 受け取り待ち)</small>`;
+  const todo=[];
+  if(s.ripe) todo.push(`<span class="todoi">🧺 収穫できる作物 <b>${s.ripe}</b></span>`);
+  if(s.dry)  todo.push(`<span class="todoi">💧 水が切れた作物 <b>${s.dry}</b></span>`);
+  t += todo.length ? " ・ "+todo.join(" ・ ") : " ・ 庭は落ち着いています";
+  t += ` <span class="kbdh">G</span>`;
+  el.innerHTML=t;
+  el.classList.toggle("todo", todo.length>0);
+}
+$("gardenStat").addEventListener("click",openGarden);
+$("toGardenBtn").addEventListener("click",openGarden);
+$("poemGardenBtn").addEventListener("click",()=>{ stopPoem(); openGarden(); });
+
 refreshBestLine();
 refreshStatsLine();
+refreshGardenStat();
+setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
 </script>
 </body>
 </html>
