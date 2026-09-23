@@ -3370,19 +3370,19 @@ function recordHarvest(id,t,quiet){
   S.totalHarvest++;
   const after=tierOf(id);
   if(after>before){
-    const msg=`${CROP[id].icon} ${CROP[id].name}の品質が上がりました。これからは「${qName(id,after)}」が穫れます(売値 ${priceOf(id,after)}ネジ)`;
-    if(quiet){ S.vLog.up=S.vLog.up||[]; S.vLog.up.push(msg); } else { toast(msg,"good",5200); sfx.vil(); }
+    const msg=`${ico(CROP[id])} ${esc(CROP[id].name)}の品質が上がりました。これからは「${esc(qName(id,after))}」が穫れます(売値 ${priceOf(id,after)}ネジ)`;
+    if(quiet){ S.vLog.up=S.vLog.up||[]; S.vLog.up.push(msg); } else { toast(msg,"good",5200,true); sfx.vil(); }
   }
 }
 /* 村人の仕事ぶりをまとめて知らせる */
 function reportVillagers(){
   const L=S.vLog; if(!L || (!L.h && !L.up)) return;
-  const parts=Object.entries(L.h||{}).map(([id,n])=>`${CROP[id].icon}×${n}`);
+  const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${n}`);
   if(parts.length){
-    toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} ネジ)`,"good",6000);
+    toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} ネジ)`,"good",6000,true);
     sfx.vil();
   }
-  for(const m of (L.up||[])) toast(m,"good",5200);
+  for(const m of (L.up||[])) toast(m,"good",5200,true);
   S.vLog={}; checkUnlocks(); save();
 }
 /* 案山子のいる畑の数(1打あたりの時短が増える) */
@@ -3450,11 +3450,11 @@ function crowVisit(){
       const k=targets[Math.floor(Math.random()*targets.length)];
       const c=CROP[f[k].crop.id];
       f[k].crop=null; f[k].emptySince=now;
-      taken.push(`畑${fi+1}の ${k} の ${c.icon}${c.name}`);
+      taken.push(`畑${fi+1}の ${k} の ${ico(c)}${esc(c.name)}`);
     }
   });
   if(taken.length){
-    toast(`カラスが ${taken.join("、")} を持っていきました。実ったら早めに収穫するか、案山子を置きましょう`,"warn",7000);
+    toast(`カラスが ${taken.join("、")} を持っていきました。実ったら早めに収穫するか、案山子を置きましょう`,"warn",7000,true);
     save();
   }
 }
@@ -3512,12 +3512,33 @@ function fmtDur(ms){
   return `${mi}分`;
 }
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-function toast(text,kind="",ms=2600){
+/* お知らせの吹き出し。
+   同じ内容が出ているときは増やさず、その1つの表示時間を延ばすだけにする。
+   多いときは古いものから消して、同時に出るのは4つまで。 */
+let liveToasts=[];
+const MAX_TOASTS=4;
+function dropToast(o){
+  clearTimeout(o.timer);
+  liveToasts=liveToasts.filter(x=>x!==o);
+  o.el.classList.add("out");
+  setTimeout(()=>o.el.remove(),320);
+}
+function toast(text,kind="",ms=2600,html=false){
+  const key=String(text);
+  const same=liveToasts.find(o=>o.key===key);
+  if(same){                       // 同じダイアログは1つだけ
+    clearTimeout(same.timer);
+    same.timer=setTimeout(()=>dropToast(same),ms);
+    return;
+  }
   const t=document.createElement("div");
   t.className="toast "+kind;
-  t.textContent=text;
+  if(html) t.innerHTML=text; else t.textContent=text;
   $("g-toasts").appendChild(t);
-  setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),320); }, ms);
+  const o={key, el:t, timer:null};
+  liveToasts.push(o);
+  o.timer=setTimeout(()=>dropToast(o),ms);
+  while(liveToasts.length>MAX_TOASTS) dropToast(liveToasts[0]);
 }
 function floatAt(k,text){
   const el=plotEls[k]; if(!el) return;
@@ -3557,7 +3578,7 @@ function unlockText(u){
 /* 新しく店に並んだものを知らせる */
 function checkUnlocks(){
   const items=[
-    ...CROPS.filter(c=>!c.gacha && c.day==null).map(c=>({key:c.id, ok:isUnlocked(c), label:`${c.icon} ${c.name}の種`})),
+    ...CROPS.filter(c=>!c.gacha && c.day==null).map(c=>({key:c.id, ok:isUnlocked(c), label:`${ico(c)} ${esc(c.name)}の種`})),
     {key:"fert", ok:meets(FERT.unlock), label:`${FERT.icon} ${FERT.name}`},
     ...OBJ_ORDER.map(id=>({key:"obj:"+id, ok:meets(OBJS[id].unlock), label:`${OBJS[id].icon} ${OBJS[id].name}`})),
     {key:"vil", ok:meets(VIL_UNLOCK), label:"👩‍🌾 村人"},
@@ -3565,7 +3586,7 @@ function checkUnlocks(){
   for(const it of items){
     if(it.ok && !S.known.includes(it.key)){
       S.known.push(it.key);
-      if(!["carrot","potato"].includes(it.key)) toast(`お店に ${it.label} が並びました`, "good", 4200);
+      if(!["carrot","potato"].includes(it.key)) toast(`お店に ${it.label} が並びました`, "good", 4200, true);
     }
   }
 }
@@ -3766,7 +3787,7 @@ function act(k){
           S.treas[c.id]=(S.treas[c.id]||0)+1;
           S.totalHarvest++;
           floatAt(k,"✨"+ico(c));
-          toast(`${c.icon} ${c.name} を手に入れました。${c.eff.text}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000);
+          toast(`${ico(c)} ${esc(c.name)} を手に入れました。${esc(c.eff.text)}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000,true);
           sfx.vil();
         }else{
           let t=tierOf(c.id);
@@ -3776,7 +3797,7 @@ function act(k){
           S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
           for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
           floatAt(k,"+"+ico(c)+QUALITY[t].mark+(num>1?"×2":""));
-          if(first) toast(`${c.icon} ${qName(c.id,t)} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000);
+          if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000,true);
         }
         checkUnlocks();
       }else if(p.crop) nope(k,"まだ実っていません");
@@ -4053,7 +4074,7 @@ function buySeed(id,n){
   if(!spend(seedCost(c)*n)) return;
   S.seeds[id]=(S.seeds[id]||0)+n;
   if(!(S.seeds[S.seedId]>0)) S.seedId=id;
-  toast(`${c.icon} ${c.name}の種を ${n}つ 買いました`);
+  toast(`${ico(c)} ${esc(c.name)}の種を ${n}つ 買いました`,"",2600,true);
   save(); renderAll();
 }
 function buyCan(){
@@ -4084,7 +4105,7 @@ function buyVilUp(){
   const next=VIL_LADDER[(S.vilLv||0)+1]; if(!next) return;
   if(!spend(vilUpPrice())) return;
   S.vilLv=(S.vilLv||0)+1;
-  toast(`✨ 元気の種を使いました。村人は ${CROP[next].icon}${CROP[next].name} を育てるようになります`,"good",4600);
+  toast(`✨ 元気の種を使いました。村人は ${ico(CROP[next])}${esc(CROP[next].name)} を育てるようになります`,"good",4600,true);
   sfx.vil();
   save(); renderAll();
 }
@@ -4104,7 +4125,7 @@ function sellSeed(id,n){
   S.seeds[id]=have-k;
   const gain=k*seedPrice(c);
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`${c.icon} ${c.name}の種を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good");
+  toast(`${ico(c)} ${esc(c.name)}の種を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good",2600,true);
   if(!(S.seeds[S.seedId]>0)){ const o=ownedSeeds(); if(o.length) S.seedId=o[0]; }
   save(); renderAll();
 }
@@ -4114,7 +4135,7 @@ function sell(id,t,n){
   S.inv[id][t]=have-k;
   const gain=k*priceOf(id,t);
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`${c.icon} ${qName(id,t)}を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good");
+  toast(`${ico(c)} ${esc(qName(id,t))}を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good",2600,true);
   checkUnlocks();
   save(); renderAll();
 }
@@ -4463,7 +4484,7 @@ function enter(){
   const todayKey=new Date().toDateString();
   if(dayCrop && S.dayNotice!==todayKey){        // 同じ日に何度入っても一度だけ
     S.dayNotice=todayKey; save();
-    toast(`今日は${DAY_NAMES[today()]}曜。お店に ${dayCrop.icon} ${dayCrop.name}の種 が並んでいます`,"good",4600);
+    toast(`今日は${DAY_NAMES[today()]}曜。お店に ${ico(dayCrop)} ${esc(dayCrop.name)}の種 が並んでいます`,"good",4600,true);
   }
   consumeInbox();   // まだ受け取っていない分があれば受け取る
   flushInboxReport();
