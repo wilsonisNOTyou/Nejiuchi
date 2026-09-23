@@ -1228,7 +1228,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       <div class="slot" data-tool="6"><span class="n">6</span>
         <div class="seedsel"><span class="arr" id="g-objArrL">◀</span><span class="ic" id="g-objIc">📦</span><span id="g-objNm">設置</span><span class="cnt" id="g-objCnt"></span><span class="arr" id="g-objArrR">▶</span></div>
       </div>
-      <div class="fieldsel"><span class="arr">▲▼</span>畑 <span id="g-fieldNo">1</span> / <span id="g-fieldMax">1</span></div>
+      <div class="fieldsel"><span class="arr">▲▼</span>畑 <span id="g-fieldNo">1</span> / <span id="g-fieldMax">1</span><span class="arr" id="g-fieldHint"></span></div>
     </div>
 
     <div class="planter" id="g-planter"></div>
@@ -3213,8 +3213,8 @@ const OBJS = {
 };
 const OBJ_ORDER = ["spr","crow"];
 const FERT = { name:"肥料", icon:"🍂", cost:60, unlock:{sales:200} };
-/* 畑の追加チケット(n枚目を買う値段) */
-const FIELD_PRICES = [0, 500, 3000, 12000, 40000];
+/* 畑の追加チケット(n枚目を買う値段)。最大10枚 */
+const FIELD_PRICES = [0, 500, 3000, 12000, 40000, 150000, 500000, 1500000, 4000000, 10000000];
 
 /* ---------- 状態 ---------- */
 function makeField(){
@@ -3762,6 +3762,7 @@ function renderBar(){
   else if(on>0 || (S.objSel==="crow"&&crowPlaced())){ const o=OBJS[S.objSel]; $("g-objIc").innerHTML=o.icon; $("g-objNm").textContent=o.name; $("g-objCnt").textContent=on>0?("×"+on):"(回収できます)"; }
   else    { $("g-objIc").innerHTML="📦"; $("g-objNm").textContent="設置物なし"; $("g-objCnt").textContent=""; }
   $("g-fieldNo").textContent=S.cur+1; $("g-fieldMax").textContent=S.fields.length;
+  $("g-fieldHint").textContent = S.fields.length>5 ? "Shiftで5枚送り" : "";
   $("g-money").textContent=fmtNum(S.money);
   $("g-rate").textContent=`ネジ打ち1打で ${minPerKey()}分 進む`;
 }
@@ -4595,8 +4596,8 @@ function onKey(e){
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
   if(k==="ArrowRight"){ e.preventDefault(); cycleSel(1); return; }
-  if(k==="ArrowUp"){ e.preventDefault(); switchField(-1); return; }
-  if(k==="ArrowDown"){ e.preventDefault(); switchField(1); return; }
+  if(k==="ArrowUp"){ e.preventDefault(); switchField(e.shiftKey?-5:-1); return; }
+  if(k==="ArrowDown"){ e.preventDefault(); switchField(e.shiftKey?5:1); return; }
   if(k.length===1){
     const up=k.toUpperCase();
     if(KEYS.includes(up)){ e.preventDefault(); act(up); }
