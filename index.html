@@ -3020,7 +3020,7 @@ const CROPS = [
     eff:{ key:"minute", per:1, unit:"分", text:"1打の時短 +1分" },
     desc:"貴重品。茶色の瞳。", lore:"打鍵のひとつひとつを、この瞳がしっかり数えている。" },
   { id:"redflash", r:"GHR", gacha:true, treasure:true, name:"ソプラノレッドフラッシュ", icon:"⚡", cost:0, hours:48, price:0,
-    eff:{ key:"growth", per:2, unit:"%", text:"成長の速さ +2%" },
+    eff:{ key:"growth", per:1, unit:"%", text:"成長の速さ +1%" },
     desc:"貴重品。赤い閃光。", lore:"畑の時間が、ほんの少しだけ前のめりになる。" },
   { id:"whitewizard", r:"GHR", gacha:true, treasure:true, name:"ソプラノホワイトウィザード", icon:"🎩", cost:0, hours:48, price:0,
     eff:{ key:"water", per:2, unit:"時間", text:"水やりの持続 +2時間" },
@@ -3029,8 +3029,8 @@ const CROPS = [
     eff:{ key:"quality", per:1, unit:"%", cap:100, text:"1段上の品質で穫れる確率 +1%" },
     desc:"貴重品。桃色の王冠。", lore:"ときどき、穫れたものに星がひとつ増えている。" },
   { id:"yellowghost", r:"GHR", gacha:true, treasure:true, name:"アルトイエローゴースト", icon:"👻", cost:0, hours:48, price:0,
-    eff:{ key:"crow", per:5, unit:"%", cap:95, text:"カラスに狙われる確率 −5%(最大 −95%)" },
-    desc:"貴重品。黄色い幽霊。", lore:"案山子よりずっと怖いものが、畑の隅に立っている。" },
+    eff:{ key:"vilgrowth", per:2, unit:"%", text:"村人の畑の成長 +2%" },
+    desc:"貴重品。黄色い幽霊。", lore:"畑の隅に立って、村人の手をそっと速める。怖がられているのか慕われているのか、誰も知らない。" },
   { id:"greennecklace", r:"GHR", gacha:true, treasure:true, name:"アルトグリーンネックレス", icon:"📿", cost:0, hours:48, price:0,
     eff:{ key:"seed", per:1, unit:"%", cap:75, text:"種の値段 −1%(最大 −75%)" },
     desc:"貴重品。緑の首飾り。", lore:"これを提げて店に行くと、なぜか値引きしてもらえる。" },
@@ -3088,10 +3088,10 @@ const effVal = id => {
 const effSell    = () => 1 + effVal("blackvelvet")/100;     // 売却価格
 const effDouble  = () => effVal("navyblue")/100;            // 2個穫れる確率
 const effMinute  = () => effVal("browneyes");               // 1打の時短(分)
-const effGrowth  = () => 1 + effVal("redflash")/100;        // 成長の速さ
+const effGrowth  = () => 1 + effVal("redflash")/100;        // 成長の速さ(畑ぜんぶ)
+const effVilGrow = () => effGrowth() * (1 + effVal("yellowghost")/100);  // 村人の区画はさらに速い
 const effWater   = () => effVal("whitewizard")*HOUR;        // 水やりの持続(ミリ秒)
 const effQuality = () => effVal("pinkprincess")/100;        // 1段上の品質で穫れる確率
-const effCrow    = () => 1 - effVal("yellowghost")/100;     // カラスに狙われる確率の倍率
 const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の倍率
 const effGacha   = () => 1 - effVal("silverstar")/100;      // ガチャの値段の倍率
 const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き
@@ -3323,7 +3323,7 @@ function tick(now=Date.now()){
       const cov=covered(fi);
       for(const k of KEYS){
         const p=f[k];
-        if(p.vil){ villagerAdvance(p,dt*effGrowth()); continue; }
+        if(p.vil){ villagerAdvance(p,dt*effVilGrow()); continue; }
         if(p.crop && !isRipe(p)){
           const add = ((p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last)) * effGrowth();
           if(add>0) grow(p,add,last);
@@ -3417,7 +3417,7 @@ function applySkip(minutes){
     const cov=covered(fi);
     for(const k of KEYS){
       const p=f[k];
-      if(p.vil){ villagerAdvance(p,minutes*60000*effGrowth()); n++; continue; }
+      if(p.vil){ villagerAdvance(p,minutes*60000*effVilGrow()); n++; continue; }
       if(!p.crop || isRipe(p) || !isWet(fi,k,now,cov)) continue;
       grow(p,minutes*60000*effGrowth(),now);
       if(isRipe(p)) p.crop.ripeAt=now;
@@ -3466,7 +3466,7 @@ function crowVisit(){
     const targets=KEYS.filter(k=>{ const p=f[k]; return p.crop && isRipe(p) && p.crop.ripeAt && now-p.crop.ripeAt>=CROW_AFTER; });
     if(!targets.length) return;
     S.lastCrow[fi]=now;
-    if(Math.random()<CROW_CHANCE*effCrow()){
+    if(Math.random()<CROW_CHANCE){
       const k=targets[Math.floor(Math.random()*targets.length)];
       const c=CROP[f[k].crop.id];
       f[k].crop=null; f[k].emptySince=now;
