@@ -3193,6 +3193,9 @@ function applySkip(minutes){
   return n;
 }
 /* ネジ打ち本編から届いた分を受け取る */
+/* ネジ打ちで遊んだ分を受け取る。
+   タイトル画面に戻った時点でも受け取るので、庭に入る前から畑の状態が最新になる。
+   お知らせは庭に入ったときにまとめて出す(タイトルでは画面に出せないため) */
 function consumeInbox(){
   let box;
   try{ box=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); }catch(e){ box=null; }
@@ -3204,13 +3207,21 @@ function consumeInbox(){
   const n=minutes>0 ? applySkip(minutes) : 0;
   S.money+=screws;
   S.fromTypingMin+=minutes; S.fromTypingScrews+=screws;
+  const m=S.inMsg||{min:0,screws:0,plots:0};
+  m.min+=minutes; m.screws+=screws; m.plots=Math.max(m.plots,n);
+  S.inMsg=m;
   save();
+}
+/* 受け取った分のお知らせ(庭に入ったときに出す) */
+function flushInboxReport(){
+  const m=S.inMsg;
+  if(!m || (!m.min && !m.screws)) return;
   const parts=[];
-  if(minutes>0) parts.push(`時間が ${fmtDur(minutes*60000)} 進みました(水の効いている${n}区画)`);
-  if(screws>0) parts.push(`抜いたネジ ${screws}本 が届きました`);
+  if(m.min>0) parts.push(`時間が ${fmtDur(m.min*60000)} 進みました(水の効いている${m.plots}区画)`);
+  if(m.screws>0) parts.push(`抜いたネジ ${fmtNum(m.screws)}本 が届きました`);
   toast("ネジ打ちから — "+parts.join(" / "), "good", 5200);
-  if(minutes>0 && n===0) toast("水の効いている作物が無かったので、時間は使われませんでした", "warn", 5200);
-  renderAll();
+  if(m.min>0 && m.plots===0) toast("水の効いている作物が無かったので、時間は使われませんでした", "warn", 5200);
+  S.inMsg=null; save();
 }
 /* カラス: 案山子のいない畑で、実ったまま長く放置された作物を持っていくことがある */
 function crowVisit(){
@@ -4146,7 +4157,8 @@ function enter(){
   }
   const dayCrop=CROPS.find(c=>c.day===today());
   if(dayCrop) toast(`今日は${DAY_NAMES[today()]}曜。お店に ${dayCrop.icon} ${dayCrop.name}の種 が並んでいます`,"good",4600);
-  consumeInbox();   // ネジ打ちで遊んだ分をここで受け取る
+  consumeInbox();   // まだ受け取っていない分があれば受け取る
+  flushInboxReport();
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
@@ -4162,6 +4174,7 @@ function leave(){
 }
 /* タイトル画面に出す庭のようす */
 function summary(){
+  consumeInbox();   // タイトルに戻った時点で受け取り、畑の状態を最新にする
   tick(); save();
   const now=Date.now();
   let ripe=0, dry=0;
@@ -4174,9 +4187,7 @@ function summary(){
       else if(!isWet(fi,k,now,cov)) dry++;
     }
   });
-  let pending=0;
-  try{ const b=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); pending=b?(b.screws|0):0; }catch(e){}
-  return { money:S.money, pending, ripe, dry, villagers:S.villagers };
+  return { money:S.money, pending:0, ripe, dry, villagers:S.villagers };
 }
 function backToTitle(){ leave(); show("title"); }
 window.addEventListener("beforeunload",()=>{ tick(); save(); });
