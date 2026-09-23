@@ -996,6 +996,12 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .tsum{font-size:.82rem; margin-top:.15rem}
 #screen-garden .tsum b{color:var(--shu); font-size:1rem}
 
+/* ---- 庭: ガチャの自動売却表示 ---- */
+#screen-garden .gcard .gsold{
+  position:absolute; left:-3px; bottom:-5px; background:#2e7d32; color:#fff;
+  font-size:.58rem; font-weight:800; padding:.08rem .32rem; border-radius:999px;
+}
+
 /* カウントダウン */
 #countdown{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -1210,7 +1216,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
     </div>
 
     <div class="bar-row">
-      <div class="slot" data-tool="1"><span class="n">1</span><span class="ic">✋</span>素手</div>
+      <div class="slot" data-tool="1"><span class="n">1</span><span class="ic">✋</span><span id="g-sickName">素手</span></div>
       <div class="slot" data-tool="2"><span class="n">2</span><span class="ic">⛏️</span><span id="g-hoeName">クワ</span></div>
       <div class="slot" data-tool="3"><span class="n">3</span><span class="ic">💧</span><span id="g-canName">じょうろ</span></div>
       <div class="slot" data-tool="4"><span class="n">4</span>
@@ -1255,7 +1261,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       <div class="tabs" id="g-shopTabs">
         <button class="tab" data-tab="0">種</button>
         <button class="tab" data-tab="1">道具・土地</button>
-        <button class="tab" data-tab="2">売る</button>
+        <button class="tab" data-tab="2">効率化</button>
+        <button class="tab" data-tab="3">売る</button>
       </div>
       <div id="g-shopBody" class="plist"></div>
       <div class="keyhint" id="g-shopHint"></div>
@@ -3181,6 +3188,13 @@ const CANS = [
   { lv:3, name:"銀のじょうろ", hours:48, area:"cross", cost:1500, what:"十字5区画" },
   { lv:4, name:"金のじょうろ", hours:72, area:"ring",  cost:6000, what:"周り9区画" },
 ];
+/* カマ(一度に収穫できる範囲。素手のまま強化していく) */
+const SICKLES = [
+  { lv:1, name:"素手",       area:"self",  cost:0,     what:"1区画" },
+  { lv:2, name:"小がま",     area:"row3",  cost:600,   what:"左右と合わせて横3区画" },
+  { lv:3, name:"大がま",     area:"cross", cost:3000,  what:"上下左右と合わせて十字5区画" },
+  { lv:4, name:"大鎌",       area:"ring",  cost:12000, what:"周り8区画と合わせて9区画" },
+];
 /* クワ(一度に耕せる範囲) */
 const HOES = [
   { lv:1, name:"クワ",       area:"self",  cost:0,    what:"1区画" },
@@ -3212,7 +3226,7 @@ function newState(){
     money:START_MONEY, totalSales:0, totalHarvest:0,
     fields:[makeField()], cur:0,
     tool:1, seedId:"carrot", objSel:"spr",
-    seeds:{ carrot:4 }, inv:{}, canLv:1, hoeLv:1, fert:0, objs:{},
+    seeds:{ carrot:4 }, inv:{}, canLv:1, hoeLv:1, sickLv:1, fert:0, objs:{}, auto:{},
     harvestBy:{}, harvestQ:{}, got:{}, gachaCount:0, treas:{}, known:["carrot","potato"], lastCrow:[],
     lastTick:Date.now(), created:Date.now(),
     fromTypingMin:0, fromTypingScrews:0,
@@ -3235,7 +3249,7 @@ function normalize(o){
   if(s.cur>=s.fields.length) s.cur=0;
   for(const key of ["seeds","inv","harvestBy","objs"]) s[key]=s[key]||{};
   s.known=s.known||[]; s.lastCrow=s.lastCrow||[];
-  s.hoeLv=s.hoeLv||1; s.canLv=s.canLv||1; s.fert=s.fert||0;
+  s.hoeLv=s.hoeLv||1; s.canLv=s.canLv||1; s.sickLv=s.sickLv||1; s.fert=s.fert||0; s.auto=s.auto||{};
   // 旧「高性能スプリンクラー」はスプリンクラーにまとめる
   if(s.objs.spr2){ s.objs.spr=(s.objs.spr||0)+s.objs.spr2; delete s.objs.spr2; }
   for(const f of s.fields) for(const k of KEYS){ if(f[k].obj==="spr2") f[k].obj="spr"; }
@@ -3361,6 +3375,12 @@ function villagerAdvance(p,dt){
     S.vLog.earn=(S.vLog.earn||0)+price;
   }
 }
+/* 自動売却の設定(作物ごと) */
+const AUTO_COST = 10000;
+const autoOf = id => S.auto[id] || null;
+const autoCrop = id => { const a=autoOf(id); return !!(a && a.c); };
+const autoSeed = id => { const a=autoOf(id); return !!(a && a.s); };
+
 /* 収穫を記録する(品質別の数・品質が上がったらお知らせ) */
 function recordHarvest(id,t,quiet){
   const before=tierOf(id);
@@ -3552,6 +3572,7 @@ function floatAt(k,text){
 const field=()=>S.fields[S.cur];
 const canInfo=()=>CANS[S.canLv-1];
 const hoeInfo=()=>HOES[S.hoeLv-1];
+const sickleInfo=()=>SICKLES[(S.sickLv||1)-1];
 
 /* ---------- 解放条件 ---------- */
 function meets(u){
@@ -3721,6 +3742,7 @@ const ownedObjs =()=>OBJ_ORDER.filter(id=>(S.objs[id]||0)>0 || (id==="crow"&&cro
 function renderBar(){
   root.querySelectorAll(".slot").forEach(s=>s.classList.toggle("on", +s.dataset.tool===S.tool));
   $("g-canName").textContent=canInfo().name;
+  $("g-sickName").textContent=sickleInfo().name;
   $("g-hoeName").textContent=hoeInfo().name;
   // 種
   const owned=ownedSeeds();
@@ -3758,6 +3780,32 @@ function hit(k){
   const el=plotEls[k]; if(!el) return;
   el.classList.add("hit"); setTimeout(()=>el.classList.remove("hit"),90);
 }
+/* 1区画ぶんの収穫(カマの範囲収穫から呼ばれる) */
+function harvestOne(k){
+  const f=field(), p=f[k];
+  if(!p.crop || !isRipe(p)) return;
+  const c=CROP[p.crop.id];
+  p.crop=null; p.emptySince=Date.now();
+  if(c.treasure){
+    S.treas[c.id]=(S.treas[c.id]||0)+1; S.totalHarvest++;
+    floatAt(k,"✨"+ico(c));
+    toast(`${ico(c)} ${esc(c.name)} を手に入れました。${esc(c.eff.text)}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000,true);
+    return;
+  }
+  let t=tierOf(c.id);
+  if(t<2 && Math.random()<effQuality()) t++;
+  const num = 1 + (Math.random()<effDouble() ? 1 : 0);
+  if(autoCrop(c.id)){
+    const gain=priceOf(c.id,t)*num;
+    S.money+=gain; S.totalSales+=gain;
+    floatAt(k,`${ico(c)}${QUALITY[t].mark}${num>1?"×2":""} +${fmtNum(gain)}`);
+  }else{
+    S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
+    floatAt(k,"+"+ico(c)+QUALITY[t].mark+(num>1?"×2":""));
+  }
+  for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
+  hit(k);
+}
 function act(k){
   tick();
   const f=field(), p=f[k];
@@ -3780,6 +3828,9 @@ function act(k){
         S.objs[p.obj]=(S.objs[p.obj]||0)+1; p.obj=null;
         S.objSel=o.id; floatAt(k,"拾った"); hit(k); sfx.pick();
       }else if(p.crop && isRipe(p)){
+        // カマの範囲内で実っているものをまとめて収穫する
+        const extra=around(k,sickleInfo().area).filter(x=>f[x].crop && isRipe(f[x]) && !f[x].vil);
+        for(const x of extra) harvestOne(x);
         const c=CROP[p.crop.id];
         p.crop=null; p.emptySince=Date.now();
         hit(k); sfx.harvest();
@@ -3794,9 +3845,15 @@ function act(k){
           if(t<2 && Math.random()<effQuality()) t++;            // 1段上の品質で穫れることがある
           const num = 1 + (Math.random()<effDouble() ? 1 : 0);  // まれに2個
           const first=!((S.harvestQ[c.id]||[])[t]>0);
-          S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
+          if(autoCrop(c.id)){                                   // 自動売却(かごに入れずその場で売る)
+            const gain=priceOf(c.id,t)*num;
+            S.money+=gain; S.totalSales+=gain;
+            floatAt(k,`${ico(c)}${QUALITY[t].mark}${num>1?"×2":""} +${fmtNum(gain)}`);
+          }else{
+            S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
+            floatAt(k,"+"+ico(c)+QUALITY[t].mark+(num>1?"×2":""));
+          }
           for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
-          floatAt(k,"+"+ico(c)+QUALITY[t].mark+(num>1?"×2":""));
           if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000,true);
         }
         checkUnlocks();
@@ -3932,8 +3989,8 @@ function keepVisible(listEl){
 
 /* ---------- お店(キーボード操作) ----------
    ← → タブ / ↑ ↓ 品物 / Enter 1つ買う・1つ売る / Shift+Enter 10買う・全部売る / A すべて売る */
-const SHOP_TABS=["種","道具・土地","売る"];
-let shopTab=0, shopCur=[0,0,0];
+const SHOP_TABS=["種","道具・土地","効率化","売る"];
+let shopTab=0, shopCur=[0,0,0,0];
 function shopRows(){
   const rows=[];
   const money=S.money;
@@ -3960,6 +4017,10 @@ function shopRows(){
     rows.push({ ic:"💧", nm: nc?`${nc.name} <span style="color:var(--ink-l)">${fmtNum(nc.cost)}ネジ</span>`:canInfo().name,
       ds: nc?`一度に ${nc.what} に水やりでき、水が ${nc.hours}時間 保ちます(今は ${canInfo().what}・${canInfo().hours}時間)`:`最高のじょうろです。一度に ${canInfo().what}、水は ${canInfo().hours}時間 保ちます`,
       keys: nc?"<b>Enter</b> 買う":"", enter:()=>nc&&buyCan(), shift:()=>nc&&buyCan() });
+    const ns=SICKLES[(S.sickLv||1)];
+    rows.push({ ic:"✋", nm: ns?`${ns.name} <span style="color:var(--ink-l)">${fmtNum(ns.cost)}ネジ</span>`:sickleInfo().name,
+      ds: ns?`一度に ${ns.what} の実った作物をまとめて収穫できます(今は ${sickleInfo().what})`:`最高のカマです。${sickleInfo().what}を一度に収穫できます`,
+      keys: ns?"<b>Enter</b> 買う":"", enter:()=>ns&&buySickle(), shift:()=>ns&&buySickle() });
     const nh=HOES[S.hoeLv];
     rows.push({ ic:"⛏️", nm: nh?`${nh.name} <span style="color:var(--ink-l)">${fmtNum(nh.cost)}ネジ</span>`:hoeInfo().name,
       ds: nh?`一度に ${nh.what} を耕せます(今は ${hoeInfo().what})`:`最高のクワです。${hoeInfo().what}を一度に耕せます`,
@@ -3995,6 +4056,35 @@ function shopRows(){
     rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}ネジ</span>`:"畑チケット",
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
+  }else if(shopTab===2){
+    // 効率化: 作物ごとの自動売却
+    for(const c of CROPS){
+      if(c.treasure) continue;
+      const a=autoOf(c.id);
+      const seen=(S.harvestBy[c.id]||0)>0;   // 一度も収穫していない作物は名前を伏せる
+      if(!seen){
+        rows.push({ locked:true, ic:"❔", nm:"？？？の自動売却",
+          ds:"この作物を一度収穫すると、ここに表示されます",
+          keys:"", enter:()=>{}, shift:()=>{} });
+        continue;
+      }
+      const ready=tierOf(c.id)>=2;   // ☆☆ まで育てた作物だけが解禁される
+      const left=Math.max(0, QUALITY[2].need-(S.harvestBy[c.id]||0));
+      const on=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
+      rows.push({
+        locked: !a && !ready,
+        ic: ico(c),
+        nm: a?`${c.name}の自動売却 <span style="color:var(--ink-l)">購入済み</span>`
+             :(ready?`${c.name}の自動売却 <span style="color:var(--ink-l)">${fmtNum(AUTO_COST)}ネジ</span>`
+                    :`${c.name}の自動売却 <span style="color:var(--ink-l)">未解禁</span>`),
+        ds: a?`収穫物 ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}ネジ) ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}ネジ)<br>穫れた${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売ります`
+             :(ready?`収穫した${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売れるようになります(それぞれオンオフできます)`
+                    :`${c.name}が ${QUALITY[2].mark} になると買えるようになります(${c.name}をあと ${fmtNum(left)}個 収穫 ・ 今 ${fmtNum(S.harvestBy[c.id]||0)}/${QUALITY[2].need}個)`),
+        keys: a?"<b>Enter</b> 収穫物のオンオフ<br><b>Shift+Enter</b> 種のオンオフ":(ready?"<b>Enter</b> 買う":""),
+        enter: ()=>a?toggleAuto(c.id,"c"):(ready&&buyAuto(c.id)),
+        shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
+      });
+    }
   }else{
     for(const c of CROPS) for(let t=0;t<3;t++){
       const n=invN(c.id,t); if(n<=0) continue;
@@ -4003,10 +4093,10 @@ function shopRows(){
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
         enter:()=>sell(c.id,t,1), shift:()=>sell(c.id,t,"all") });
     }
-    // 余った種も売れる(貴重品の種は売れない)
-    for(const c of CROPS){
-      if(c.treasure) continue;
-      const n=S.seeds[c.id]||0; if(n<=0) continue;
+    // 余った種も売れる(貴重品の種は売れない)。値段の安い順に並べる
+    const seedRows=CROPS.filter(c=>!c.treasure && (S.seeds[c.id]||0)>0).sort((a,b)=>seedPrice(a)-seedPrice(b));
+    for(const c of seedRows){
+      const n=S.seeds[c.id]||0;
       const pr=seedPrice(c);
       rows.push({ ic:"🌱", nm:`${ico(c)} ${c.name}の種 ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
@@ -4034,14 +4124,14 @@ function renderShop(){
   const total=invTotal().v;
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_TABS.map((t,i)=>i===shopTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
-    (shopTab===2 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}ネジ・種は売りません)` : "")+
+    (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}ネジ・種は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
 function shopKey(e){
   const k=e.key;
   if(k==="Escape"||k==="Tab"){ e.preventDefault(); closeModal(); return; }
-  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=(shopTab+(k==="ArrowRight"?1:-1)+3)%3; sfx.tab(); renderShop(); return; }
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=(shopTab+(k==="ArrowRight"?1:-1)+4)%4; sfx.tab(); renderShop(); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
     const n=shopRowCache.length; if(!n) return;
@@ -4055,7 +4145,7 @@ function shopKey(e){
     (e.shiftKey?r.shift:r.enter)();
     return;
   }
-  if(shopTab===2 && (k==="a"||k==="A")){ sellAll(); return; }
+  if(shopTab===3 && (k==="a"||k==="A")){ sellAll(); return; }
 }
 function spend(cost){
   if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return false; }
@@ -4083,6 +4173,12 @@ function buyCan(){
   toast(`${next.name} を手に入れました。水が ${next.hours}時間 保ちます`,"good",3600);
   save(); renderAll();
 }
+function buySickle(){
+  const next=SICKLES[(S.sickLv||1)]; if(!next||!spend(next.cost)) return;
+  S.sickLv=(S.sickLv||1)+1;
+  toast(`${next.name} を手に入れました。一度に ${next.what} を収穫できます`,"good",3600);
+  save(); renderAll();
+}
 function buyHoe(){
   const next=HOES[S.hoeLv]; if(!next||!spend(next.cost)) return;
   S.hoeLv++;
@@ -4107,6 +4203,21 @@ function buyVilUp(){
   S.vilLv=(S.vilLv||0)+1;
   toast(`✨ 元気の種を使いました。村人は ${ico(CROP[next])}${esc(CROP[next].name)} を育てるようになります`,"good",4600,true);
   sfx.vil();
+  save(); renderAll();
+}
+function buyAuto(id){
+  if(S.auto[id]) return;
+  if(tierOf(id)<2){ sfx.nope(); toast(`${CROP[id].name}が ${QUALITY[2].mark} になると買えます`,"warn"); return; }
+  if(!spend(AUTO_COST)) return;
+  S.auto[id]={c:true,s:true};
+  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の自動売却を買いました(収穫物・種ともオン)`,"good",4200,true);
+  save(); renderAll();
+}
+function toggleAuto(id,which){
+  const a=S.auto[id]; if(!a) return;
+  a[which]=!a[which];
+  sfx.tool();
+  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の${which==="c"?"収穫物":"種"}の自動売却を ${a[which]?"オン":"オフ"} にしました`,"",2400,true);
   save(); renderAll();
 }
 function buyField(){
@@ -4198,9 +4309,15 @@ function drawGacha(n){
     }
   }
   for(const x of res){
-    S.seeds[x.id]=(S.seeds[x.id]||0)+1;
     if(!(S.got[x.id]>0)) x.isNew=true;
     S.got[x.id]=(S.got[x.id]||0)+1;
+    if(autoSeed(x.id)){                      // 種の自動売却
+      const gain=seedPrice(CROP[x.id]);
+      S.money+=gain; S.totalSales+=gain;
+      x.sold=gain;
+    }else{
+      S.seeds[x.id]=(S.seeds[x.id]||0)+1;
+    }
   }
   S.gachaCount=(S.gachaCount||0)+n;
   gachaRes=res; gachaShown=0;
@@ -4280,6 +4397,7 @@ function gachaHTML(){
       <span class="gic">${ico(c)}</span>
       <span class="gnm">${c.name}</span>
       ${x.isNew?'<span class="gnew">NEW</span>':""}
+      ${x.sold?`<span class="gsold">+${fmtNum(x.sold)}</span>`:""}
     </div>`;
   }).join("");
   return `<div class="gacha">
@@ -4327,7 +4445,7 @@ function treasKey(e){
    作物ごとに ふつう / ☆ / ☆☆ の3項目(全27項目)。
    その品質を初めて収穫すると、説明文が読めるようになる。
    ↑↓ で1項目ずつ、← → で作物ごとに移動 */
-const BOOK_CROPS = CROPS.filter(c=>!c.treasure);   // 貴重品はお店の「貴重品」タブで見る
+const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price);   // 売値の安い順(貴重品は貴重品の画面で見る)
 let bookCur=0, bookTier=0;
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 const loreOf = (c,t) => t===0 ? c.lore : LORE_Q[c.id][t-1];
