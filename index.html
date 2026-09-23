@@ -945,6 +945,57 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .gitem.locked .gi{filter:brightness(0); opacity:.32}
 #screen-garden .gitem.locked .gin{color:var(--ink-l)}
 
+/* ---- 庭: 図鑑の品質切り替え ---- */
+#screen-garden .booklist .rowi{grid-template-columns:2rem 1fr auto}
+#screen-garden .qmarks{display:flex; gap:.15rem}
+#screen-garden .qm{font-size:.7rem; color:#d5c8ae}
+#screen-garden .qm.on{color:#e0a800}
+#screen-garden .btabs{display:flex; justify-content:center; gap:.3rem; margin-bottom:.4rem}
+#screen-garden .btab{
+  font-size:.75rem; font-weight:700; color:var(--ink-l);
+  background:#f1e8d4; border-radius:999px; padding:.1rem .6rem;
+}
+#screen-garden .btab.on{background:var(--sun); color:#3a2c08}
+#screen-garden .btab.dim{opacity:.45}
+
+/* ---- 庭: 描き起こした作物の絵・GHR ---- */
+#screen-garden .cart{display:inline-flex; width:1em; height:1em; vertical-align:-.14em}
+#screen-garden .cart svg{width:100%; height:100%; display:block}
+#screen-garden .plot .crop .cart{width:1em; height:1em}
+#screen-garden .gcard .gic .cart, #screen-garden .gitem .gi .cart{width:1em; height:1em}
+#screen-garden .bookdetail .bic .cart{width:1em; height:1em}
+/* GHR の見た目(虹色) */
+#screen-garden .gcard.GHR{
+  border-color:#ff8a3d;
+  background:linear-gradient(135deg,#fff4e6,#ffe9f4 40%,#e9f0ff 70%,#fdf6d8);
+  box-shadow:0 0 26px rgba(255,138,61,.85);
+}
+#screen-garden .gcard.GHR .gtag{background:linear-gradient(90deg,#ff8a3d,#e2589b 50%,#6f8ef0)}
+#screen-garden .gcard.GHR::after{
+  content:''; position:absolute; inset:-2px; border-radius:9px; pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.75) 50%,rgba(255,255,255,0) 70%);
+  animation:g-shine 1.6s linear infinite;
+}
+@keyframes g-shine{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){ #screen-garden .gcard.GHR::after{animation:none} }
+
+/* ---- 庭: 貴重品の画面 ---- */
+#screen-garden .tbtn.treas{background:linear-gradient(180deg,#ffe9d2,#ffd0a3); border-color:#c07330; box-shadow:0 3px 0 #c07330}
+#screen-garden .tnote{color:var(--ink-l); font-size:.85rem; line-height:1.7; margin-bottom:.7rem}
+#screen-garden .tlist{display:grid; grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); gap:.5rem}
+#screen-garden .titem{
+  display:flex; align-items:center; gap:.7rem; padding:.55rem .7rem; border-radius:10px;
+  background:linear-gradient(135deg,#fff8ef,#ffeede); border:2px solid #e8b689;
+}
+#screen-garden .titem.locked{background:linear-gradient(180deg,#efe7d6,#ded3bc); border-style:dashed; border-color:#cbbb99}
+#screen-garden .titem.locked .tic{filter:brightness(0); opacity:.3}
+#screen-garden .tic{font-size:2.2rem; line-height:1; flex:none}
+#screen-garden .tnm{font-weight:800; font-size:.92rem}
+#screen-garden .tnm .tn{color:var(--ink-l); font-weight:700; margin-left:.4em; font-size:.85em}
+#screen-garden .teff{font-size:.78rem; color:var(--ink-l); line-height:1.5; margin-top:.1rem}
+#screen-garden .tsum{font-size:.82rem; margin-top:.15rem}
+#screen-garden .tsum b{color:var(--shu); font-size:1rem}
+
 /* カウントダウン */
 #countdown{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -1151,7 +1202,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       <div class="rate" id="g-rate"></div>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
-      <button class="tbtn gacha" id="g-gachaBtn">ガチャ<span class="kb">8</span></button>
+      <button class="tbtn gacha" id="g-gachaBtn">ガチャ<span class="kb">7</span></button>
+      <button class="tbtn treas" id="g-treasBtn">貴重品<span class="kb">8</span></button>
       <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
       <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
@@ -1187,7 +1239,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 
     <p class="help">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
-      <b>Tab</b> お店 ・ <b>8</b> ガチャ ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
+      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
@@ -1223,6 +1275,20 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
     </div>
   </div>
 
+  <!-- 貴重品 -->
+  <div class="modal" id="g-treas">
+    <div class="panel gachapanel">
+      <div class="phead">
+        <h2>貴重品</h2>
+        <div class="money" id="g-treasRate"></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <p class="tnote">ガチャの GHR から出る種を育てると手に入ります。売ることはできませんが、持っているだけで庭にずっと効きます(同じものを重ねるほど強くなります)。</p>
+      <div id="g-treasBody" class="gbody-scroll"></div>
+      <div class="keyhint"><b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
   <!-- 図鑑 -->
   <div class="modal" id="g-book">
     <div class="panel">
@@ -1235,7 +1301,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
         <div id="g-bookList" class="plist booklist"></div>
         <div id="g-bookDetail" class="bookdetail"></div>
       </div>
-      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -2391,8 +2457,10 @@ async function fetchRanking(d){
 }
 
 let rankCur="normal", dictCur="easy";
+let rankReq=0;
 async function openRanking(d,highlight){
   rankCur=d;
+  const myReq=++rankReq;   // 素早く切り替えたとき、古い読み込み結果を捨てる
   for(const t of RANK_TABS) $("tab-"+t).classList.toggle("active",d===t);
   show("ranking");
   const list=$("rankList");
@@ -2404,6 +2472,8 @@ async function openRanking(d,highlight){
   $("rankStatus").textContent="読み込み中...";
   try{
     const rows=await fetchRanking(d);
+    if(myReq!==rankReq) return;          // 別のタブに移っていたら何もしない
+    list.innerHTML="";
     $("rankStatus").textContent=rows.length?"":"まだ記録がありません。一番乗りのチャンス!";
     rows.forEach((r,i)=>{
       const li=document.createElement("li");
@@ -2424,7 +2494,7 @@ async function openRanking(d,highlight){
       list.appendChild(li);
     });
   }catch(e){
-    $("rankStatus").textContent="読み込みに失敗しました。通信環境を確認してください。";
+    if(myReq===rankReq) $("rankStatus").textContent="読み込みに失敗しました。通信環境を確認してください。";
   }
 }
 
@@ -2887,7 +2957,43 @@ const CROPS = [
   { id:"lychee", r:"UR", gacha:true, name:"月光ライチ", icon:"🌙", cost:0, hours:190, price:7500,
     desc:"ガチャ限定。月の光で実が透ける。",
     lore:"満月の晩に収穫すると、実の中身がうっすら透けて見える。見えたと言い張る者が三人いる。" },
-  { id:"butternut", r:"GSR", gacha:true, name:"バターナッツかぼちゃ", icon:"🧈", cost:0, hours:200, price:14000,
+  { id:"onion", r:"N", gacha:true, name:"たまねぎ", icon:"🧅", cost:0, hours:16, price:45,
+    desc:"ガチャ限定。土から出すと目にしみる。",
+    lore:"収穫のたびに誰かが泣く。悲しいわけではないと、毎回説明するはめになる。" },
+  { id:"lettuce", r:"N", gacha:true, name:"レタス", icon:"🥬", cost:0, hours:22, price:70,
+    desc:"ガチャ限定。ぱりっとした歯ざわり。",
+    lore:"畑から抜いてすぐ食べると音が違う。その音を聞くために育てている者もいる。" },
+  { id:"garlic", r:"R", gacha:true, name:"にんにく", icon:"🧄", cost:0, hours:34, price:250,
+    desc:"ガチャ限定。畑仕事の前の景気づけ。",
+    lore:"収穫の日は全員が同じものを食べる。そうしないと翌日の練習で気まずくなるからである。" },
+  { id:"peas", r:"R", gacha:true, name:"えんどう豆", icon:"🫛", cost:0, hours:38, price:280,
+    desc:"ガチャ限定。さやを開けるまで数がわからない。",
+    lore:"さやを開ける音が好きで、中身より先に鞘のほうを集めている者がいる。" },
+  { id:"peach", r:"SR", gacha:true, name:"もも", icon:"🍑", cost:0, hours:70, price:780,
+    desc:"ガチャ限定。持ち上げるのに気を使う。",
+    lore:"傷がつかないよう、収穫のときだけ手袋を外す。素手のほうがやさしく持てるらしい。" },
+  { id:"kiwi", r:"SR", gacha:true, name:"キウイ", icon:"🥝", cost:0, hours:78, price:820,
+    desc:"ガチャ限定。外は地味で中は鮮やか。",
+    lore:"切るまで中身が見えない。切った瞬間の緑を見るために育てていると言っても過言ではない。" },
+  { id:"mango", r:"HR", gacha:true, name:"マンゴー", icon:"🥭", cost:0, hours:96, price:1900,
+    desc:"ガチャ限定。甘い香りが畑に漂う。",
+    lore:"実る頃になると、畑の一角だけ空気が甘い。カラスも寄ってくるので案山子は必須。" },
+  { id:"cherry", r:"HR", gacha:true, name:"さくらんぼ", icon:"🍒", cost:0, hours:100, price:2000,
+    desc:"ガチャ限定。二つでひと組。",
+    lore:"必ず二つ並んで実る。どちらかだけ穫ろうとすると、決まって両方落ちる。" },
+  { id:"coconut", r:"UR", gacha:true, name:"ヤシの実", icon:"🥥", cost:0, hours:160, price:7000,
+    desc:"ガチャ限定。固いが中身は甘い。",
+    lore:"割るのに一番力がいる作物。ネジを抜くより手間がかかると、この庭では言われている。" },
+  { id:"olive", r:"UR", gacha:true, name:"黄金オリーブ", icon:"🫒", cost:0, hours:170, price:7100,
+    desc:"ガチャ限定。搾ると金色の油になる。",
+    lore:"搾った油は金色で、畑の道具に差すとよく回る。もったいないので誰もやらない。" },
+  { id:"bluemoon", r:"GSR", gacha:true, name:"ブルームーンベリー", icon:"🫐", cost:0, hours:210, price:16000,
+    desc:"シークレット。青い月の晩にだけ色づく。",
+    lore:"青く光る実。摘み取ると光は消えるので、光ったままの姿を見られるのは畑にいる者だけ。" },
+  { id:"sunlemon", r:"GSR", gacha:true, name:"レモン・ド・ソレイユ", icon:"🍋", cost:0, hours:230, price:17000,
+    desc:"シークレット。太陽をそのまま搾ったような酸味。",
+    lore:"切ると部屋が明るくなったように感じる。気のせいだと言う者も、必ずもう一度切ってみる。" },
+  { id:"butternut", r:"GSR", gacha:true, name:"バターナッツかぼちゃ", icon:"🍐", cost:0, hours:200, price:14000,
     desc:"シークレット。ひょうたん型の高級かぼちゃ。",
     lore:"ひょうたんのような形で、切ると濃い橙色。この庭に来た者のうち、実物を見たことがある者はごくわずか。" },
   { id:"romanesco", r:"GSR", gacha:true, name:"ロマネスコ", icon:"🌀", cost:0, hours:220, price:16000,
@@ -2896,8 +3002,67 @@ const CROPS = [
   { id:"shadowqueen", r:"GSR", gacha:true, name:"シャドークイーン", icon:"🌑", cost:0, hours:240, price:20000,
     desc:"シークレット。土の中で紫に染まる。",
     lore:"掘り出すまで何色か分からない。切った瞬間の濃い紫を見るために、十日を待つ価値がある。" },
+  /* ここから下は GHR(貴重品)。収穫すると売れないかわりに、庭にずっと効く力を授ける */
+  { id:"blackvelvet", r:"GHR", gacha:true, treasure:true, name:"バスブラックベルベット", icon:"🎀", cost:0, hours:48, price:0,
+    eff:{ key:"sell", per:1, unit:"%", text:"売却価格 +1%" },
+    desc:"貴重品。黒天鵞絨のリボン。", lore:"低く響く声のように、静かに値を押し上げる。" },
+  { id:"navyblue", r:"GHR", gacha:true, treasure:true, name:"バスネイビーブルー", icon:"💧", cost:0, hours:48, price:0,
+    eff:{ key:"double", per:1, unit:"%", cap:100, text:"2個穫れる確率 +1%" },
+    desc:"貴重品。深い藍の雫。", lore:"ひとつのはずのものが、ときどきふたつになる。" },
+  { id:"browneyes", r:"GHR", gacha:true, treasure:true, name:"バスブラウンアイズ", icon:"👁️", cost:0, hours:48, price:0,
+    eff:{ key:"minute", per:1, unit:"分", text:"1打の時短 +1分" },
+    desc:"貴重品。茶色の瞳。", lore:"打鍵のひとつひとつを、この瞳がしっかり数えている。" },
+  { id:"redflash", r:"GHR", gacha:true, treasure:true, name:"ソプラノレッドフラッシュ", icon:"⚡", cost:0, hours:48, price:0,
+    eff:{ key:"growth", per:2, unit:"%", text:"成長の速さ +2%" },
+    desc:"貴重品。赤い閃光。", lore:"畑の時間が、ほんの少しだけ前のめりになる。" },
+  { id:"whitewizard", r:"GHR", gacha:true, treasure:true, name:"ソプラノホワイトウィザード", icon:"🎩", cost:0, hours:48, price:0,
+    eff:{ key:"water", per:2, unit:"時間", text:"水やりの持続 +2時間" },
+    desc:"貴重品。白い魔法使いの帽子。", lore:"一度まいた水が、なかなか乾かなくなる。" },
+  { id:"pinkprincess", r:"GHR", gacha:true, treasure:true, name:"ソプラノピンクプリンセス", icon:"👑", cost:0, hours:48, price:0,
+    eff:{ key:"quality", per:1, unit:"%", cap:100, text:"1段上の品質で穫れる確率 +1%" },
+    desc:"貴重品。桃色の王冠。", lore:"ときどき、穫れたものに星がひとつ増えている。" },
+  { id:"yellowghost", r:"GHR", gacha:true, treasure:true, name:"アルトイエローゴースト", icon:"👻", cost:0, hours:48, price:0,
+    eff:{ key:"crow", per:5, unit:"%", cap:95, text:"カラスに狙われる確率 −5%(最大 −95%)" },
+    desc:"貴重品。黄色い幽霊。", lore:"案山子よりずっと怖いものが、畑の隅に立っている。" },
+  { id:"greennecklace", r:"GHR", gacha:true, treasure:true, name:"アルトグリーンネックレス", icon:"📿", cost:0, hours:48, price:0,
+    eff:{ key:"seed", per:1, unit:"%", cap:75, text:"種の値段 −1%(最大 −75%)" },
+    desc:"貴重品。緑の首飾り。", lore:"これを提げて店に行くと、なぜか値引きしてもらえる。" },
+  { id:"silverstar", r:"GHR", gacha:true, treasure:true, name:"テナーシルバースター", icon:"⭐", cost:0, hours:48, price:0,
+    eff:{ key:"gacha", per:1, unit:"%", cap:75, text:"ガチャの値段 −1%(最大 −75%)" },
+    desc:"貴重品。銀の星。", lore:"星を持つ者には、ガチャの主人も少しだけ甘くなる。" },
+  { id:"blueamaryllis", r:"GHR", gacha:true, treasure:true, name:"テナーブルーアマリリス", icon:"🌸", cost:0, hours:48, price:0,
+    eff:{ key:"fert", per:1, unit:"%", cap:90, text:"肥料の効果 +1%(最大 +90%)" },
+    desc:"貴重品。青いアマリリス。", lore:"この花のそばでまいた肥料は、驚くほどよく効く。" },
 ];
 const CROP = Object.fromEntries(CROPS.map(c=>[c.id,c]));
+/* UR以上の作物と貴重品は、絵文字ではなく描き起こした絵を使う
+   (文字だけの場所では c.icon の絵文字を使う) */
+const ART = {
+  nejitree:`<svg viewBox="0 0 32 32"><rect x="14.2" y="17" width="3.6" height="10" rx="1.2" fill="#7a5230"/><circle cx="16" cy="12" r="9" fill="#4f8a3a"/><circle cx="10.5" cy="14" r="5" fill="#63a349"/><circle cx="21.5" cy="14" r="4.5" fill="#3f7530"/><g fill="#c3ccd8"><rect x="14.4" y="9.5" width="3.2" height="7" rx="1.3"/><rect x="12.4" y="7" width="7.2" height="3.2" rx="1.5"/></g><g stroke="#8a97a6" stroke-width=".7"><path d="M14.6 11.5h2.8M14.6 13.2h2.8"/></g></svg>`,
+  dragonfruit:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="18" rx="8" ry="10" fill="#dd3f77"/><ellipse cx="13" cy="15" rx="3" ry="5" fill="#f06f9c" opacity=".55"/><g fill="#8fd16a"><path d="M8 12L3 9l6 1z"/><path d="M24 12l5-3-6 1z"/><path d="M9 20l-5 2 5 1z"/><path d="M23 20l5 2-5 1z"/><path d="M16 4c2.2 2 3 3.4 3 5.6L16 8l-3 1.6C13 7.4 13.8 6 16 4z"/></g><g fill="#fff" opacity=".55"><circle cx="15" cy="18" r=".8"/><circle cx="18" cy="21" r=".8"/></g></svg>`,
+  lychee:`<svg viewBox="0 0 32 32"><circle cx="15" cy="19" r="8.5" fill="#f4e5d4"/><circle cx="12" cy="16" r="3" fill="#fff" opacity=".7"/><g fill="#e2c8ad"><circle cx="11.5" cy="21" r="1.3"/><circle cx="16.5" cy="23" r="1.3"/><circle cx="19" cy="18" r="1.3"/><circle cx="14" cy="15.5" r="1.1"/></g><path d="M23 5a5 5 0 1 0 4.2 6.2A4 4 0 0 1 23 5z" fill="#ffe789"/></svg>`,
+  coconut:`<svg viewBox="0 0 32 32"><circle cx="16" cy="19" r="8.6" fill="#8a5a33"/><path d="M7.6 17.5A8.6 8.6 0 0 1 24.2 15z" fill="#a3703f"/><g fill="#3c2415"><circle cx="12.8" cy="16.5" r="1.4"/><circle cx="19.2" cy="16.5" r="1.4"/><circle cx="16" cy="20.5" r="1.4"/></g><path d="M16 10.5C18.5 5.5 23 4 27 5c-3.4 1-6.6 2.6-8.4 5.8z" fill="#4f8a3a"/><path d="M16 10.5C13.5 6.5 9.5 5.5 6 6.6c3.2.6 6 2 8 4.4z" fill="#63a349"/></svg>`,
+  olive:`<svg viewBox="0 0 32 32"><ellipse cx="15.5" cy="20" rx="7" ry="8.6" fill="#e0bf3c"/><ellipse cx="13" cy="17.5" rx="2.4" ry="3.4" fill="#f7e493" opacity=".85"/><path d="M15.5 11.4c0-4.4 4.2-6.6 8.5-6.4-1 4.2-4.2 6.4-8.5 6.4z" fill="#6f9a3e"/><path d="M15.5 11.4V7.6" stroke="#6f9a3e" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  bluemoon:`<svg viewBox="0 0 32 32"><circle cx="15" cy="19" r="7.6" fill="#334fc8"/><circle cx="10.5" cy="15.5" r="4.2" fill="#5c7cf0"/><circle cx="20.5" cy="16.5" r="3.6" fill="#2537a4"/><circle cx="12" cy="16" r="1.5" fill="#d5e2ff" opacity=".9"/><path d="M24 5a4.6 4.6 0 1 0 3.2 5.6A3.7 3.7 0 0 1 24 5z" fill="#e6edff"/><g fill="#9fb6ff" opacity=".9"><circle cx="7" cy="9" r=".9"/><circle cx="27" cy="20" r=".8"/></g></svg>`,
+  sunlemon:`<svg viewBox="0 0 32 32"><g stroke="#f6cf4a" stroke-width="2" stroke-linecap="round" opacity=".9"><path d="M16 1.5v3M16 27.5v3M1.5 16h3M27.5 16h3M5.5 5.5l2.2 2.2M24.3 24.3l2.2 2.2M26.5 5.5l-2.2 2.2M7.7 24.3l-2.2 2.2"/></g><ellipse cx="16" cy="16" rx="8.4" ry="6.6" fill="#f3cf1e"/><ellipse cx="12.8" cy="13.8" rx="2.6" ry="1.9" fill="#fbe98a"/><path d="M24.4 16c1.4-.4 2.4-.6 3-.2-.6.6-1.6 1-3 1.2z" fill="#e0b810"/></svg>`,
+  butternut:`<svg viewBox="0 0 32 32"><path d="M16 5c1.7 0 2.7 1.8 2.7 4.6 0 2.4-.8 3.6-.8 5.2 4 1 6.4 4 6.4 7.8 0 4.2-3.4 7-7.9 7s-7.9-2.8-7.9-7c0-3.8 2.6-6.9 6.7-7.9-.1-1.6-.9-2.8-.9-5.1C14.3 6.8 15 5 16 5z" fill="#e0b76a"/><path d="M12.8 23.4c0-3 1.8-5 4.6-5.4" stroke="#f3d9a4" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M16 5.2c.8-1.2 1.8-1.6 3-1.8" stroke="#6f9a3e" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`,
+  romanesco:`<svg viewBox="0 0 32 32"><circle cx="16" cy="19" r="9" fill="#87b944"/><g fill="#a3d15c"><circle cx="16" cy="11.4" r="3.4"/><circle cx="10.6" cy="15.4" r="2.9"/><circle cx="21.4" cy="15.4" r="2.9"/><circle cx="12.2" cy="22" r="2.5"/><circle cx="19.8" cy="22" r="2.5"/><circle cx="16" cy="18.2" r="2.1"/></g><g fill="#c9ea90"><circle cx="16" cy="11.4" r="1.4"/><circle cx="10.6" cy="15.4" r="1.2"/><circle cx="21.4" cy="15.4" r="1.2"/><circle cx="16" cy="18.2" r="1"/></g></svg>`,
+  shadowqueen:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="20" rx="9" ry="7.4" fill="#3a1f52"/><ellipse cx="12.6" cy="17.8" rx="3" ry="2.1" fill="#6c3c92" opacity=".85"/><g fill="#1d0f2b"><circle cx="12" cy="22" r="1"/><circle cx="18.4" cy="22.6" r="1"/><circle cx="20" cy="18" r="1"/></g><path d="M9.5 11.5l2.2 3 4.3-4.2 4.3 4.2 2.2-3v4.2H9.5z" fill="#e3c341"/><circle cx="16" cy="9.6" r="1.1" fill="#fff0b0"/></svg>`,
+  blackvelvet:`<svg viewBox="0 0 32 32"><path d="M16 16L6.5 9.5v13z" fill="#2b2b33"/><path d="M16 16l9.5-6.5v13z" fill="#3d3d49"/><path d="M13 20l-2 7 5-8z" fill="#22222a"/><path d="M19 20l2 7-5-8z" fill="#33333d"/><circle cx="16" cy="16" r="3.4" fill="#16161b"/><circle cx="14.9" cy="14.9" r="1" fill="#70707f"/></svg>`,
+  navyblue:`<svg viewBox="0 0 32 32"><path d="M16 4c5.4 7.4 8.4 10.6 8.4 14.6a8.4 8.4 0 0 1-16.8 0C7.6 14.6 10.6 11.4 16 4z" fill="#23408d"/><path d="M11.6 19.6a4.4 4.4 0 0 0 3.2 4.2" stroke="#84a4f0" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="13" cy="12" rx="1.6" ry="2.6" fill="#5b7fd6" opacity=".7"/></svg>`,
+  browneyes:`<svg viewBox="0 0 32 32"><path d="M2.5 16S7.5 8.5 16 8.5 29.5 16 29.5 16 24.5 23.5 16 23.5 2.5 16 2.5 16z" fill="#f4e7d3"/><circle cx="16" cy="16" r="5.6" fill="#7a4a24"/><circle cx="16" cy="16" r="2.4" fill="#1d1109"/><circle cx="14" cy="14" r="1.2" fill="#fff" opacity=".9"/><path d="M2.5 16S7.5 8.5 16 8.5 29.5 16 29.5 16" fill="none" stroke="#6b4a2a" stroke-width="1.4"/></svg>`,
+  redflash:`<svg viewBox="0 0 32 32"><path d="M18.5 2L7.5 18.5h6.2L11.5 30 24.5 12h-7z" fill="#e03434"/><path d="M18.5 2L7.5 18.5h6.2z" fill="#ff7d5e" opacity=".75"/></svg>`,
+  whitewizard:`<svg viewBox="0 0 32 32"><path d="M16 3l7.4 19.4H8.6z" fill="#f4f4f9"/><path d="M11.6 17.6h8.8l1.2 3.4H10.4z" fill="#cbcbdb"/><ellipse cx="16" cy="23.4" rx="12" ry="3.8" fill="#dedee9"/><g fill="#ffe27a"><circle cx="19.6" cy="9.6" r="1.3"/><circle cx="13" cy="13.6" r="1"/><circle cx="17" cy="15.4" r=".8"/></g></svg>`,
+  pinkprincess:`<svg viewBox="0 0 32 32"><path d="M5 22.5L7 9l5 5.8L16 6l4 8.8L25 9l2 13.5z" fill="#ef79ae"/><rect x="5" y="22.5" width="22" height="4.2" rx="1.6" fill="#dd5896"/><g fill="#fff2f8"><circle cx="16" cy="18.4" r="1.7"/><circle cx="9.8" cy="19.4" r="1.2"/><circle cx="22.2" cy="19.4" r="1.2"/></g></svg>`,
+  yellowghost:`<svg viewBox="0 0 32 32"><path d="M6.6 27.4V15.4a9.4 9.4 0 0 1 18.8 0v12l-3.1-2.6-3.1 2.6-3.2-2.6-3.1 2.6z" fill="#f1d148"/><g fill="#3a2c08"><circle cx="12.4" cy="15" r="1.7"/><circle cx="19.6" cy="15" r="1.7"/></g><path d="M13.8 19.4c1.2 1.2 3.2 1.2 4.4 0" stroke="#3a2c08" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`,
+  greennecklace:`<svg viewBox="0 0 32 32"><path d="M6.5 8.5A11.5 11.5 0 0 0 25.5 8.5" stroke="#7fc46a" stroke-width="2.2" fill="none"/><path d="M16 21.6l-3-4.2h6z" fill="#3f7a2c"/><circle cx="16" cy="24.6" r="3.6" fill="#5fd08a"/><circle cx="14.8" cy="23.4" r="1.2" fill="#e2fbec"/><g fill="#a8e08f"><circle cx="9" cy="12" r="1.1"/><circle cx="23" cy="12" r="1.1"/></g></svg>`,
+  silverstar:`<svg viewBox="0 0 32 32"><path d="M16 2.5l3.8 8.7 9.4.9-7.1 6.3 2.1 9.2L16 22.8 7.8 27.6l2.1-9.2-7.1-6.3 9.4-.9z" fill="#c9d2de"/><path d="M16 2.5l3.8 8.7 9.4.9-7.1 6.3z" fill="#eef3f9"/></svg>`,
+  blueamaryllis:`<svg viewBox="0 0 32 32"><g fill="#4a7ad8"><ellipse cx="16" cy="7.8" rx="3.2" ry="6"/><ellipse cx="16" cy="24.2" rx="3.2" ry="6"/><ellipse cx="7.8" cy="16" rx="6" ry="3.2"/><ellipse cx="24.2" cy="16" rx="6" ry="3.2"/></g><g fill="#5f8de6"><ellipse cx="10.2" cy="10.2" rx="5.4" ry="2.9" transform="rotate(-45 10.2 10.2)"/><ellipse cx="21.8" cy="21.8" rx="5.4" ry="2.9" transform="rotate(-45 21.8 21.8)"/><ellipse cx="21.8" cy="10.2" rx="2.9" ry="5.4" transform="rotate(-45 21.8 10.2)"/><ellipse cx="10.2" cy="21.8" rx="2.9" ry="5.4" transform="rotate(-45 10.2 21.8)"/></g><circle cx="16" cy="16" r="3.6" fill="#ffe27a"/></svg>`,
+};
+for(const id in ART){ if(CROP[id]) CROP[id].art=ART[id]; }
+/* 絵の出し方: 描き起こしがあればそれを、無ければ絵文字を使う */
+const ico = c => c.art ? `<span class="cart">${c.art}</span>` : c.icon;
+
 
 /* 品質: 同じ作物をたくさん収穫すると、次から穫れるものの品質が上がる
    need: その品質が穫れるようになる累計収穫数 / mult: 売値の倍率 */
@@ -2906,8 +3071,26 @@ const QUALITY = [
   { mark:"☆",  mult:1.10, need:10  },
   { mark:"☆☆", mult:1.25, need:100 },
 ];
+/* 貴重品(GHR)の持っている数と、そこから決まる庭全体の効果 */
+const tre = id => (S.treas && S.treas[id]) || 0;
+const effVal = id => {
+  const c=CROP[id]; if(!c||!c.eff) return 0;
+  const v=c.eff.per*tre(id);
+  return c.eff.cap!=null ? Math.min(c.eff.cap, v) : v;
+};
+const effSell    = () => 1 + effVal("blackvelvet")/100;     // 売却価格
+const effDouble  = () => effVal("navyblue")/100;            // 2個穫れる確率
+const effMinute  = () => effVal("browneyes");               // 1打の時短(分)
+const effGrowth  = () => 1 + effVal("redflash")/100;        // 成長の速さ
+const effWater   = () => effVal("whitewizard")*HOUR;        // 水やりの持続(ミリ秒)
+const effQuality = () => effVal("pinkprincess")/100;        // 1段上の品質で穫れる確率
+const effCrow    = () => 1 - effVal("yellowghost")/100;     // カラスに狙われる確率の倍率
+const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の倍率
+const effGacha   = () => 1 - effVal("silverstar")/100;      // ガチャの値段の倍率
+const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き
+
 const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0); };
-const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult);
+const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult*effSell());
 const qName   = (id,t) => CROP[id].name+QUALITY[t].mark;
 /* 品質ごとの図鑑の説明文(ふつうの品質は CROPS の lore) */
 const LORE_Q = {
@@ -2943,6 +3126,30 @@ const LORE_Q = {
                "百本目。焼く係を巡るじゃんけんが、年々本気になっている。"],
   sunflower:  ["花が大きく、種がぎっしり詰まるようになった。",
                "百本目。畑の端に並べて植えると、日曜だけ壁のようになる。"],
+  onion:      ["形が丸く揃い、皮の色つやが良くなった。",
+               "百個目。もう誰も泣かない。泣くのは初めて手伝いに来た者だけ。"],
+  lettuce:    ["葉がぎゅっと巻いて、重みが出てきた。",
+               "百個目。抜いたときの音で、その日の出来がわかるようになった。"],
+  garlic:     ["粒が大きく揃い、香りが強くなった。",
+               "百個目。収穫の翌日は、練習場の空気で誰が食べたかすぐわかる。"],
+  peas:       ["さやが太り、粒の数が揃ってきた。",
+               "百さや目。開ける前に中の数を言い当てられるようになった。"],
+  peach:      ["産毛が細かく、香りが立つようになった。",
+               "百個目。手のひらに乗せた瞬間の重さで、食べ頃がわかる。"],
+  kiwi:       ["切り口の緑が鮮やかになった。",
+               "百個目。外見の地味さと中身の鮮やかさの差が、いっそう際立つようになった。"],
+  mango:      ["香りが強く、色の入りが均一になった。",
+               "百個目。実る頃には、畑の一角が甘い匂いの部屋のようになる。"],
+  cherry:     ["二つの粒の大きさが揃ってきた。",
+               "百組目。どちらかだけを穫る方法を、ついに誰も見つけられなかった。"],
+  coconut:    ["殻が厚く、中の汁が増えた。",
+               "百個目。割り方に流派ができ、二つの派閥がにらみ合っている。"],
+  olive:      ["実が締まり、搾れる油が増えた。",
+               "百個目。金色の油はますます澄み、もったいなさもますます増した。"],
+  bluemoon:   ["青の光が強くなり、夜の畑で目印になる。",
+               "百粒目。摘んでも数秒だけ光が残る。その数秒のために十日を待つ。"],
+  sunlemon:   ["酸味が澄み、香りが遠くまで届くようになった。",
+               "百個目。切った瞬間、本当に部屋が明るくなる。もう誰も気のせいだとは言わない。"],
   chili:      ["色が濃くなり、香りだけで辛さが分かるようになった。",
                "百本目。触れずに収穫する方法を、この庭の者は自然と身につけている。"],
   cucumber:   ["曲がりが減り、太さが揃ってきた。並べると気持ちがいい。",
@@ -3006,10 +3213,10 @@ function newState(){
     fields:[makeField()], cur:0,
     tool:1, seedId:"carrot", objSel:"spr",
     seeds:{ carrot:4 }, inv:{}, canLv:1, hoeLv:1, fert:0, objs:{},
-    harvestBy:{}, harvestQ:{}, got:{}, gachaCount:0, known:["carrot","potato"], lastCrow:[],
+    harvestBy:{}, harvestQ:{}, got:{}, gachaCount:0, treas:{}, known:["carrot","potato"], lastCrow:[],
     lastTick:Date.now(), created:Date.now(),
     fromTypingMin:0, fromTypingScrews:0,
-    villagers:0, vLog:{},
+    villagers:0, vLog:{}, vilLv:0,
     owner:Math.random().toString(36).slice(2)+Date.now().toString(36),  // 番付で自分の記録を見分ける印
     rankName:"",
   };
@@ -3033,12 +3240,12 @@ function normalize(o){
   if(s.objs.spr2){ s.objs.spr=(s.objs.spr||0)+s.objs.spr2; delete s.objs.spr2; }
   for(const f of s.fields) for(const k of KEYS){ if(f[k].obj==="spr2") f[k].obj="spr"; }
   if(s.objSel!=="vil" && !OBJ_ORDER.includes(s.objSel)) s.objSel="spr";
-  s.villagers=s.villagers||0; s.vLog=s.vLog||{};
+  s.villagers=s.villagers||0; s.vLog=s.vLog||{}; s.vilLv=s.vilLv||0;
   if(!s.owner) s.owner=Math.random().toString(36).slice(2)+Date.now().toString(36);
   s.rankName=s.rankName||"";
   // 収穫かごを品質別に([ふつう, ☆, ☆☆])
   for(const id of Object.keys(s.inv)){ if(typeof s.inv[id]==="number") s.inv[id]=[s.inv[id],0,0]; }
-  s.harvestQ=s.harvestQ||{}; s.got=s.got||{}; s.gachaCount=s.gachaCount||0;
+  s.harvestQ=s.harvestQ||{}; s.got=s.got||{}; s.gachaCount=s.gachaCount||0; s.treas=s.treas||{};
   for(const id of Object.keys(s.harvestBy)){ if(!s.harvestQ[id]) s.harvestQ[id]=[s.harvestBy[id],0,0]; }
   // P を案山子置き場に。P にあったものは手持ちに戻し、ほかの区画の案山子は P へ移す
   for(const f of s.fields){
@@ -3102,9 +3309,9 @@ function tick(now=Date.now()){
       const cov=covered(fi);
       for(const k of KEYS){
         const p=f[k];
-        if(p.vil){ villagerAdvance(p,dt); continue; }
+        if(p.vil){ villagerAdvance(p,dt*effGrowth()); continue; }
         if(p.crop && !isRipe(p)){
-          const add = (p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last);
+          const add = ((p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last)) * effGrowth();
           if(add>0) grow(p,add,last);
         }
         // 何も植わっていない耕した土は、24時間で草むらに戻る
@@ -3124,12 +3331,16 @@ function tick(now=Date.now()){
    庭を閉じていた時間も、次に開いたときの tick() でまとめて処理される。 */
 const vilUsed = () => S.fields.reduce((a,f)=>a+KEYS.filter(k=>f[k].vil).length,0);
 const vilFree = () => S.villagers*VIL_SLOTS - vilUsed();
-const VIL_CROP = "carrot";   // 村人が育てるのはにんじんだけ
+/* 村人が育てる作物。元気の種を買うたびに、お店にいつも並ぶ作物の中で1段上がる */
+const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","nejitree"];
+const VIL_UP_PRICES = [30000,60000,120000,250000,500000,1000000,2000000,4000000];
+const vilCropId = () => VIL_LADDER[Math.min(S.vilLv||0, VIL_LADDER.length-1)];
+const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length-1)];
 function villagerAdvance(p,dt){
   let t=dt, guard=0;
   while(guard++<100000){
     if(!p.crop){
-      const c=CROP[VIL_CROP];
+      const c=CROP[vilCropId()];
       if(S.money<c.cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
       S.money-=c.cost;
       S.vLog.spent=(S.vLog.spent||0)+c.cost;
@@ -3140,10 +3351,13 @@ function villagerAdvance(p,dt){
     t-=rem;
     const c=CROP[p.crop.id];
     p.crop=null;
-    const q=tierOf(c.id), price=priceOf(c.id,q);   // q: 品質(t は残り時間なので別名に)
+    let q=tierOf(c.id);                             // q: 品質(t は残り時間なので別名に)
+    if(q<2 && Math.random()<effQuality()) q++;
+    const num = 1 + (Math.random()<effDouble() ? 1 : 0);
+    const price=priceOf(c.id,q)*num;
     S.money+=price; S.totalSales+=price;
-    recordHarvest(c.id,q,true);
-    S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+1;
+    for(let i=0;i<num;i++) recordHarvest(c.id,q,true);
+    S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+num;
     S.vLog.earn=(S.vLog.earn||0)+price;
   }
 }
@@ -3173,7 +3387,7 @@ function reportVillagers(){
 }
 /* 案山子のいる畑の数(1打あたりの時短が増える) */
 const crowFields = () => S.fields.filter(f=>KEYS.some(k=>f[k].obj==="crow")).length;
-const minPerKey  = () => MIN_PER_KEY + crowFields();
+const minPerKey  = () => MIN_PER_KEY + crowFields() + effMinute();
 /* タイピングで得た時間を、水の効いている作物にまとめて足す */
 function applySkip(minutes){
   const now=Date.now();
@@ -3183,9 +3397,9 @@ function applySkip(minutes){
     const cov=covered(fi);
     for(const k of KEYS){
       const p=f[k];
-      if(p.vil){ villagerAdvance(p,minutes*60000); n++; continue; }
+      if(p.vil){ villagerAdvance(p,minutes*60000*effGrowth()); n++; continue; }
       if(!p.crop || isRipe(p) || !isWet(fi,k,now,cov)) continue;
-      grow(p,minutes*60000,now);
+      grow(p,minutes*60000*effGrowth(),now);
       if(isRipe(p)) p.crop.ripeAt=now;
       n++;
     }
@@ -3232,7 +3446,7 @@ function crowVisit(){
     const targets=KEYS.filter(k=>{ const p=f[k]; return p.crop && isRipe(p) && p.crop.ripeAt && now-p.crop.ripeAt>=CROW_AFTER; });
     if(!targets.length) return;
     S.lastCrow[fi]=now;
-    if(Math.random()<CROW_CHANCE){
+    if(Math.random()<CROW_CHANCE*effCrow()){
       const k=targets[Math.floor(Math.random()*targets.length)];
       const c=CROP[f[k].crop.id];
       f[k].crop=null; f[k].emptySince=now;
@@ -3309,7 +3523,7 @@ function floatAt(k,text){
   const el=plotEls[k]; if(!el) return;
   const r=el.getBoundingClientRect();
   const f=document.createElement("div");
-  f.className="float"; f.textContent=text;
+  f.className="float"; f.innerHTML=text;
   f.style.left=(r.left+r.width/2)+"px"; f.style.top=(r.top+4)+"px";
   root.appendChild(f);
   setTimeout(()=>f.remove(),950);
@@ -3377,7 +3591,7 @@ function buildPlanter(){
 }
 function cropStageIcon(p){
   const c=CROP[p.crop.id];
-  if(isRipe(p)) return {ic:c.icon, st:""};
+  if(isRipe(p)) return {ic:ico(c), st:""};
   return p.crop.grown/need(p.crop)<0.4 ? {ic:"🌱", st:"st1"} : {ic:"🌿", st:"st2"};
 }
 function renderField(){
@@ -3405,7 +3619,7 @@ function renderField(){
     qb.textContent=(p.crop&&isRipe(p)) ? QUALITY[tierOf(p.crop.id)].mark : "";
     if(p.crop){
       const {ic,st}=cropStageIcon(p);
-      cropEl.textContent=ic; cropEl.className="crop "+st;
+      cropEl.innerHTML=ic; cropEl.className="crop "+st;
       el.querySelector(".pb i").style.width=Math.min(100,p.crop.grown/need(p.crop)*100)+"%";
     }else{
       cropEl.textContent=""; cropEl.className="crop";
@@ -3431,7 +3645,7 @@ function renderInfo(){
       const c=CROP[p.crop.id];
       sub.push(`${c.icon} ${c.name} 育成 ${Math.floor(p.crop.grown/need(p.crop)*100)}% ・ あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
     }else if(p.vWait){
-      const c=CROP[VIL_CROP];
+      const c=CROP[vilCropId()];
       sub.push(`種代(${c?c.cost:"?"}ネジ)が足りず、ネジが貯まるのを待っています`);
     }
     sub.push("植える・水やり・収穫・売却まで自動 ・ 6 で村人を持ってこの区画を押すと外せます");
@@ -3445,12 +3659,12 @@ function renderInfo(){
     const c=CROP[p.crop.id];
     if(isRipe(p)){
       const t=tierOf(c.id);
-      big=`${selKey} ・ ${c.icon} ${qName(c.id,t)} 収穫できます`;
+      big=`${selKey} ・ ${ico(c)} ${esc(qName(c.id,t))} 収穫できます`;
       sub.push(`素手(1)で収穫 ・ 売値 ${priceOf(c.id,t)}ネジ`);
       if(t<2){ const left=QUALITY[t+1].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,t+1)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
-      big=`${selKey} ・ ${c.icon} ${c.name} 育成 ${pct}%`;
+      big=`${selKey} ・ ${ico(c)} ${esc(c.name)} 育成 ${pct}%`;
       sub.push(`実るまで 水が効いていれば あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
     }
   }
@@ -3461,7 +3675,7 @@ function renderInfo(){
     if(covered(S.cur).has(selKey)) sub.push("スプリンクラーの水が届いています");
     else sub.push(p.wet>now ? `水 あと ${fmtDur(p.wet-now)}` : (p.crop&&!isRipe(p) ? "水切れ — 成長が止まっています" : "水 なし"));
   }
-  $("g-infoBig").textContent=big;
+  $("g-infoBig").innerHTML=big;
   $("g-infoSub").innerHTML=sub.map(esc).join("<br>");
 }
 /* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
@@ -3474,7 +3688,7 @@ function renderBasket(){
     const n=invN(c.id,t); if(n<=0) continue;
     any=true;
     const s=document.createElement("span"); s.className="chip"+(t?" q"+t:"");
-    s.textContent=`${c.icon} ${qName(c.id,t)} ×${n}`;
+    s.innerHTML=`${ico(c)} ${esc(qName(c.id,t))} ×${n}`;
     b.appendChild(s);
   }
   if(!any) b.innerHTML='<span class="empty">まだ何もありません。実った作物を素手(1)で収穫しましょう</span>';
@@ -3546,13 +3760,24 @@ function act(k){
         S.objSel=o.id; floatAt(k,"拾った"); hit(k); sfx.pick();
       }else if(p.crop && isRipe(p)){
         const c=CROP[p.crop.id];
-        const t=tierOf(c.id);
-        const first=!((S.harvestQ[c.id]||[])[t]>0);
         p.crop=null; p.emptySince=Date.now();
-        S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]++;
-        recordHarvest(c.id,t,false);
-        floatAt(k,"+"+c.icon+QUALITY[t].mark); hit(k); sfx.harvest();
-        if(first) toast(`${c.icon} ${qName(c.id,t)} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000);
+        hit(k); sfx.harvest();
+        if(c.treasure){                        // 貴重品は売れない。持っているだけで庭にずっと効く
+          S.treas[c.id]=(S.treas[c.id]||0)+1;
+          S.totalHarvest++;
+          floatAt(k,"✨"+c.icon);
+          toast(`${c.icon} ${c.name} を手に入れました。${c.eff.text}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000);
+          sfx.vil();
+        }else{
+          let t=tierOf(c.id);
+          if(t<2 && Math.random()<effQuality()) t++;            // 1段上の品質で穫れることがある
+          const num = 1 + (Math.random()<effDouble() ? 1 : 0);  // まれに2個
+          const first=!((S.harvestQ[c.id]||[])[t]>0);
+          S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
+          for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
+          floatAt(k,"+"+c.icon+QUALITY[t].mark+(num>1?"×2":""));
+          if(first) toast(`${c.icon} ${qName(c.id,t)} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000);
+        }
         checkUnlocks();
       }else if(p.crop) nope(k,"まだ実っていません");
       else nope(k);
@@ -3569,7 +3794,7 @@ function act(k){
     case 3: { // じょうろ: 範囲内の耕した土に水やり(何度やっても期限が今から延びるだけ)
       const targets=[k, ...around(k,canInfo().area)].filter(x=>f[x].s==="soil" && !f[x].obj && !f[x].vil);
       if(!targets.length){ nope(k, p.obj?"設置物があります":(p.s==="grass"?"先にクワ(2)で耕しましょう":null)); break; }
-      const until=Date.now()+canInfo().hours*HOUR;
+      const until=Date.now()+canInfo().hours*HOUR+effWater();
       for(const x of targets){ f[x].wet=until; hit(x); }
       floatAt(k, targets.length>1?`💧×${targets.length}`:"💧");
       sfx.water();
@@ -3593,7 +3818,7 @@ function act(k){
       if((p.crop.fert||0)>=2){ nope(k,"この作物に肥料はもう2回使っています"); break; }
       p.crop.fert=(p.crop.fert||0)+1;
       S.fert--;
-      grow(p, need(p.crop)*FERT_BOOST, Date.now());
+      grow(p, need(p.crop)*effFert(), Date.now());
       if(isRipe(p)) p.crop.ripeAt=Date.now();
       hit(k); floatAt(k,`🍂 ${p.crop.fert}/2`); sfx.fert();
       break;
@@ -3666,6 +3891,7 @@ function openModal(name){
   $("g-"+name).classList.add("open");
   if(name==="shop") renderShop();
   if(name==="gacha") renderGacha();
+  if(name==="treas") renderTreas();
   if(name==="book") renderBook();
   if(name==="rank") prepareRank();
 }
@@ -3700,10 +3926,10 @@ function shopRows(){
       const tag = daily?`<b style="color:var(--shu)">${DAY_NAMES[c.day]}曜限定</b> ・ `:"";
       rows.push({
         locked:!ok,
-        ic: ok?c.icon:"❔",
-        nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${c.cost}ネジ</span>`:"？？？",
+        ic: ok?ico(c):"❔",
+        nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${seedCost(c)}ネジ${seedCost(c)<c.cost?`<s style="opacity:.5;margin-left:.3em">${c.cost}</s>`:""}</span>`:"？？？",
         ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}ネジ(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
-        keys: ok?`<b>Enter</b> 1つ ${money>=c.cost?"":"(不足)"}<br><b>Shift+Enter</b> 10個`:"",
+        keys: ok?`<b>Enter</b> 1つ ${money>=seedCost(c)?"":"(不足)"}<br><b>Shift+Enter</b> 10個`:"",
         enter: ()=>ok && buySeed(c.id,1),
         shift: ()=>ok && buySeed(c.id,10),
       });
@@ -3732,9 +3958,18 @@ function shopRows(){
     const vOk=meets(VIL_UNLOCK);
     rows.push({ locked:!vOk, ic: vOk?"👩‍🌾":"❔",
       nm: vOk?`村人 <span style="color:var(--ink-l)">${fmtNum(VIL_COST)}ネジ</span>`:"？？？",
-      ds: vOk?`指定した${VIL_SLOTS}区画で、にんじんを植え・水やり・収穫・売却まで自動で行います。6 で村人を持って区画を押して指定(もう一度押すと外す)。庭を閉じている間の分も、次に開いたときにまとめて処理されます ・ 雇っている村人 ${S.villagers}人(あと ${vilFree()}区画)`
+      ds: vOk?`指定した${VIL_SLOTS}区画で、${CROP[vilCropId()].icon}${CROP[vilCropId()].name}を植え・水やり・収穫・売却まで自動で行います。6 で村人を持って区画を押して指定(もう一度押すと外す)。庭を閉じている間の分も、次に開いたときにまとめて処理されます ・ 雇っている村人 ${S.villagers}人(あと ${vilFree()}区画)`
             : unlockText(VIL_UNLOCK),
       keys: vOk?"<b>Enter</b> 雇う":"", enter:()=>vOk&&buyVil(), shift:()=>vOk&&buyVil() });
+    // 元気の種(村人の育てる作物を1段上げる)
+    if(S.villagers>0){
+      const up=vilUpPrice(), now=CROP[vilCropId()], next=VIL_LADDER[(S.vilLv||0)+1];
+      rows.push({ ic:"✨",
+        nm: next?`元気の種 <span style="color:var(--ink-l)">${fmtNum(up)}ネジ</span>`:"元気の種",
+        ds: next?`村人が育てる作物が ${now.icon}${now.name} から ${CROP[next].icon}${CROP[next].name} に上がります(雇っている村人 全員に効きます)。買うたびに次の値段が上がります`
+                :`村人は ${now.icon}${now.name} を育てています。これ以上は上がりません`,
+        keys: next?"<b>Enter</b> 買う":"", enter:()=>next&&buyVilUp(), shift:()=>next&&buyVilUp() });
+    }
     const nf=S.fields.length, price=FIELD_PRICES[nf];
     rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}ネジ</span>`:"畑チケット",
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
@@ -3743,15 +3978,16 @@ function shopRows(){
     for(const c of CROPS) for(let t=0;t<3;t++){
       const n=invN(c.id,t); if(n<=0) continue;
       const pr=priceOf(c.id,t);
-      rows.push({ ic:c.icon, nm:`${qName(c.id,t)} ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
+      rows.push({ ic:ico(c), nm:`${qName(c.id,t)} ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
         enter:()=>sell(c.id,t,1), shift:()=>sell(c.id,t,"all") });
     }
-    // 余った種も売れる
+    // 余った種も売れる(貴重品の種は売れない)
     for(const c of CROPS){
+      if(c.treasure) continue;
       const n=S.seeds[c.id]||0; if(n<=0) continue;
       const pr=seedPrice(c);
-      rows.push({ ic:"🌱", nm:`${c.icon} ${c.name}の種 ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
+      rows.push({ ic:"🌱", nm:`${ico(c)} ${c.name}の種 ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
         enter:()=>sellSeed(c.id,1), shift:()=>sellSeed(c.id,"all") });
     }
@@ -3811,9 +4047,10 @@ function buyVil(){
   toast(`村人を雇いました。6 で村人を持って、まかせたい区画を${VIL_SLOTS}つ押してください`,"good",5000);
   save(); renderAll();
 }
+const seedCost = c => Math.max(1, Math.round(c.cost*effSeed()));
 function buySeed(id,n){
   const c=CROP[id]; if(!c||!isUnlocked(c)) return;
-  if(!spend(c.cost*n)) return;
+  if(!spend(seedCost(c)*n)) return;
   S.seeds[id]=(S.seeds[id]||0)+n;
   if(!(S.seeds[S.seedId]>0)) S.seedId=id;
   toast(`${c.icon} ${c.name}の種を ${n}つ 買いました`);
@@ -3841,6 +4078,14 @@ function buyObj(id){
   const o=OBJS[id]; if(!o||!meets(o.unlock)||!spend(o.cost)) return;
   S.objs[id]=(S.objs[id]||0)+1; S.objSel=id;
   toast(`${o.icon} ${o.name} を買いました。6 で持って区画に置けます`,"good",3600);
+  save(); renderAll();
+}
+function buyVilUp(){
+  const next=VIL_LADDER[(S.vilLv||0)+1]; if(!next) return;
+  if(!spend(vilUpPrice())) return;
+  S.vilLv=(S.vilLv||0)+1;
+  toast(`✨ 元気の種を使いました。村人は ${CROP[next].icon}${CROP[next].name} を育てるようになります`,"good",4600);
+  sfx.vil();
   save(); renderAll();
 }
 function buyField(){
@@ -3899,10 +4144,11 @@ const RARITY={
   SR: { label:"SR",  rate:25,  color:"#a274d8" },
   HR: { label:"HR",  rate:3,   color:"#e4903a" },
   UR: { label:"UR",  rate:1.7, color:"#e3c341" },
-  GSR:{ label:"GSR", rate:0.3, color:"#e2589b" },
+  GSR:{ label:"GSR", rate:0.27, color:"#e2589b" },
+  GHR:{ label:"GHR", rate:0.03, color:"#ff8a3d" },
 };
-const RARITY_ORDER=["N","R","SR","HR","UR","GSR"];
-const GACHA_COST1=100, GACHA_COST11=1000;
+const RARITY_ORDER=["N","R","SR","HR","UR","GSR","GHR"];
+const GACHA_COST1=100, GACHA_COST11=1000, GACHA_COST111=10000;
 const poolOf = r => CROPS.filter(c=>c.r===r);
 function rollRarity(minIdx){
   const list=RARITY_ORDER.slice(minIdx||0);
@@ -3918,12 +4164,18 @@ function drawOne(minIdx){
 let gachaRes=[], gachaShown=0, gachaTimer=null;
 function drawGacha(n){
   if(gachaShown<gachaRes.length) return;      // 演出中は引けない
-  const cost = n===11 ? GACHA_COST11 : GACHA_COST1*n;
+  const cost = Math.max(1, Math.round((n===111 ? GACHA_COST111 : (n===11 ? GACHA_COST11 : GACHA_COST1*n))*effGacha()));
   if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return; }
   S.money-=cost;
   const res=[];
   for(let i=0;i<n;i++) res.push(drawOne(0));
-  if(n===11 && !res.some(x=>RARITY_ORDER.indexOf(x.r)>=2)) res[10]=drawOne(2);   // SR以上1つ確定
+  // 11回ごとにSR以上を1つ確定(111回なら10回分)
+  if(n>=11){
+    for(let b=0; b+11<=n; b+=11){
+      const blk=res.slice(b,b+11);
+      if(!blk.some(x=>RARITY_ORDER.indexOf(x.r)>=2)) res[b+10]=drawOne(2);
+    }
+  }
   for(const x of res){
     S.seeds[x.id]=(S.seeds[x.id]||0)+1;
     if(!(S.got[x.id]>0)) x.isNew=true;
@@ -3942,7 +4194,7 @@ function revealNext(){
   gachaShown++;
   sfxGacha(gachaRes[gachaShown-1].r);
   renderGacha();
-  gachaTimer=setTimeout(revealNext, 360);
+  gachaTimer=setTimeout(revealNext, gachaRes.length>20 ? 70 : 360);
 }
 function gachaSkip(){
   clearTimeout(gachaTimer);
@@ -3965,8 +4217,8 @@ function renderGacha(){
   $("g-gachaMoney").textContent=fmtNum(S.money);
   $("g-gachaBody").innerHTML=gachaHTML()+gachaListHTML();
   $("g-gachaHint").innerHTML =
-    (gachaShown<gachaRes.length ? "<b>Enter</b> 早送り" : "<b>Enter</b> 1回引く ・ <b>Shift+Enter</b> 11回引く")+
-    " ・ <b>↑ ↓</b> リストを見る ・ <b>8</b> / <b>Esc</b> 閉じる";
+    (gachaShown<gachaRes.length ? "<b>Enter</b> 早送り" : "<b>Enter</b> 1回 ・ <b>Shift+Enter</b> 11回 ・ <b>Ctrl+Enter</b> 111回")+
+    " ・ <b>↑ ↓</b> リストを見る ・ <b>7</b> / <b>Esc</b> 閉じる";
 }
 /* アイテムリスト: レア度ごとに、出る作物を並べる。未入手は影だけ見える */
 function gachaListHTML(){
@@ -3980,18 +4232,18 @@ function gachaListHTML(){
         // ガチャで引いた作物と、お店で育てて知っている作物は絵が見える
         const known = n>0 || (!c.gacha && (isUnlocked(c) || S.harvestBy[c.id]>0));
         return known
-          ? `<div class="gitem"><span class="gi">${c.icon}</span><span class="gin">${c.name}</span>${n>0?`<span class="gic2">×${fmtNum(n)}</span>`:""}</div>`
-          : `<div class="gitem locked"><span class="gi">${c.icon}</span><span class="gin">？？？</span></div>`;
+          ? `<div class="gitem"><span class="gi">${ico(c)}</span><span class="gin">${c.name}</span>${n>0?`<span class="gic2">×${fmtNum(n)}</span>`:""}</div>`
+          : `<div class="gitem locked"><span class="gi">${ico(c)}</span><span class="gin">？？？</span></div>`;
       }).join("")+`</div></div>`;
   }).join("")+`</div>`;
 }
 function gachaKey(e){
   const k=e.key;
-  if(k==="Escape"||k==="8"){ e.preventDefault(); closeModal(); return; }
+  if(k==="Escape"||k==="7"){ e.preventDefault(); closeModal(); return; }
   if(k==="Enter"){
     e.preventDefault();
     if(gachaShown<gachaRes.length) gachaSkip();
-    else drawGacha(e.shiftKey?11:1);
+    else drawGacha((e.ctrlKey||e.metaKey) ? 111 : (e.shiftKey?11:1));
     return;
   }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-gachaBody").scrollBy(0, k==="ArrowDown"?90:-90); }
@@ -4004,7 +4256,7 @@ function gachaHTML(){
     const c=CROP[x.id];
     return `<div class="gcard ${x.r}${i===gachaShown-1?" pop":""}">
       <span class="gtag">${RARITY[x.r].label}</span>
-      <span class="gic">${c.icon}</span>
+      <span class="gic">${ico(c)}</span>
       <span class="gnm">${c.name}</span>
       ${x.isNew?'<span class="gnew">NEW</span>':""}
     </div>`;
@@ -4016,7 +4268,7 @@ function gachaHTML(){
         <div class="gneck"></div>
         <div class="gbody"><span class="gknob"></span><span class="gout"></span></div>
       </div>
-      <div class="gcost">1回 <b>${GACHA_COST1}</b>ネジ<br>11回 <b>${fmtNum(GACHA_COST11)}</b>ネジ<small>SR以上1つ確定</small></div>
+      <div class="gcost">1回 <b>${fmtNum(Math.round(GACHA_COST1*effGacha()))}</b>ネジ<br>11回 <b>${fmtNum(Math.round(GACHA_COST11*effGacha()))}</b>ネジ<br>111回 <b>${fmtNum(Math.round(GACHA_COST111*effGacha()))}</b>ネジ<small>11回ごとにSR以上1つ確定${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
       <div class="gtotal">これまで ${fmtNum(S.gachaCount||0)}回</div>
     </div>
     <div class="gright">
@@ -4026,24 +4278,51 @@ function gachaHTML(){
   </div>`;
 }
 
+/* ---------- 貴重品(GHR) ----------
+   売れないかわりに、持っているだけで庭にずっと効く */
+const TREASURES = CROPS.filter(c=>c.treasure);
+function renderTreas(){
+  const got=TREASURES.filter(c=>tre(c.id)>0).length;
+  const total=TREASURES.reduce((a,c)=>a+tre(c.id),0);
+  $("g-treasRate").textContent=`集めた種類 ${got} / ${TREASURES.length} ・ 持っている数 ${fmtNum(total)}`;
+  $("g-treasBody").innerHTML=`<div class="tlist">`+TREASURES.map(c=>{
+    const n=tre(c.id), v=effVal(c.id), capped=c.eff.cap!=null && v>=c.eff.cap;
+    return `<div class="titem ${n>0?"":"locked"}">
+      <div class="tic">${ico(c)}</div>
+      <div class="tbody">
+        <div class="tnm">${n>0?esc(c.name):"？？？"}${n>0?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
+        <div class="teff">${n>0?esc(c.eff.text):"ガチャの GHR から出る種を育てると手に入ります"}</div>
+        ${n>0?`<div class="tsum">今の合計 <b>${v}${c.eff.unit}</b>${capped?" (上限)":""}</div>`:""}
+      </div></div>`;
+  }).join("")+`</div>`;
+}
+function treasKey(e){
+  const k=e.key;
+  if(k==="Escape"||k==="8"){ e.preventDefault(); closeModal(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-treasBody").scrollBy(0, k==="ArrowDown"?90:-90); }
+}
+
 /* ---------- 図鑑 ----------
    作物ごとに ふつう / ☆ / ☆☆ の3項目(全27項目)。
    その品質を初めて収穫すると、説明文が読めるようになる。
    ↑↓ で1項目ずつ、← → で作物ごとに移動 */
-const BOOK = CROPS.flatMap(c=>[0,1,2].map(t=>({c,t})));
-let bookCur=0;
+const BOOK_CROPS = CROPS.filter(c=>!c.treasure);   // 貴重品はお店の「貴重品」タブで見る
+let bookCur=0, bookTier=0;
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 const loreOf = (c,t) => t===0 ? c.lore : LORE_Q[c.id][t-1];
 function renderBook(){
-  const got=BOOK.filter(e=>qCount(e.c.id,e.t)>0).length;
-  $("g-bookRate").textContent=`図鑑 ${got} / ${BOOK.length} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
-  $("g-bookList").innerHTML=BOOK.map((e,i)=>{
-    const {c,t}=e, known=isUnlocked(c)||S.harvestBy[c.id]>0, had=qCount(c.id,t)>0;
-    const label = known ? qName(c.id,t) : "？？？";
-    return `<div class="rowi ${had?"":"locked"} ${i===bookCur?"cur":""} ${t?"q"+t:""}" data-i="${i}">
-      <div class="ic">${known?c.icon:"❔"}</div><div class="nm">${label}${had?"":` <span style="color:var(--ink-l);font-weight:500">未収穫</span>`}</div></div>`;
+  let gotAll=0, allEntries=0;
+  for(const c of BOOK_CROPS) for(let t=0;t<3;t++){ allEntries++; if(qCount(c.id,t)>0) gotAll++; }
+  $("g-bookRate").textContent=`図鑑 ${gotAll} / ${allEntries} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
+  $("g-bookList").innerHTML=BOOK_CROPS.map((c,i)=>{
+    const known=isUnlocked(c)||S.harvestBy[c.id]>0;
+    const marks=[0,1,2].map(t=>`<span class="qm${qCount(c.id,t)>0?" on":""}">${t?QUALITY[t].mark:"・"}</span>`).join("");
+    return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}" data-i="${i}">
+      <div class="ic">${known?ico(c):"❔"}</div>
+      <div class="nm">${known?c.name:"？？？"}</div>
+      <div class="qmarks">${marks}</div></div>`;
   }).join("");
-  const {c,t}=BOOK[bookCur];
+  const c=BOOK_CROPS[bookCur], t=bookTier;
   const known=isUnlocked(c)||S.harvestBy[c.id]>0, n=qCount(c.id,t), total=S.harvestBy[c.id]||0;
   if(!known){
     $("g-bookDetail").innerHTML=`<div class="bic">❔</div><div class="bnm">？？？</div>
@@ -4053,7 +4332,8 @@ function renderBook(){
       : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
     $("g-bookDetail").innerHTML=`
-      <div class="bic q${t}">${c.icon}${t?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
+      <div class="btabs">${[0,1,2].map(q=>`<span class="btab${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}">${q?QUALITY[q].mark:"ふつう"}</span>`).join("")}</div>
+      <div class="bic q${t}">${ico(c)}${t?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
       <div class="bnm">${qName(c.id,t)}</div>
       <dl>
         <dt>この品質の収穫</dt><dd>${fmtNum(n)}個</dd>
@@ -4068,15 +4348,14 @@ function renderBook(){
 function bookKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
-  const N=BOOK.length;
+  const N=BOOK_CROPS.length;
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
     bookCur=(bookCur+(k==="ArrowDown"?1:-1)+N)%N;
     sfx.cursor(); renderBook();
-  }else if(k==="ArrowLeft"||k==="ArrowRight"){
+  }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
-    const crop=Math.floor(bookCur/3), t=bookCur%3, C=CROPS.length;
-    bookCur=((crop+(k==="ArrowRight"?1:-1)+C)%C)*3+t;
+    bookTier=(bookTier+(k==="ArrowRight"?1:-1)+3)%3;
     sfx.tab(); renderBook();
   }
 }
@@ -4135,13 +4414,15 @@ function onKey(e){
   }
   if(modal==="shop"){ shopKey(e); return; }
   if(modal==="gacha"){ gachaKey(e); return; }
+  if(modal==="treas"){ treasKey(e); return; }
   if(modal==="book"){ bookKey(e); return; }
   if(modal==="rank"){ if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); } else if(e.key==="Enter"){ e.preventDefault(); submitRank(); } return; }
   if(e.ctrlKey||e.metaKey||e.altKey) return;
   const k=e.key;
   if(k==="Process"){ toast("入力モードを半角英数にしてください","warn"); return; }
   if(k==="Tab"){ e.preventDefault(); openModal("shop"); return; }
-  if(k==="8"){ e.preventDefault(); openModal("gacha"); return; }
+  if(k==="7"){ e.preventDefault(); openModal("gacha"); return; }
+  if(k==="8"){ e.preventDefault(); openModal("treas"); return; }
   if(k===" "){ e.preventDefault(); openModal("book"); return; }
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
   if(k==="Escape"){ backToTitle(); return; }
@@ -4158,6 +4439,7 @@ function onKey(e){
 root.querySelectorAll(".slot").forEach(s=>s.addEventListener("click",()=>setTool(+s.dataset.tool)));
 $("g-shopBtn").addEventListener("click",()=>openModal("shop"));
 $("g-gachaBtn").addEventListener("click",()=>openModal("gacha"));
+$("g-treasBtn").addEventListener("click",()=>openModal("treas"));
 $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
@@ -4178,7 +4460,11 @@ function enter(){
     toast("ようこそ。クワ(2)で耕し、種(4)を植え、じょうろ(3)で水をあげましょう","good",6000);
   }
   const dayCrop=CROPS.find(c=>c.day===today());
-  if(dayCrop) toast(`今日は${DAY_NAMES[today()]}曜。お店に ${dayCrop.icon} ${dayCrop.name}の種 が並んでいます`,"good",4600);
+  const todayKey=new Date().toDateString();
+  if(dayCrop && S.dayNotice!==todayKey){        // 同じ日に何度入っても一度だけ
+    S.dayNotice=todayKey; save();
+    toast(`今日は${DAY_NAMES[today()]}曜。お店に ${dayCrop.icon} ${dayCrop.name}の種 が並んでいます`,"good",4600);
+  }
   consumeInbox();   // まだ受け取っていない分があれば受け取る
   flushInboxReport();
   reportVillagers();
