@@ -831,6 +831,120 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
   color:#e0a800; text-shadow:0 1px 0 #fff;
 }
 
+/* ---- 庭: 種ガチャ ---- */
+#screen-garden .gacha{display:grid; grid-template-columns:auto 1fr; gap:1.1rem; align-items:start; padding:.4rem 0 .2rem}
+#screen-garden .gleft{text-align:center; width:150px}
+/* ガチャガチャ本体 */
+#screen-garden .gmachine{width:132px; margin:0 auto}
+#screen-garden .gmachine.shake{animation:g-gshake .36s ease-in-out infinite}
+@keyframes g-gshake{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+#screen-garden .gdome{
+  position:relative; height:92px; border-radius:66px 66px 14px 14px; overflow:hidden;
+  background:linear-gradient(160deg, rgba(255,255,255,.85), rgba(210,235,245,.5) 45%, rgba(160,200,220,.55));
+  box-shadow:inset -8px -6px 14px rgba(70,110,130,.25), inset 6px 6px 12px rgba(255,255,255,.9), 0 3px 0 #9a7a4e;
+  border:3px solid #c89a5e; border-bottom:none;
+}
+#screen-garden .gb{position:absolute; width:26px; height:26px; border-radius:50%; box-shadow:inset -3px -4px 6px rgba(0,0,0,.25), inset 3px 3px 5px rgba(255,255,255,.7)}
+#screen-garden .gb.b1{background:#e2589b; left:12px; bottom:6px}
+#screen-garden .gb.b2{background:#e3c341; left:40px; bottom:4px}
+#screen-garden .gb.b3{background:#4f9ed6; left:68px; bottom:8px}
+#screen-garden .gb.b4{background:#a274d8; left:26px; bottom:32px}
+#screen-garden .gb.b5{background:#e4903a; left:56px; bottom:34px}
+#screen-garden .gb.b6{background:#7fc46a; left:40px; bottom:60px}
+#screen-garden .gneck{height:10px; background:linear-gradient(180deg,#c89a5e,#9a7a4e); border-radius:2px}
+#screen-garden .gbody{
+  position:relative; height:66px; border-radius:6px 6px 10px 10px;
+  background:linear-gradient(180deg,#d9573f,#a8341f);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.3), 0 4px 0 #6f2214;
+}
+#screen-garden .gknob{
+  position:absolute; left:50%; top:14px; transform:translateX(-50%);
+  width:26px; height:26px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff6d8, #e3c341 60%, #a8801c);
+  box-shadow:0 2px 0 rgba(0,0,0,.35);
+}
+#screen-garden .gmachine.shake .gknob{animation:g-gknob .36s linear infinite}
+@keyframes g-gknob{to{transform:translateX(-50%) rotate(360deg)}}
+#screen-garden .gout{
+  position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+  width:52px; height:20px; border-radius:4px; background:#2b1a12;
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.6);
+}
+#screen-garden .gcost{margin-top:.6rem; font-weight:700; font-size:.88rem; line-height:1.6}
+#screen-garden .gcost b{font-size:1.05rem}
+#screen-garden .gcost small{display:block; color:var(--ink-l); font-size:.75rem}
+#screen-garden .gtotal{color:var(--ink-l); font-size:.8rem; margin-top:.3rem}
+/* 確率表 */
+#screen-garden .grates{display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:.7rem}
+#screen-garden .grate{
+  border:2px solid var(--rc); border-radius:7px; padding:.2rem .5rem; background:#fff;
+  font-size:.8rem; display:flex; align-items:baseline; gap:.3rem;
+}
+#screen-garden .grate b{color:var(--rc); font-size:.9rem}
+#screen-garden .grate small{color:var(--ink-l); font-size:.7rem}
+/* 出た種のカード */
+#screen-garden .gcards{display:flex; flex-wrap:wrap; gap:.4rem; min-height:11rem; align-content:flex-start}
+#screen-garden .gempty{color:var(--ink-l); font-size:.9rem; padding:1rem .2rem}
+#screen-garden .gcard{
+  position:relative; width:5.1rem; height:5.6rem; border-radius:9px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem;
+  background:linear-gradient(180deg,#fff,#f1e8d4); border:2px solid #cbbb99;
+}
+#screen-garden .gcard .gtag{
+  position:absolute; top:-1px; left:-1px; padding:.05rem .35rem; font-size:.62rem; font-weight:800;
+  color:#fff; border-radius:7px 0 7px 0; background:#8f9bab;
+}
+#screen-garden .gcard .gic{font-size:2rem; line-height:1}
+#screen-garden .gcard .gnm{font-size:.68rem; font-weight:700; text-align:center; line-height:1.2; padding:0 .15rem}
+#screen-garden .gcard .gnew{
+  position:absolute; right:-4px; top:-6px; background:#d9573f; color:#fff;
+  font-size:.58rem; font-weight:800; padding:.1rem .3rem; border-radius:999px; transform:rotate(8deg);
+}
+#screen-garden .gcard.R{border-color:#4f9ed6} #screen-garden .gcard.R .gtag{background:#4f9ed6}
+#screen-garden .gcard.SR{border-color:#a274d8; box-shadow:0 0 10px rgba(162,116,216,.45)} #screen-garden .gcard.SR .gtag{background:#a274d8}
+#screen-garden .gcard.HR{border-color:#e4903a; box-shadow:0 0 14px rgba(228,144,58,.55)} #screen-garden .gcard.HR .gtag{background:#e4903a}
+#screen-garden .gcard.UR{
+  border-color:#e3c341; box-shadow:0 0 20px rgba(227,195,65,.75);
+  background:linear-gradient(180deg,#fffdf0,#f7e9b8);
+}
+#screen-garden .gcard.UR .gtag{background:#e3c341}
+#screen-garden .gcard.GSR{
+  border-color:#e2589b; box-shadow:0 0 24px rgba(226,88,155,.8);
+  background:linear-gradient(145deg,#fff0f7,#f7dced 45%,#e9e2ff);
+}
+#screen-garden .gcard.GSR .gtag{background:linear-gradient(90deg,#e2589b,#9b6ce0)}
+#screen-garden .gcard.pop{animation:g-gpop .34s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes g-gpop{0%{transform:scale(.4) rotate(-8deg); opacity:0}100%{transform:none; opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  #screen-garden .gmachine.shake, #screen-garden .gmachine.shake .gknob, #screen-garden .gcard.pop{animation:none}
+}
+
+/* ---- 庭: ガチャ画面とアイテムリスト ---- */
+#screen-garden .tbtn.gacha{background:linear-gradient(180deg,#f3e0ff,#e0c2f5); border-color:#8a5ab8; box-shadow:0 3px 0 #8a5ab8}
+#screen-garden .gachapanel{width:min(820px,95vw)}
+#screen-garden .gbody-scroll{max-height:62vh; overflow:auto; padding-right:.2rem}
+#screen-garden .glist{margin-top:1rem; border-top:1px solid #e3d7bd; padding-top:.7rem}
+#screen-garden .gsec{margin-bottom:.7rem}
+#screen-garden .gsechead{
+  display:flex; align-items:baseline; gap:.5rem; margin-bottom:.35rem;
+  border-left:5px solid var(--rc); padding-left:.5rem;
+}
+#screen-garden .gsechead b{color:var(--rc); font-size:1rem}
+#screen-garden .gsechead span{font-size:.82rem; color:var(--ink-l)}
+#screen-garden .gsechead small{margin-left:auto; font-size:.78rem; color:var(--ink-l)}
+#screen-garden .gitems{display:flex; flex-wrap:wrap; gap:.4rem}
+#screen-garden .gitem{
+  position:relative; width:4.6rem; height:4.9rem; border-radius:8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem;
+  background:linear-gradient(180deg,#fff,#f6efdf); border:2px solid var(--rc);
+}
+#screen-garden .gitem .gi{font-size:1.7rem; line-height:1}
+#screen-garden .gitem .gin{font-size:.62rem; font-weight:700; text-align:center; line-height:1.15; padding:0 .1rem}
+#screen-garden .gitem .gic2{position:absolute; right:.2rem; bottom:.1rem; font-size:.6rem; color:var(--ink-l); font-weight:700}
+#screen-garden .gitem.locked{background:linear-gradient(180deg,#efe7d6,#ded3bc); border-style:dashed}
+#screen-garden .gitem.locked .gi{filter:brightness(0); opacity:.32}
+#screen-garden .gitem.locked .gin{color:var(--ink-l)}
+
 /* カウントダウン */
 #countdown{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -1037,6 +1151,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       <div class="rate" id="g-rate"></div>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
+      <button class="tbtn gacha" id="g-gachaBtn">ガチャ<span class="kb">8</span></button>
       <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
       <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
@@ -1072,7 +1187,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 
     <p class="help">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
-      <b>Tab</b> お店 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
+      <b>Tab</b> お店 ・ <b>8</b> ガチャ ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
@@ -1092,6 +1207,19 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       </div>
       <div id="g-shopBody" class="plist"></div>
       <div class="keyhint" id="g-shopHint"></div>
+    </div>
+  </div>
+
+  <!-- 種ガチャ -->
+  <div class="modal" id="g-gacha">
+    <div class="panel gachapanel">
+      <div class="phead">
+        <h2>種ガチャ</h2>
+        <div class="money">🔩 <span id="g-gachaMoney">0</span><small>ネジ</small></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <div id="g-gachaBody" class="gbody-scroll"></div>
+      <div class="keyhint" id="g-gachaHint"></div>
     </div>
   </div>
 
@@ -1355,7 +1483,7 @@ const WORDS_NORMAL = [
   { t: "パンパンですよパンパン", k: "ぱんぱんですよぱんぱん" },
   { t: "足長いアピール", k: "あしながいあぴーる" },
   { t: "座高高いアピール", k: "ざこうたかいあぴーる" },
-  { t: "ちゅっ、足長くてごめん", k: "ちゅっ、あしながくてごめん" },
+  { t: "Chu！足長くてごめん", k: "Chu！あしながくてごめん" },
   { t: "朝までそれ正解", k: "あさまでそれせいかい" },
   { t: "そこに10がありました", k: "そこに10がありました" },
   { t: "infoss再履", k: "infossさいり" },
@@ -2649,8 +2777,10 @@ const CROW_CHANCE   = 0.5;      // 狙われたときに実際に持っていか
 const CROW_INTERVAL = 24*HOUR;  // 同じ畑にカラスが来る間隔
 const FERT_BOOST    = 0.25;     // 肥料1つで進む割合(必要時間の25%)
 const REVERT_AFTER  = 24*HOUR;  // 何も植えずに放っておくと、耕した土はこの時間で草むらに戻る
-const VIL_COST      = 3000;     // 村人1人を雇う値段(にんじん専門)
-const VIL_SLOTS     = 5;        // 村人1人が世話できる区画数
+const VIL_COST      = 5000;     // 村人1人を雇う値段(にんじん専門)
+/* 村人の入荷条件: お店の中でいちばん厳しく、最後に解放される */
+const VIL_UNLOCK    = { sales:50000, harvest:1000, fields:3 };
+const VIL_SLOTS     = 9;        // 村人1人が世話できる区画数(27区画=3人でちょうど埋まる)
 const RANK_PATH     = "nejiuchi/garden";   // 番付(Firebase)の保存先
 
 /* 畑の区画(キーボードの並び)
@@ -2681,33 +2811,91 @@ function around(k,area){
    unlock: 店に並ぶ条件 {sales:累計売上, fields:畑の枚数, harvest:累計収穫数}
    desc: お店での一言 / lore: 図鑑の説明文(初めて収穫すると読める) */
 const CROPS = [
-  { id:"carrot", name:"にんじん", icon:"🥕", cost:5, hours:6, price:12,
+  { id:"carrot", r:"N", name:"にんじん", icon:"🥕", cost:5, hours:6, price:12,
     desc:"最初の一本。6時間で抜ける手軽さ。",
     lore:"ネジ抜きの庭で最初に抜かれるもの。引き抜くときの手応えがネジに似ていると言い出した者がいて、それ以来この庭では「一本目」と呼ばれている。" },
-  { id:"potato", name:"じゃがいも", icon:"🥔", cost:10, hours:12, price:26,
+  { id:"potato", r:"N", name:"じゃがいも", icon:"🥔", cost:10, hours:12, price:26,
     desc:"半日で育つ。地味だが裏切らない。",
     lore:"掘るまで何個ついているか分からない。期待しすぎず、がっかりもしない。庭仕事の心構えは全部こいつから教わった。" },
-  { id:"tomato", name:"トマト", icon:"🍅", cost:20, hours:24, price:55,
+  { id:"tomato", r:"N", name:"トマト", icon:"🍅", cost:20, hours:24, price:55,
     unlock:{sales:100}, desc:"赤くなるまで一日。",
     lore:"一日かけて赤くなる。朝に植えて、夜にネジ打ちで時間を進めて、寝る前に収穫する。そういう生活リズムを作った元凶。" },
-  { id:"corn", name:"とうもろこし", icon:"🌽", cost:40, hours:36, price:110,
+  { id:"corn", r:"N", name:"とうもろこし", icon:"🌽", cost:40, hours:36, price:110,
     unlock:{sales:400}, desc:"背が伸びるほど嬉しくなる。",
     lore:"キーボードの上で一番背が高くなる作物。隣の区画を覗き込むように育つので、置き場所を考えるのが楽しい。" },
-  { id:"eggplant", name:"なす", icon:"🍆", cost:60, hours:48, price:170,
+  { id:"eggplant", r:"R", name:"なす", icon:"🍆", cost:60, hours:48, price:170,
     unlock:{fields:2}, desc:"畑を広げた人のための夏野菜。",
     lore:"畑を二枚持った者だけが種を買える。広い畑を見渡して「なすでも植えるか」と言えるのは、ちょっとした贅沢である。" },
-  { id:"strawberry", name:"いちご", icon:"🍓", cost:120, hours:72, price:360,
+  { id:"strawberry", r:"R", name:"いちご", icon:"🍓", cost:120, hours:72, price:360,
     unlock:{sales:2000}, desc:"三日待つ価値のある甘さ。",
     lore:"三日待つ。その間に何度水をやり忘れたかで、甘さが変わると信じている者もいる(実際は変わらない)。" },
-  { id:"pumpkin", name:"かぼちゃ", icon:"🎃", cost:250, hours:96, price:780,
+  { id:"pumpkin", r:"SR", name:"かぼちゃ", icon:"🎃", cost:250, hours:96, price:780,
     unlock:{sales:5000, fields:2}, desc:"四日かけて重たく育つ。",
     lore:"四日かけて、区画いっぱいに膨らむ。収穫した日はなんとなく打鍵が丁寧になる。重いものを持った後の手のように。" },
-  { id:"melon", name:"メロン", icon:"🍈", cost:600, hours:120, price:1900,
+  { id:"melon", r:"HR", name:"メロン", icon:"🍈", cost:600, hours:120, price:1900,
     unlock:{sales:15000, fields:3}, desc:"五日がかりの高級品。",
     lore:"五日がかりの高級品。網目が一本ずつ入っていく様子を、スプリンクラーの音を聞きながら眺めるのが通の楽しみ方。" },
-  { id:"nejitree", name:"ネジの木", icon:"🔩", cost:2000, hours:168, price:7000,
+  { id:"nejitree", r:"UR", name:"ネジの木", icon:"🌳", cost:2000, hours:168, price:7000,
     unlock:{sales:50000, harvest:300}, desc:"一週間で実るネジ。抜くのが本業。",
     lore:"一週間かけて、枝先に一本のネジが実る。抜いたネジを植えるとネジが実る。この庭がネジ抜きの庭と呼ばれる理由の、最後のひとつ。" },
+
+  /* ここから下は曜日限定の種(day: 0=日 1=月 … 6=土 の曜日だけお店に並ぶ) */
+  { id:"mushroom", day:1, name:"マッシュルーム", icon:"🍄", cost:60, hours:10, price:150,
+    desc:"月曜限定。月の出ている間に生える。",
+    lore:"月曜の朝、畑を見ると勝手に生えている。誰も植えた覚えがないのに、毎週きちんと数が揃っている。" },
+  { id:"paprika", day:2, name:"ファイアパプリカ", icon:"🫑", cost:240, hours:26, price:620,
+    desc:"火曜限定。かじると口の中で火が出る(比喩)。",
+    lore:"火曜だけ入荷する。辛くはないのに、食べた者はなぜか一日中しゃべり続ける。" },
+  { id:"watermelon", day:3, name:"すいか", icon:"🍉", cost:450, hours:55, price:1200,
+    desc:"水曜限定。水をたっぷり抱えて育つ。",
+    lore:"重さのほとんどが水。水やりを一度でも切らすと、叩いたときの音でばれる。" },
+  { id:"apple", day:4, name:"りんご", icon:"🍎", cost:340, hours:48, price:900,
+    desc:"木曜限定。木になるものはこれだけ。",
+    lore:"この庭で唯一、木のまま実る。収穫のときだけ少し見上げることになる。" },
+  { id:"kumquat", day:5, name:"金柑", icon:"🍊", cost:560, hours:64, price:1500,
+    desc:"金曜限定。小さいのに値が張る。",
+    lore:"金曜の夕方に穫れると値が跳ねる、という言い伝えがある。実際の売値は変わらない。" },
+  { id:"sweetpotato", day:6, name:"さつまいも", icon:"🍠", cost:120, hours:18, price:300,
+    desc:"土曜限定。土の中でじっくり甘くなる。",
+    lore:"土曜の畑仕事の後に焼くのが決まり。焼く係は毎回じゃんけんで決めている。" },
+  { id:"sunflower", day:0, name:"ひまわり", icon:"🌻", cost:190, hours:20, price:480,
+    desc:"日曜限定。種ごと売れる。",
+    lore:"日曜の畑に一本立っているだけで、その週の畑仕事が少し楽しくなる。種は来週の楽しみ。" },
+
+  /* ここから下は種ガチャでしか手に入らない作物 */
+  { id:"chili", r:"R", gacha:true, name:"とうがらし", icon:"🌶️", cost:0, hours:30, price:220,
+    desc:"ガチャ限定。辛さは畑仕事の目覚まし。",
+    lore:"収穫のとき、うっかり目をこすった者は一日使い物にならない。それでも毎年植えられている。" },
+  { id:"cucumber", r:"R", gacha:true, name:"きゅうり", icon:"🥒", cost:0, hours:40, price:300,
+    desc:"ガチャ限定。まっすぐ伸びると気持ちがいい。",
+    lore:"まっすぐ伸びた一本を抜いたときの気分は、うまく打ち切れた長文とよく似ている。" },
+  { id:"broccoli", r:"SR", gacha:true, name:"ブロッコリー", icon:"🥦", cost:0, hours:60, price:700,
+    desc:"ガチャ限定。小さな粒の集まりで一つ。",
+    lore:"よく見ると、小さな粒が集まって一つの形になっている。ひとつずつの打鍵が記録になるのと同じ。" },
+  { id:"avocado", r:"SR", gacha:true, name:"アボカド", icon:"🥑", cost:0, hours:110, price:900,
+    desc:"ガチャ限定。熟すまでがとにかく長い。",
+    lore:"食べ頃を見極められた試しがない。それでも毎回、今度こそと思って収穫している。" },
+  { id:"pineapple", r:"HR", gacha:true, name:"パイナップル", icon:"🍍", cost:0, hours:80, price:1700,
+    desc:"ガチャ限定。短い期間で高く売れる。",
+    lore:"葉の先がとがっていて、抜くときに手袋がいる。それでも短い日数で実るので人気がある。" },
+  { id:"grape", r:"HR", gacha:true, name:"ぶどう", icon:"🍇", cost:0, hours:130, price:2200,
+    desc:"ガチャ限定。房ごと実る。",
+    lore:"一粒ずつ数えた者がいる。数え終わる前に食べてしまい、結局この庭では誰も正確な数を知らない。" },
+  { id:"dragonfruit", r:"UR", gacha:true, name:"ドラゴンフルーツ", icon:"🐉", cost:0, hours:150, price:6500,
+    desc:"ガチャ限定。夜にだけ花が開く。",
+    lore:"花が開くのは夜の数時間だけ。深夜テンションで畑を見に来た者だけが、その瞬間に出会える。" },
+  { id:"lychee", r:"UR", gacha:true, name:"月光ライチ", icon:"🌙", cost:0, hours:190, price:7500,
+    desc:"ガチャ限定。月の光で実が透ける。",
+    lore:"満月の晩に収穫すると、実の中身がうっすら透けて見える。見えたと言い張る者が三人いる。" },
+  { id:"butternut", r:"GSR", gacha:true, name:"バターナッツかぼちゃ", icon:"🧈", cost:0, hours:200, price:14000,
+    desc:"シークレット。ひょうたん型の高級かぼちゃ。",
+    lore:"ひょうたんのような形で、切ると濃い橙色。この庭に来た者のうち、実物を見たことがある者はごくわずか。" },
+  { id:"romanesco", r:"GSR", gacha:true, name:"ロマネスコ", icon:"🌀", cost:0, hours:220, price:16000,
+    desc:"シークレット。渦がどこまでも続く。",
+    lore:"小さな渦が、同じ形の渦でできている。見つめていると時間を忘れる。畑仕事が止まるので注意。" },
+  { id:"shadowqueen", r:"GSR", gacha:true, name:"シャドークイーン", icon:"🌑", cost:0, hours:240, price:20000,
+    desc:"シークレット。土の中で紫に染まる。",
+    lore:"掘り出すまで何色か分からない。切った瞬間の濃い紫を見るために、十日を待つ価値がある。" },
 ];
 const CROP = Object.fromEntries(CROPS.map(c=>[c.id,c]));
 
@@ -2741,6 +2929,42 @@ const LORE_Q = {
                "網目の一本一本に迷いがない。五日を百回重ねた者にだけ許された香り。"],
   nejitree:   ["実ったネジの溝がまっすぐ切れている。抜くのが気持ちいい。",
                "締めても抜いても手応えが変わらない、理想のネジ。ネジ抜きの庭の、終わりのない終わり。"],
+  mushroom:   ["かさの開きが揃ってきた。月曜の朝が少し楽しみになる。",
+               "百本目。もはや畑のほうから、月曜になると生やしてくれている気がする。"],
+  paprika:    ["色つやが増して、切ると中まで赤い。",
+               "百個目。火曜の食卓が、この一個で決まるようになった。"],
+  watermelon: ["叩いた音が澄んできた。水を切らさなかった証拠。",
+               "百個目。音だけで食べ頃の日が当たる。水曜の名人と呼ばれている。"],
+  apple:      ["赤みが増して、枝ぶりも落ち着いてきた。",
+               "百個目。木曜の朝、見上げるだけで今日穫るべき実がわかる。"],
+  kumquat:    ["皮が薄く、香りが強くなった。",
+               "百個目。小さな実ひとつに、金曜の夕日が閉じ込められている。"],
+  sweetpotato:["形が太く、甘みが乗ってきた。",
+               "百本目。焼く係を巡るじゃんけんが、年々本気になっている。"],
+  sunflower:  ["花が大きく、種がぎっしり詰まるようになった。",
+               "百本目。畑の端に並べて植えると、日曜だけ壁のようになる。"],
+  chili:      ["色が濃くなり、香りだけで辛さが分かるようになった。",
+               "百本目。触れずに収穫する方法を、この庭の者は自然と身につけている。"],
+  cucumber:   ["曲がりが減り、太さが揃ってきた。並べると気持ちがいい。",
+               "水を切らさなかった日数が、そのまま真っ直ぐさになる。百本並べても一本も曲がっていない。"],
+  broccoli:   ["粒が締まって、房の形が丸くなった。",
+               "どこを切っても同じ形が現れる。百株育てた者だけが気づく、静かな規則。"],
+  avocado:    ["食べ頃の見極めが少しずつ当たるようになってきた。",
+               "触れば分かる。百個目にしてようやく、熟す前の一日を言い当てられるようになった。"],
+  pineapple:  ["葉の反りが揃い、香りが強くなった。",
+               "切り口から蜜がにじむ。短い日数で、ここまで甘くできることを誰も信じない。"],
+  grape:      ["粒の大きさが揃い、房がずっしりしている。",
+               "先端の粒まで甘い。百房目にして、この庭の名物と呼ばれるようになった。"],
+  dragonfruit:["花の咲く時刻が読めるようになってきた。",
+               "夜に畑へ出るのが習慣になった頃、実の赤が深くなっていることに気づく。"],
+  lychee:     ["殻が薄く、月の光をよく通すようになった。",
+               "百個目。透けた実の向こうに月が見える、と言い張る者が四人に増えた。"],
+  butternut:  ["形の反りが美しく揃ってきた。",
+               "百個目。もはや作物というより、置物として飾りたくなる完成度。"],
+  romanesco:  ["渦の巻きが細かく、深くなった。",
+               "百株目。渦の奥にまだ渦がある。見つめる時間が一番長い作物。"],
+  shadowqueen:["紫が濃くなり、皮まで艶が出た。",
+               "百個目。掘り出した瞬間に黒く光る。この庭の最後の到達点。"],
 };
 
 /* じょうろ(水が保つ時間) */
@@ -2782,7 +3006,7 @@ function newState(){
     fields:[makeField()], cur:0,
     tool:1, seedId:"carrot", objSel:"spr",
     seeds:{ carrot:4 }, inv:{}, canLv:1, hoeLv:1, fert:0, objs:{},
-    harvestBy:{}, harvestQ:{}, known:["carrot","potato"], lastCrow:[],
+    harvestBy:{}, harvestQ:{}, got:{}, gachaCount:0, known:["carrot","potato"], lastCrow:[],
     lastTick:Date.now(), created:Date.now(),
     fromTypingMin:0, fromTypingScrews:0,
     villagers:0, vLog:{},
@@ -2814,7 +3038,7 @@ function normalize(o){
   s.rankName=s.rankName||"";
   // 収穫かごを品質別に([ふつう, ☆, ☆☆])
   for(const id of Object.keys(s.inv)){ if(typeof s.inv[id]==="number") s.inv[id]=[s.inv[id],0,0]; }
-  s.harvestQ=s.harvestQ||{};
+  s.harvestQ=s.harvestQ||{}; s.got=s.got||{}; s.gachaCount=s.gachaCount||0;
   for(const id of Object.keys(s.harvestBy)){ if(!s.harvestQ[id]) s.harvestQ[id]=[s.harvestBy[id],0,0]; }
   // P を案山子置き場に。P にあったものは手持ちに戻し、ほかの区画の案山子は P へ移す
   for(const f of s.fields){
@@ -3091,7 +3315,13 @@ function meets(u){
   if(u.harvest && S.totalHarvest<u.harvest) return false;
   return true;
 }
-const isUnlocked = c => meets(c.unlock);
+const DAY_NAMES=["日","月","火","水","木","金","土"];
+const today = () => new Date().getDay();
+const isUnlocked = c =>
+  c.gacha ? (S.got && S.got[c.id]>0)
+  : (c.day!=null ? c.day===today() : meets(c.unlock));
+const gachaText = () => "種ガチャから出ます";
+const dayText = c => `毎週${DAY_NAMES[c.day]}曜だけお店に並びます`;
 function unlockText(u){
   const a=[];
   if(u.sales)   a.push(`累計売上 ${fmtNum(u.sales)}ネジ`);
@@ -3102,9 +3332,10 @@ function unlockText(u){
 /* 新しく店に並んだものを知らせる */
 function checkUnlocks(){
   const items=[
-    ...CROPS.map(c=>({key:c.id, ok:isUnlocked(c), label:`${c.icon} ${c.name}の種`})),
+    ...CROPS.filter(c=>!c.gacha && c.day==null).map(c=>({key:c.id, ok:isUnlocked(c), label:`${c.icon} ${c.name}の種`})),
     {key:"fert", ok:meets(FERT.unlock), label:`${FERT.icon} ${FERT.name}`},
     ...OBJ_ORDER.map(id=>({key:"obj:"+id, ok:meets(OBJS[id].unlock), label:`${OBJS[id].icon} ${OBJS[id].name}`})),
+    {key:"vil", ok:meets(VIL_UNLOCK), label:"👩‍🌾 村人"},
   ];
   for(const it of items){
     if(it.ok && !S.known.includes(it.key)){
@@ -3239,7 +3470,8 @@ function renderBasket(){
 }
 /* 手持ちの種・設置物(1つ以上あるもの) */
 const ownedSeeds=()=>CROPS.filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id);
-const ownedObjs =()=>OBJ_ORDER.filter(id=>(S.objs[id]||0)>0).concat(S.villagers>0?["vil"]:[]);
+const crowPlaced =()=>S.fields.some(f=>f[POST].obj==="crow");
+const ownedObjs =()=>OBJ_ORDER.filter(id=>(S.objs[id]||0)>0 || (id==="crow"&&crowPlaced())).concat(S.villagers>0?["vil"]:[]);
 function renderBar(){
   root.querySelectorAll(".slot").forEach(s=>s.classList.toggle("on", +s.dataset.tool===S.tool));
   $("g-canName").textContent=canInfo().name;
@@ -3257,7 +3489,7 @@ function renderBar(){
   if(!oo.includes(S.objSel) && oo.length) S.objSel=oo[0];
   const on=S.objs[S.objSel]||0;
   if(S.objSel==="vil" && S.villagers>0){ $("g-objIc").textContent="👩‍🌾"; $("g-objNm").textContent="村人"; $("g-objCnt").textContent=`あと${vilFree()}区画`; }
-  else if(on>0){ const o=OBJS[S.objSel]; $("g-objIc").textContent=o.icon; $("g-objNm").textContent=o.name; $("g-objCnt").textContent="×"+on; }
+  else if(on>0 || (S.objSel==="crow"&&crowPlaced())){ const o=OBJS[S.objSel]; $("g-objIc").textContent=o.icon; $("g-objNm").textContent=o.name; $("g-objCnt").textContent=on>0?("×"+on):"(回収できます)"; }
   else    { $("g-objIc").textContent="📦"; $("g-objNm").textContent="設置物なし"; $("g-objCnt").textContent=""; }
   $("g-fieldNo").textContent=S.cur+1; $("g-fieldMax").textContent=S.fields.length;
   $("g-money").textContent=fmtNum(S.money);
@@ -3284,9 +3516,9 @@ function act(k){
   tick();
   const f=field(), p=f[k];
   selKey=k;
-  // P(案山子置き場)は、案山子を置く・拾うだけ
-  if(p.s==="post" && !(S.tool===1 && p.obj) && !(S.tool===6 && S.objSel==="crow")){
-    nope(k,"P は案山子置き場です。6 で案山子を持って置けます");
+  // P(案山子置き場)で触れるのは案山子だけ。収穫のときに誤って外さないよう、素手では回収できない
+  if(p.s==="post" && !(S.tool===6 && S.objSel==="crow")){
+    nope(k, p.obj ? "案山子を回収するには 6 で案山子を持って押します" : "P は案山子置き場です。6 で案山子を持って置けます");
     save(); renderAll(); return;
   }
   // 村人の区画は、肥料と「村人を外す」以外は触れない
@@ -3297,6 +3529,7 @@ function act(k){
   switch(S.tool){
     case 1: // 素手: 収穫 / 設置物を拾う
       if(p.obj){
+        if(p.obj==="crow"){ nope(k,"案山子を回収するには 6 で案山子を持って押します"); break; }
         const o=OBJS[p.obj];
         S.objs[p.obj]=(S.objs[p.obj]||0)+1; p.obj=null;
         S.objSel=o.id; floatAt(k,"拾った"); hit(k); sfx.pick();
@@ -3346,10 +3579,12 @@ function act(k){
       if(S.fert<=0){ nope(k,"肥料がありません。Tab でお店へ"); break; }
       if(!p.crop){ nope(k,"作物が植わっていません"); break; }
       if(isRipe(p)){ nope(k,"もう実っています"); break; }
+      if((p.crop.fert||0)>=2){ nope(k,"この作物に肥料はもう2回使っています"); break; }
+      p.crop.fert=(p.crop.fert||0)+1;
       S.fert--;
       grow(p, need(p.crop)*FERT_BOOST, Date.now());
       if(isRipe(p)) p.crop.ripeAt=Date.now();
-      hit(k); floatAt(k,"🍂 ぐんぐん"); sfx.fert();
+      hit(k); floatAt(k,`🍂 ${p.crop.fert}/2`); sfx.fert();
       break;
     }
     case 6: { // 設置: スプリンクラーや案山子を置く / 村人に区画をまかせる
@@ -3372,11 +3607,15 @@ function act(k){
       if(p.vil){ nope(k,"村人が世話をしている区画です"); break; }
       if(id==="crow" && p.s!=="post"){ nope(k,"案山子は P の案山子置き場に置きます"); break; }
       if(id!=="crow" && p.s==="post"){ nope(k,"P には案山子しか置けません"); break; }
+      if(id==="crow" && p.obj==="crow"){    // 置いてある案山子を回収する(素手では外れない)
+        S.objs.crow=(S.objs.crow||0)+1; p.obj=null;
+        floatAt(k,"案山子 回収"); hit(k); sfx.pick();
+        break;
+      }
       const n=S.objs[id]||0;
       if(n<=0){ nope(k,"置けるものがありません。Tab でお店へ"); break; }
       if(p.obj){ nope(k,"もう何か置いてあります"); break; }
       if(p.crop){ nope(k,"作物の上には置けません"); break; }
-      if(id==="crow" && p.obj){ nope(k,"案山子はこの畑にもういます(畑1枚につき1体)"); break; }
       p.obj=id; S.objs[id]=n-1; p.emptySince=0;
       hit(k); floatAt(k,OBJS[id].icon); sfx.place();
       break;
@@ -3408,18 +3647,20 @@ function switchField(dir){
 }
 
 /* ---------- ウィンドウ共通 ---------- */
-let modal=null;   // null | "shop" | "book" | "rank"
+let modal=null;   // null | "shop" | "gacha" | "book" | "rank"
 function openModal(name){
   closeModal(true);
   modal=name;
   sfx.open();
   $("g-"+name).classList.add("open");
   if(name==="shop") renderShop();
+  if(name==="gacha") renderGacha();
   if(name==="book") renderBook();
   if(name==="rank") prepareRank();
 }
 function closeModal(silent){
   if(!modal) return;
+  if(modal==="gacha" && gachaShown<gachaRes.length) gachaSkip();
   if(!silent) sfx.close();
   $("g-"+modal).classList.remove("open");
   const ae=document.activeElement; if(ae && ae.blur) ae.blur();
@@ -3441,12 +3682,16 @@ function shopRows(){
   const btn=(label,ok)=>`<button class="sbtn" ${ok?"":"disabled"} tabindex="-1">${label}</button>`;
   if(shopTab===0){
     for(const c of CROPS){
+      if(c.gacha) continue;   // ガチャ限定の種はお店に並ばない
       const ok=isUnlocked(c), have=S.seeds[c.id]||0;
+      const daily=c.day!=null;
+      if(daily && !ok) continue;      // 曜日限定は、その曜日しかお店に出さない
+      const tag = daily?`<b style="color:var(--shu)">${DAY_NAMES[c.day]}曜限定</b> ・ `:"";
       rows.push({
         locked:!ok,
         ic: ok?c.icon:"❔",
         nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${c.cost}ネジ</span>`:"？？？",
-        ds: ok?`育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}ネジ(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
+        ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}ネジ(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
         keys: ok?`<b>Enter</b> 1つ ${money>=c.cost?"":"(不足)"}<br><b>Shift+Enter</b> 10個`:"",
         enter: ()=>ok && buySeed(c.id,1),
         shift: ()=>ok && buySeed(c.id,10),
@@ -3464,7 +3709,7 @@ function shopRows(){
     const fOk=meets(FERT.unlock);
     rows.push({ locked:!fOk, ic: fOk?FERT.icon:"❔",
       nm: fOk?`${FERT.name} <span style="color:var(--ink-l)">${FERT.cost}ネジ</span>`:"？？？",
-      ds: fOk?`育成中の作物にまくと、必要な時間の${FERT_BOOST*100}%ぶん一気に育ちます(5 で持つ) ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
+      ds: fOk?`育成中の作物にまくと、必要な時間の${FERT_BOOST*100}%ぶん一気に育ちます(5 で持つ)。1つの作物には2回まで ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
       keys: fOk?"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個":"", enter:()=>fOk&&buyFert(1), shift:()=>fOk&&buyFert(10) });
     for(const id of OBJ_ORDER){
       const o=OBJS[id], ok=meets(o.unlock);
@@ -3473,9 +3718,12 @@ function shopRows(){
         ds: ok?`${esc(o.what)}(6 で持って区画に置く) ・ 手持ち ${S.objs[id]||0}`:unlockText(o.unlock),
         keys: ok?"<b>Enter</b> 買う":"", enter:()=>ok&&buyObj(id), shift:()=>ok&&buyObj(id) });
     }
-    rows.push({ ic:"👩‍🌾", nm:`村人 <span style="color:var(--ink-l)">${fmtNum(VIL_COST)}ネジ</span>`,
-      ds:`指定した${VIL_SLOTS}区画で、にんじんを植え・水やり・収穫・売却まで自動で行います。6 で村人を持って区画を押して指定(もう一度押すと外す)。庭を閉じている間の分も、次に開いたときにまとめて処理されます ・ 雇っている村人 ${S.villagers}人(あと ${vilFree()}区画)`,
-      keys:"<b>Enter</b> 雇う", enter:()=>buyVil(), shift:()=>buyVil() });
+    const vOk=meets(VIL_UNLOCK);
+    rows.push({ locked:!vOk, ic: vOk?"👩‍🌾":"❔",
+      nm: vOk?`村人 <span style="color:var(--ink-l)">${fmtNum(VIL_COST)}ネジ</span>`:"？？？",
+      ds: vOk?`指定した${VIL_SLOTS}区画で、にんじんを植え・水やり・収穫・売却まで自動で行います。6 で村人を持って区画を押して指定(もう一度押すと外す)。庭を閉じている間の分も、次に開いたときにまとめて処理されます ・ 雇っている村人 ${S.villagers}人(あと ${vilFree()}区画)`
+            : unlockText(VIL_UNLOCK),
+      keys: vOk?"<b>Enter</b> 雇う":"", enter:()=>vOk&&buyVil(), shift:()=>vOk&&buyVil() });
     const nf=S.fields.length, price=FIELD_PRICES[nf];
     rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}ネジ</span>`:"畑チケット",
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
@@ -3538,6 +3786,7 @@ function spend(cost){
   S.money-=cost; sfx.buy(); return true;
 }
 function buyVil(){
+  if(!meets(VIL_UNLOCK)) return;
   if(!spend(VIL_COST)) return;
   S.villagers++; S.objSel="vil";
   toast(`村人を雇いました。6 で村人を持って、まかせたい区画を${VIL_SLOTS}つ押してください`,"good",5000);
@@ -3608,6 +3857,142 @@ $("g-shopBody").addEventListener("click",e=>{
 });
 root.querySelectorAll("#g-shopTabs .tab").forEach(t=>t.addEventListener("click",()=>{ shopTab=+t.dataset.tab; renderShop(); }));
 
+/* ---------- 種ガチャ ----------
+   N40% / R30% / SR25% / HR3% / UR1.7% / GSR0.3%(シークレット3種は各0.1%)
+   11回引くと、そのうち1つはSR以上が確定する */
+const RARITY={
+  N:  { label:"N",   rate:40,  color:"#8f9bab" },
+  R:  { label:"R",   rate:30,  color:"#4f9ed6" },
+  SR: { label:"SR",  rate:25,  color:"#a274d8" },
+  HR: { label:"HR",  rate:3,   color:"#e4903a" },
+  UR: { label:"UR",  rate:1.7, color:"#e3c341" },
+  GSR:{ label:"GSR", rate:0.3, color:"#e2589b" },
+};
+const RARITY_ORDER=["N","R","SR","HR","UR","GSR"];
+const GACHA_COST1=100, GACHA_COST11=1000;
+const poolOf = r => CROPS.filter(c=>c.r===r);
+function rollRarity(minIdx){
+  const list=RARITY_ORDER.slice(minIdx||0);
+  const total=list.reduce((a,r)=>a+RARITY[r].rate,0);
+  let x=Math.random()*total;
+  for(const r of list){ x-=RARITY[r].rate; if(x<=0) return r; }
+  return list[list.length-1];
+}
+function drawOne(minIdx){
+  const r=rollRarity(minIdx), pool=poolOf(r);
+  return { r, id: pool[Math.floor(Math.random()*pool.length)].id };
+}
+let gachaRes=[], gachaShown=0, gachaTimer=null;
+function drawGacha(n){
+  if(gachaShown<gachaRes.length) return;      // 演出中は引けない
+  const cost = n===11 ? GACHA_COST11 : GACHA_COST1*n;
+  if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return; }
+  S.money-=cost;
+  const res=[];
+  for(let i=0;i<n;i++) res.push(drawOne(0));
+  if(n===11 && !res.some(x=>RARITY_ORDER.indexOf(x.r)>=2)) res[10]=drawOne(2);   // SR以上1つ確定
+  for(const x of res){
+    S.seeds[x.id]=(S.seeds[x.id]||0)+1;
+    if(!(S.got[x.id]>0)) x.isNew=true;
+    S.got[x.id]=(S.got[x.id]||0)+1;
+  }
+  S.gachaCount=(S.gachaCount||0)+n;
+  gachaRes=res; gachaShown=0;
+  if(!ownedSeeds().includes(S.seedId)) S.seedId=res[0].id;
+  checkUnlocks(); save();
+  renderGacha();
+  revealNext();
+}
+function revealNext(){
+  clearTimeout(gachaTimer);
+  if(gachaShown>=gachaRes.length){ renderGacha(); renderBar(); save(); return; }
+  gachaShown++;
+  sfxGacha(gachaRes[gachaShown-1].r);
+  renderGacha();
+  gachaTimer=setTimeout(revealNext, 360);
+}
+function gachaSkip(){
+  clearTimeout(gachaTimer);
+  if(!gachaRes.length) return;
+  gachaShown=gachaRes.length;
+  const best=gachaRes.reduce((a,x)=>Math.max(a,RARITY_ORDER.indexOf(x.r)),0);
+  sfxGacha(RARITY_ORDER[best]);
+  renderGacha(); renderBar();
+}
+function sfxGacha(r){
+  const i=RARITY_ORDER.indexOf(r);
+  if(i<=0) beep(760,.06,"sine",.045);
+  else if(i===1) seq([880,1170],60,"sine",.05,.09);
+  else if(i===2) seq([880,1170,1560],70,"square",.05,.1);
+  else if(i===3) seq([1046,1318,1568,2093],70,"square",.055,.12);
+  else seq([784,988,1318,1568,2093,2637],75,"square",.06,.16);
+}
+/* ガチャ画面: 機械・確率・引いた結果・アイテムリスト */
+function renderGacha(){
+  $("g-gachaMoney").textContent=fmtNum(S.money);
+  $("g-gachaBody").innerHTML=gachaHTML()+gachaListHTML();
+  $("g-gachaHint").innerHTML =
+    (gachaShown<gachaRes.length ? "<b>Enter</b> 早送り" : "<b>Enter</b> 1回引く ・ <b>Shift+Enter</b> 11回引く")+
+    " ・ <b>↑ ↓</b> リストを見る ・ <b>8</b> / <b>Esc</b> 閉じる";
+}
+/* アイテムリスト: レア度ごとに、出る作物を並べる。未入手は影だけ見える */
+function gachaListHTML(){
+  return `<div class="glist">`+RARITY_ORDER.map(r=>{
+    const pool=poolOf(r);
+    const got=pool.filter(c=>S.got[c.id]>0 || (!c.gacha && (isUnlocked(c) || S.harvestBy[c.id]>0))).length;
+    return `<div class="gsec" style="--rc:${RARITY[r].color}">
+      <div class="gsechead"><b>${RARITY[r].label}</b><span>${RARITY[r].rate}%</span><small>${got} / ${pool.length}</small></div>
+      <div class="gitems">`+pool.map(c=>{
+        const n=S.got[c.id]||0;
+        // ガチャで引いた作物と、お店で育てて知っている作物は絵が見える
+        const known = n>0 || (!c.gacha && (isUnlocked(c) || S.harvestBy[c.id]>0));
+        return known
+          ? `<div class="gitem"><span class="gi">${c.icon}</span><span class="gin">${c.name}</span>${n>0?`<span class="gic2">×${fmtNum(n)}</span>`:""}</div>`
+          : `<div class="gitem locked"><span class="gi">${c.icon}</span><span class="gin">？？？</span></div>`;
+      }).join("")+`</div></div>`;
+  }).join("")+`</div>`;
+}
+function gachaKey(e){
+  const k=e.key;
+  if(k==="Escape"||k==="8"){ e.preventDefault(); closeModal(); return; }
+  if(k==="Enter"){
+    e.preventDefault();
+    if(gachaShown<gachaRes.length) gachaSkip();
+    else drawGacha(e.shiftKey?11:1);
+    return;
+  }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-gachaBody").scrollBy(0, k==="ArrowDown"?90:-90); }
+}
+function gachaHTML(){
+  const rates=RARITY_ORDER.map(r=>
+    `<div class="grate" style="--rc:${RARITY[r].color}"><b>${RARITY[r].label}</b><span>${RARITY[r].rate}%</span><small>${poolOf(r).length}種</small></div>`).join("");
+  const spinning = gachaShown<gachaRes.length;
+  const cards=gachaRes.slice(0,gachaShown).map((x,i)=>{
+    const c=CROP[x.id];
+    return `<div class="gcard ${x.r}${i===gachaShown-1?" pop":""}">
+      <span class="gtag">${RARITY[x.r].label}</span>
+      <span class="gic">${c.icon}</span>
+      <span class="gnm">${c.name}</span>
+      ${x.isNew?'<span class="gnew">NEW</span>':""}
+    </div>`;
+  }).join("");
+  return `<div class="gacha">
+    <div class="gleft">
+      <div class="gmachine${spinning?" shake":""}">
+        <div class="gdome"><i class="gb b1"></i><i class="gb b2"></i><i class="gb b3"></i><i class="gb b4"></i><i class="gb b5"></i><i class="gb b6"></i></div>
+        <div class="gneck"></div>
+        <div class="gbody"><span class="gknob"></span><span class="gout"></span></div>
+      </div>
+      <div class="gcost">1回 <b>${GACHA_COST1}</b>ネジ<br>11回 <b>${fmtNum(GACHA_COST11)}</b>ネジ<small>SR以上1つ確定</small></div>
+      <div class="gtotal">これまで ${fmtNum(S.gachaCount||0)}回</div>
+    </div>
+    <div class="gright">
+      <div class="grates">${rates}</div>
+      <div class="gcards">${cards||'<div class="gempty">ここに引いた種が出ます</div>'}</div>
+    </div>
+  </div>`;
+}
+
 /* ---------- 図鑑 ----------
    作物ごとに ふつう / ☆ / ☆☆ の3項目(全27項目)。
    その品質を初めて収穫すると、説明文が読めるようになる。
@@ -3629,9 +4014,9 @@ function renderBook(){
   const known=isUnlocked(c)||S.harvestBy[c.id]>0, n=qCount(c.id,t), total=S.harvestBy[c.id]||0;
   if(!known){
     $("g-bookDetail").innerHTML=`<div class="bic">❔</div><div class="bnm">？？？</div>
-      <div class="lore unknown">${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。</div>`;
+      <div class="lore unknown">${c.gacha?`${gachaText()}(レア度 ${c.r})。引き当てると、名前がわかります。`:(c.day!=null?`${dayText(c)}。`:`${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。`)}</div>`;
   }else{
-    const cond = t===0 ? "種を植えて育てれば穫れます"
+    const cond = t===0 ? (c.gacha?`${gachaText()}(レア度 ${c.r})`:(c.day!=null?dayText(c):"種を植えて育てれば穫れます"))
       : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
     $("g-bookDetail").innerHTML=`
@@ -3716,12 +4101,14 @@ function onKey(e){
     return;
   }
   if(modal==="shop"){ shopKey(e); return; }
+  if(modal==="gacha"){ gachaKey(e); return; }
   if(modal==="book"){ bookKey(e); return; }
   if(modal==="rank"){ if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); } else if(e.key==="Enter"){ e.preventDefault(); submitRank(); } return; }
   if(e.ctrlKey||e.metaKey||e.altKey) return;
   const k=e.key;
   if(k==="Process"){ toast("入力モードを半角英数にしてください","warn"); return; }
   if(k==="Tab"){ e.preventDefault(); openModal("shop"); return; }
+  if(k==="8"){ e.preventDefault(); openModal("gacha"); return; }
   if(k===" "){ e.preventDefault(); openModal("book"); return; }
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
   if(k==="Escape"){ backToTitle(); return; }
@@ -3737,6 +4124,7 @@ function onKey(e){
 }
 root.querySelectorAll(".slot").forEach(s=>s.addEventListener("click",()=>setTool(+s.dataset.tool)));
 $("g-shopBtn").addEventListener("click",()=>openModal("shop"));
+$("g-gachaBtn").addEventListener("click",()=>openModal("gacha"));
 $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
@@ -3756,6 +4144,8 @@ function enter(){
     welcomed=true;
     toast("ようこそ。クワ(2)で耕し、種(4)を植え、じょうろ(3)で水をあげましょう","good",6000);
   }
+  const dayCrop=CROPS.find(c=>c.day===today());
+  if(dayCrop) toast(`今日は${DAY_NAMES[today()]}曜。お店に ${dayCrop.icon} ${dayCrop.name}の種 が並んでいます`,"good",4600);
   consumeInbox();   // ネジ打ちで遊んだ分をここで受け取る
   reportVillagers();
   crowVisit();
