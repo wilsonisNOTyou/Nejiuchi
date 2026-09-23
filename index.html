@@ -3643,7 +3643,7 @@ function renderInfo(){
     big=`${selKey} ・ 👩‍🌾 村人が世話をしています`;
     if(p.crop){
       const c=CROP[p.crop.id];
-      sub.push(`${c.icon} ${c.name} 育成 ${Math.floor(p.crop.grown/need(p.crop)*100)}% ・ あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
+      sub.push(`${ico(c)} ${esc(c.name)} 育成 ${Math.floor(p.crop.grown/need(p.crop)*100)}% ・ あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
     }else if(p.vWait){
       const c=CROP[vilCropId()];
       sub.push(`種代(${c?c.cost:"?"}ネジ)が足りず、ネジが貯まるのを待っています`);
@@ -3676,7 +3676,7 @@ function renderInfo(){
     else sub.push(p.wet>now ? `水 あと ${fmtDur(p.wet-now)}` : (p.crop&&!isRipe(p) ? "水切れ — 成長が止まっています" : "水 なし"));
   }
   $("g-infoBig").innerHTML=big;
-  $("g-infoSub").innerHTML=sub.map(esc).join("<br>");
+  $("g-infoSub").innerHTML=sub.join("<br>");
 }
 /* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
 const invN = (id,t) => (S.inv[id]&&S.inv[id][t])||0;
@@ -3705,17 +3705,17 @@ function renderBar(){
   const owned=ownedSeeds();
   if(!owned.includes(S.seedId) && owned.length) S.seedId=owned[0];
   const n=S.seeds[S.seedId]||0;
-  if(n>0){ const c=CROP[S.seedId]; $("g-seedIc").textContent=c.icon; $("g-seedNm").textContent=c.name+"の種"; $("g-seedCnt").textContent="×"+n; }
-  else   { $("g-seedIc").textContent="🌱"; $("g-seedNm").textContent="種がありません"; $("g-seedCnt").textContent=""; }
+  if(n>0){ const c=CROP[S.seedId]; $("g-seedIc").innerHTML=ico(c); $("g-seedNm").textContent=c.name+"の種"; $("g-seedCnt").textContent="×"+n; }
+  else   { $("g-seedIc").innerHTML="🌱"; $("g-seedNm").textContent="種がありません"; $("g-seedCnt").textContent=""; }
   // 肥料
   $("g-fertCnt").textContent="×"+S.fert;
   // 設置物
   const oo=ownedObjs();
   if(!oo.includes(S.objSel) && oo.length) S.objSel=oo[0];
   const on=S.objs[S.objSel]||0;
-  if(S.objSel==="vil" && S.villagers>0){ $("g-objIc").textContent="👩‍🌾"; $("g-objNm").textContent="村人"; $("g-objCnt").textContent=`あと${vilFree()}区画`; }
-  else if(on>0 || (S.objSel==="crow"&&crowPlaced())){ const o=OBJS[S.objSel]; $("g-objIc").textContent=o.icon; $("g-objNm").textContent=o.name; $("g-objCnt").textContent=on>0?("×"+on):"(回収できます)"; }
-  else    { $("g-objIc").textContent="📦"; $("g-objNm").textContent="設置物なし"; $("g-objCnt").textContent=""; }
+  if(S.objSel==="vil" && S.villagers>0){ $("g-objIc").innerHTML="👩‍🌾"; $("g-objNm").textContent="村人"; $("g-objCnt").textContent=`あと${vilFree()}区画`; }
+  else if(on>0 || (S.objSel==="crow"&&crowPlaced())){ const o=OBJS[S.objSel]; $("g-objIc").innerHTML=o.icon; $("g-objNm").textContent=o.name; $("g-objCnt").textContent=on>0?("×"+on):"(回収できます)"; }
+  else    { $("g-objIc").innerHTML="📦"; $("g-objNm").textContent="設置物なし"; $("g-objCnt").textContent=""; }
   $("g-fieldNo").textContent=S.cur+1; $("g-fieldMax").textContent=S.fields.length;
   $("g-money").textContent=fmtNum(S.money);
   $("g-rate").textContent=`ネジ打ち1打で ${minPerKey()}分 進む`;
@@ -3765,7 +3765,7 @@ function act(k){
         if(c.treasure){                        // 貴重品は売れない。持っているだけで庭にずっと効く
           S.treas[c.id]=(S.treas[c.id]||0)+1;
           S.totalHarvest++;
-          floatAt(k,"✨"+c.icon);
+          floatAt(k,"✨"+ico(c));
           toast(`${c.icon} ${c.name} を手に入れました。${c.eff.text}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000);
           sfx.vil();
         }else{
@@ -3775,7 +3775,7 @@ function act(k){
           const first=!((S.harvestQ[c.id]||[])[t]>0);
           S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
           for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
-          floatAt(k,"+"+c.icon+QUALITY[t].mark+(num>1?"×2":""));
+          floatAt(k,"+"+ico(c)+QUALITY[t].mark+(num>1?"×2":""));
           if(first) toast(`${c.icon} ${qName(c.id,t)} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000);
         }
         checkUnlocks();
