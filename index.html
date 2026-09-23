@@ -1002,6 +1002,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
   font-size:.58rem; font-weight:800; padding:.08rem .32rem; border-radius:999px;
 }
 
+#screen-garden .tlore{font-size:.76rem; color:var(--ink-l); line-height:1.6; margin-top:.25rem; border-top:1px dashed #e0d3b8; padding-top:.25rem}
+
 /* カウントダウン */
 #countdown{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -1357,7 +1359,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
     <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkCopyNote"></span><button class="btn primary" id="bkCopy">コピーする (C)</button></div>
     <h3>記録文字列から読み込む</h3>
-    <p class="bk-p">読み込むと、このブラウザにある記録はすべて置き換わります。庭の「記録」でコピーした庭だけの文字列も読み込めます(その場合は庭だけが置き換わります)。</p>
+    <p class="bk-p">読み込むと、このブラウザにある記録はすべて置き換わります。読み込んだあとは自動で画面を読み直します。</p>
     <textarea class="bk-code" id="bkImport" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkImportNote"></span><button class="btn" id="bkLoad">読み込む (Enter)</button></div>
     <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>K</b> / <b>Esc</b> 閉じる</p>
@@ -4445,24 +4447,49 @@ function treasKey(e){
    作物ごとに ふつう / ☆ / ☆☆ の3項目(全27項目)。
    その品質を初めて収穫すると、説明文が読めるようになる。
    ↑↓ で1項目ずつ、← → で作物ごとに移動 */
-const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price);   // 売値の安い順(貴重品は貴重品の画面で見る)
+/* 図鑑: 売値の安い順。貴重品(GHR)は品質が無いので、最後にまとめて並べる */
+const BOOK_CROPS = CROPS.slice().sort((a,b)=>(a.treasure?1:0)-(b.treasure?1:0) || a.price-b.price);
+const bookSeen = c => c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
 let bookCur=0, bookTier=0;
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 const loreOf = (c,t) => t===0 ? c.lore : LORE_Q[c.id][t-1];
 function renderBook(){
   let gotAll=0, allEntries=0;
-  for(const c of BOOK_CROPS) for(let t=0;t<3;t++){ allEntries++; if(qCount(c.id,t)>0) gotAll++; }
+  for(const c of BOOK_CROPS){
+    if(c.treasure){ allEntries++; if(tre(c.id)>0) gotAll++; continue; }
+    for(let t=0;t<3;t++){ allEntries++; if(qCount(c.id,t)>0) gotAll++; }
+  }
   $("g-bookRate").textContent=`図鑑 ${gotAll} / ${allEntries} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
   $("g-bookList").innerHTML=BOOK_CROPS.map((c,i)=>{
-    const known=isUnlocked(c)||S.harvestBy[c.id]>0;
-    const marks=[0,1,2].map(t=>`<span class="qm${qCount(c.id,t)>0?" on":""}">${t?QUALITY[t].mark:"・"}</span>`).join("");
+    const known=bookSeen(c);
+    const marks=c.treasure
+      ? `<span class="qm${known?" on":""}">✨</span>`
+      : [0,1,2].map(t=>`<span class="qm${qCount(c.id,t)>0?" on":""}">${t?QUALITY[t].mark:"・"}</span>`).join("");
     return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}" data-i="${i}">
       <div class="ic">${known?ico(c):"❔"}</div>
       <div class="nm">${known?c.name:"？？？"}</div>
       <div class="qmarks">${marks}</div></div>`;
   }).join("");
-  const c=BOOK_CROPS[bookCur], t=bookTier;
-  const known=isUnlocked(c)||S.harvestBy[c.id]>0, n=qCount(c.id,t), total=S.harvestBy[c.id]||0;
+  const c=BOOK_CROPS[bookCur], t=c.treasure?0:bookTier;
+  const known=bookSeen(c), n=c.treasure?tre(c.id):qCount(c.id,t), total=S.harvestBy[c.id]||0;
+  if(c.treasure){
+    // 貴重品: 品質は無く、永続効果と説明文を載せる
+    $("g-bookDetail").innerHTML = known ? `
+      <div class="btabs"><span class="btab on">貴重品 GHR</span></div>
+      <div class="bic q2">${ico(c)}</div>
+      <div class="bnm">${esc(c.name)}</div>
+      <dl>
+        <dt>持っている数</dt><dd>${fmtNum(n)}個</dd>
+        <dt>効果</dt><dd>${esc(c.eff.text)}</dd>
+        <dt>今の合計</dt><dd>${effVal(c.id)}${c.eff.unit}${c.eff.cap!=null&&effVal(c.id)>=c.eff.cap?"(上限)":""}</dd>
+        <dt>育つまで</dt><dd>${fmtDur(c.hours*HOUR)}</dd>
+      </dl>
+      <div class="lore">${esc(c.lore)}</div>`
+    : `<div class="bic">❔</div><div class="bnm">？？？</div>
+       <div class="lore unknown">ガチャの GHR(0.03%)から出る種を育てると手に入ります。</div>`;
+    keepVisible($("g-bookList"));
+    return;
+  }
   if(!known){
     $("g-bookDetail").innerHTML=`<div class="bic">❔</div><div class="bnm">？？？</div>
       <div class="lore unknown">${c.gacha?`${gachaText()}(レア度 ${c.r})。引き当てると、名前がわかります。`:(c.day!=null?`${dayText(c)}。`:`${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。`)}</div>`;
@@ -4638,7 +4665,25 @@ function summary(){
 }
 function backToTitle(){ leave(); show("title"); }
 window.addEventListener("beforeunload",()=>{ tick(); save(); });
-return { enter, leave, onKey, summary };
+/* デバッグ用: 庭のすべての要素を解放した状態にする */
+function debugUnlock(){
+  S=newState();
+  S.money=1000000000; S.totalSales=1000000000; S.totalHarvest=100000; S.gachaCount=1000;
+  S.fields=[makeField(),makeField(),makeField(),makeField(),makeField()];
+  S.canLv=CANS.length; S.hoeLv=HOES.length; S.sickLv=SICKLES.length; S.fert=999;
+  S.objs={spr:9, crow:9}; S.villagers=3; S.vilLv=VIL_LADDER.length-1;
+  for(const c of CROPS){
+    S.got[c.id]=1; S.seeds[c.id]=10;
+    S.harvestBy[c.id]=QUALITY[2].need+50;
+    S.harvestQ[c.id]=[50,50,10];
+    if(c.treasure){ S.treas[c.id]=1; }
+    else{ S.inv[c.id]=[3,3,3]; S.auto[c.id]={c:false,s:false}; }
+  }
+  S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
+  S.lastTick=Date.now();
+  save();
+}
+return { enter, leave, onKey, summary, debugUnlock };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -4682,6 +4727,30 @@ async function backupCopy(){
 function backupImport(){
   const note=$("bkImportNote"), str=$("bkImport").value;
   if(!str.trim()){ note.textContent="記録文字列を貼り付けてください(I で貼り付け欄へ)"; return; }
+  // デバッグ用の合言葉: すべての要素を解放した状態にする
+  if(str.trim().toLowerCase()==="nejiuchi-debug"){
+    if(!confirm("デバッグ用: すべての要素を解放した記録に置き換えます。今の記録は消えます。よろしいですか?")) return;
+    try{
+      // ネジ打ち側: 自己ベスト・辞典・名前・統計
+      const words=[...WORDS_EASY,...WORDS_NORMAL,...WORDS_HARD].map(w=>w.k);
+      localStorage.setItem(LS_PREFIX+"dict", JSON.stringify(words));
+      localStorage.setItem(LS_PREFIX+"best-easy","40");
+      localStorage.setItem(LS_PREFIX+"best-normal","30");
+      localStorage.setItem(LS_PREFIX+"best-hard","20");
+      localStorage.setItem(LS_PREFIX+"best-ta-easy","30.5");
+      localStorage.setItem(LS_PREFIX+"best-ta-normal","28.4");
+      localStorage.setItem(LS_PREFIX+"best-ta-hard","22.1");
+      localStorage.setItem(LS_PREFIX+"best-oneshot","35");
+      for(const pm of POEMS) localStorage.setItem(LS_PREFIX+"best-"+POEM_KEY(pm),"42.5");
+      localStorage.setItem(LS_PREFIX+"playerName","デバッグ");
+      localStorage.setItem(LS_PREFIX+"stats", JSON.stringify({plays:100,screws:5000}));
+      localStorage.setItem(LS_PREFIX+"garden:inbox", JSON.stringify({keys:0,screws:0}));
+      Garden.debugUnlock();     // 庭: 作物・道具・畑・村人・貴重品をすべて解放
+    }catch(e){ note.textContent="うまくいきませんでした"; return; }
+    note.textContent="すべて解放しました。画面を読み直します…";
+    setTimeout(()=>location.reload(),600);
+    return;
+  }
   let o;
   try{ o=JSON.parse(b64dec(str)); }catch(e){ note.textContent="読み込めませんでした。文字列が途中で切れていないか確認してください"; return; }
   // ネジ打ち全体の記録
