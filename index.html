@@ -3747,6 +3747,14 @@ function shopRows(){
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
         enter:()=>sell(c.id,t,1), shift:()=>sell(c.id,t,"all") });
     }
+    // 余った種も売れる
+    for(const c of CROPS){
+      const n=S.seeds[c.id]||0; if(n<=0) continue;
+      const pr=seedPrice(c);
+      rows.push({ ic:"🌱", nm:`${c.icon} ${c.name}の種 ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
+        keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
+        enter:()=>sellSeed(c.id,1), shift:()=>sellSeed(c.id,"all") });
+    }
   }
   return rows;
 }
@@ -3759,7 +3767,7 @@ function renderShop(){
   const cur=shopCur[shopTab];
   const body=$("g-shopBody");
   if(!rows.length){
-    body.innerHTML=`<p class="empty" style="padding:1rem .4rem">売れる作物がありません。実った作物を素手(1)で収穫してから来てください。</p>`;
+    body.innerHTML=`<p class="empty" style="padding:1rem .4rem">売れるものがありません。実った作物を素手(1)で収穫してから来てください(余った種もここで売れます)。</p>`;
   }else{
     body.innerHTML=rows.map((r,i)=>`<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
@@ -3769,7 +3777,7 @@ function renderShop(){
   const total=invTotal().v;
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_TABS.map((t,i)=>i===shopTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
-    (shopTab===2 && total>0 ? ` ・ <b>A</b> すべて売る(${fmtNum(total)}ネジ)` : "")+
+    (shopTab===2 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}ネジ・種は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
@@ -3842,6 +3850,19 @@ function buyField(){
   checkUnlocks();
   save(); renderAll();
 }
+/* 種の売値(買値の25%。ガチャ限定は売値の3分の1を元値とみなす) */
+const seedBase  = c => c.cost>0 ? c.cost : Math.round(c.price/3);
+const seedPrice = c => Math.max(1, Math.round(seedBase(c)*0.25));
+function sellSeed(id,n){
+  const c=CROP[id], have=S.seeds[id]||0; if(!c||have<=0) return;
+  const k = n==="all" ? have : Math.min(have,n);
+  S.seeds[id]=have-k;
+  const gain=k*seedPrice(c);
+  S.money+=gain; S.totalSales+=gain; sfx.sell();
+  toast(`${c.icon} ${c.name}の種を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good");
+  if(!(S.seeds[S.seedId]>0)){ const o=ownedSeeds(); if(o.length) S.seedId=o[0]; }
+  save(); renderAll();
+}
 function sell(id,t,n){
   const c=CROP[id]; const have=invN(id,t); if(!c||have<=0) return;
   const k = n==="all" ? have : Math.min(have, n);
@@ -3852,10 +3873,11 @@ function sell(id,t,n){
   checkUnlocks();
   save(); renderAll();
 }
+/* A キー: 収穫かごの作物だけをまとめて売る(種は売らない) */
 function sellAll(){
   let gain=0;
   for(const c of CROPS) for(let t=0;t<3;t++){ const n=invN(c.id,t); if(n>0){ gain+=n*priceOf(c.id,t); S.inv[c.id][t]=0; } }
-  if(!gain){ sfx.nope(); toast("売れる作物がありません","warn"); return; }
+  if(!gain){ sfx.nope(); toast("売れる作物がありません(種は A では売れません)","warn"); return; }
   S.money+=gain; S.totalSales+=gain; sfx.sell();
   toast(`すべて売りました(+${fmtNum(gain)}ネジ)`,"good");
   checkUnlocks();
