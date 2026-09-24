@@ -4819,6 +4819,14 @@ function gachaFlash(r,big){
   f.style.setProperty("--rc", RARITY[r].color);
   f.className=""; void f.offsetWidth; f.className="on"+(big?" big":"");
 }
+/* 出てきた札が見えるところまでスクロールする。
+   札は縮んだ状態から飛び出すので、見た目の大きさではなく本来の大きさで測る */
+function gachaFollow(box,el,behavior){
+  const r=el.getBoundingClientRect(), br=box.getBoundingClientRect();
+  const cy=(r.top+r.bottom)/2, h=el.offsetHeight/2+10;
+  if(cy+h>br.bottom) box.scrollBy({top:cy+h-br.bottom, behavior});
+  else if(cy-h<br.top) box.scrollBy({top:cy-h-br.top, behavior});
+}
 /* ガチャ画面: 機械・確率・引いた結果・アイテムリスト */
 function renderGacha(){
   $("g-gachaMoney").textContent=fmtNum(S.money);
@@ -4826,7 +4834,12 @@ function renderGacha(){
   body.innerHTML=gachaHTML()+gachaListHTML();
   // 大連の演出中は、いま出した段が見えるようにする
   const cur=body.querySelector(".gsumsec.pop, .gspot");
-  if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest", behavior:"smooth"});
+  if(cur) gachaFollow(body,cur,"smooth");
+  // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
+  else if(gachaRes.length>1){
+    const card=body.querySelector(".gcard.pop");
+    if(card) gachaFollow(body,card, gachaRes.length>20 ? "auto" : "smooth");
+  }
   const bigBtns=GACHA_BIG.filter(gachaPass);
   if(window.IS_MOBILE){
     $("g-gachaHint").innerHTML = gachaBusy()
