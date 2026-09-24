@@ -830,6 +830,20 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 }
 #screen-garden .rk-input:focus{outline:none; border-color:var(--sun)}
 #g-rankNow b{font-size:1.1rem}
+#screen-garden .grk-tabs{margin:1rem 0 0}
+#screen-garden .grk-list{list-style:none; max-height:38vh; overflow:auto; background:#fff; border-radius:0 10px 10px 10px; box-shadow:inset 0 0 0 2px #eadfc6; padding:.3rem .5rem}
+#screen-garden .grk-list:empty{display:none}
+#screen-garden .grk-list li{display:grid; grid-template-columns:3.2rem 1fr auto; gap:.5rem; align-items:center; padding:.45rem .3rem; border-bottom:1px dashed #e3d7bd; font-weight:700}
+#screen-garden .grk-list li:last-child{border-bottom:none}
+#screen-garden .grk-list .pos{color:var(--ink-l)}
+#screen-garden .grk-list .pn{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#screen-garden .grk-list .pn small{color:#a8801c; font-weight:700}
+#screen-garden .grk-list .ps{font-variant-numeric:tabular-nums}
+#screen-garden .grk-list li.top1 .pos{color:#c79100}
+#screen-garden .grk-list li.top2 .pos{color:#8f9bab}
+#screen-garden .grk-list li.top3 .pos{color:#b8733a}
+#screen-garden .grk-list li.me{background:#fff5d6; border-radius:6px}
+#screen-garden .grk-note{color:var(--ink-l); font-size:.85rem; margin-top:.4rem; min-height:1.2em}
 
 /* ---- 庭 第4段階: 3×3のまとまり・案山子置き場・品質 ---- */
 #screen-garden .plot.gap{margin-right:calc(var(--g)*1.8)}
@@ -1491,12 +1505,18 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
   <!-- 番付に載せる -->
   <div class="modal" id="g-rank">
     <div class="panel savebox">
-      <div class="phead"><h2>番付に載せる</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
+      <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
       <p>所持ネジと累計収穫数の番付(ランキング)に載せます。名前ごとに1件で、一度載せると庭を出るたびに自動で更新されます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">載せる(Enter)</button></div>
-      <div class="keyhint">名前を入れて <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="tabs grk-tabs" id="g-rankTabs">
+        <button class="tab" data-rk="g-money">所持ネジ</button>
+        <button class="tab" data-rk="g-harvest">累計収穫</button>
+      </div>
+      <ol class="grk-list" id="g-rankList"></ol>
+      <p class="grk-note" id="g-rankListNote"></p>
+      <div class="keyhint">名前を入れて <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計収穫 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -4895,7 +4915,33 @@ function prepareRank(){
   $("g-rankName").value=nm;
   $("g-rankNote").textContent=hasDb()?"":"※Firebase未設定のため載せられません";
   setTimeout(()=>{ const i=$("g-rankName"); i.focus(); i.select&&i.select(); },30);
+  renderGardenRank();
 }
+/* 番付の中で、所持ネジ・累計収穫のランキングを見る */
+let gRankTab="g-money", gRankReq=0;
+async function renderGardenRank(){
+  const tab=gRankTab, req=++gRankReq;
+  root.querySelectorAll("#g-rankTabs .tab").forEach(t=>t.classList.toggle("on", t.dataset.rk===tab));
+  const list=$("g-rankList"), note=$("g-rankListNote");
+  list.innerHTML="";
+  if(!hasDb()){ note.textContent="※Firebase未設定のためランキングは表示できません"; return; }
+  note.textContent="読み込み中…";
+  try{
+    const rows=await fetchRanking(tab);
+    if(req!==gRankReq) return;                    // 別のタブに切り替えていたら捨てる
+    note.textContent=rows.length?"":"まだ誰も載っていません。一番乗りのチャンス!";
+    list.innerHTML=rows.map((r,i)=>{
+      const me=r.o===S.owner;
+      const val=fmtNum(Math.floor(r.s||0))+(tab==="g-money"?"ネジ":"個");
+      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${esc(r.n||"")}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
+    }).join("");
+  }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
+}
+function switchGardenRank(dir){
+  gRankTab = gRankTab==="g-money" ? "g-harvest" : "g-money";
+  sfx.tab(); renderGardenRank();
+}
+root.querySelectorAll("#g-rankTabs .tab").forEach(t=>t.addEventListener("click",()=>{ gRankTab=t.dataset.rk; sfx.tab(); renderGardenRank(); }));
 async function submitRank(){
   const name=$("g-rankName").value.trim(), note=$("g-rankNote");
   if(!name){ note.textContent="名前を入れてください"; sfx.nope(); return; }
@@ -4907,7 +4953,8 @@ async function submitRank(){
     S.rankName=name; save(); sfx.buy();
     try{ playerName=name; store.set("playerName",name); }catch(e){}
     note.textContent="載りました。庭を出るたびに自動で更新されます";
-    setTimeout(()=>{ leave(); openRanking("g-money",name); },700);
+    $("g-rankName").blur();
+    renderGardenRank();
   }catch(e){ note.textContent="載せられませんでした。通信環境を確認してください"; }
 }
 $("g-rankBtn").addEventListener("click",submitRank);
@@ -4925,7 +4972,13 @@ function onKey(e){
   if(modal==="gacha"){ gachaKey(e); return; }
   if(modal==="treas"){ treasKey(e); return; }
   if(modal==="book"){ bookKey(e); return; }
-  if(modal==="rank"){ if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); } else if(e.key==="Enter"){ e.preventDefault(); submitRank(); } return; }
+  if(modal==="rank"){
+    if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
+    else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
+    else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); switchGardenRank(); }
+    else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("g-rankList").scrollBy(0, e.key==="ArrowDown"?60:-60); }
+    return;
+  }
   if(e.ctrlKey||e.metaKey||e.altKey) return;
   const k=e.key;
   if(k==="Process"){ toast("入力モードを半角英数にしてください","warn"); return; }
