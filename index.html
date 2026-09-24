@@ -862,6 +862,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 }
 
 /* ---- 庭: 変異(品質の4番目) ---- */
+#screen-garden .plot.ripe.mutp{box-shadow:0 0 0 3px #b27ce8, 0 0 16px rgba(178,124,232,.9), inset 0 -4px 0 rgba(0,0,0,.18)}
+#screen-garden .plot.mutp .qb{color:#e9d2ff}
 #screen-garden .cart.mut svg{filter:drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 0 5px rgba(190,120,255,.85))}
 #screen-garden .chip.q3{background:linear-gradient(135deg,#fff4fb,#f1e8ff 50%,#e8f6ff); box-shadow:inset 0 0 0 2px #b27ce8, 0 0 10px rgba(178,124,232,.55)}
 #screen-garden .bookdetail .bic.q3{filter:drop-shadow(0 0 10px rgba(178,124,232,.9))}
@@ -3223,8 +3225,8 @@ const CROPS = [
     eff:{ key:"water", per:2, unit:"時間", text:"水やりの持続 +2時間" },
     desc:"貴重品。白い魔法使いの帽子。", lore:"一度まいた水が、なかなか乾かなくなる。" },
   { id:"pinkprincess", r:"GHR", gacha:true, treasure:true, name:"ソプラノピンクプリンセス", icon:"👑", cost:0, hours:48, price:0,
-    eff:{ key:"quality", per:1, unit:"%", cap:100, text:"1段上の品質で穫れる確率 +1%" },
-    desc:"貴重品。桃色の王冠。", lore:"ときどき、穫れたものに星がひとつ増えている。" },
+    eff:{ key:"mutant", per:1, unit:"%", cap:30, text:"変異の確率 +1%(最大 +30%)" },
+    desc:"貴重品。桃色の王冠。", lore:"この王冠のある庭では、作物がときどき思いもよらない姿で実る。" },
   { id:"yellowghost", r:"GHR", gacha:true, treasure:true, name:"アルトイエローゴースト", icon:"👻", cost:0, hours:48, price:0,
     eff:{ key:"vilgrowth", per:2, unit:"%", text:"村人の畑の成長 +2%" },
     desc:"貴重品。黄色い幽霊。", lore:"畑の隅に立って、村人の手をそっと速める。怖がられているのか慕われているのか、誰も知らない。" },
@@ -3235,7 +3237,7 @@ const CROPS = [
     eff:{ key:"gacha", per:1, unit:"%", cap:75, text:"ガチャの値段 −1%(最大 −75%)" },
     desc:"貴重品。銀の星。", lore:"星を持つ者には、ガチャの主人も少しだけ甘くなる。" },
   { id:"blueamaryllis", r:"GHR", gacha:true, treasure:true, name:"テナーブルーアマリリス", icon:"🌸", cost:0, hours:48, price:0,
-    eff:{ key:"fert", per:1, unit:"%", cap:90, text:"肥料の効果 +1%(最大 +90%)" },
+    eff:{ key:"fert", per:1, unit:"%", cap:20, text:"肥料の効果 +1%(最大 +20%)" },
     desc:"貴重品。青いアマリリス。", lore:"この花のそばでまいた肥料は、驚くほどよく効く。" },
 ];
 const CROP = Object.fromEntries(CROPS.map(c=>[c.id,c]));
@@ -3376,10 +3378,10 @@ const effMinute  = () => effVal("browneyes");               // 1打の時短(分
 const effGrowth  = () => 1 + effVal("redflash")/100;        // 成長の速さ(畑ぜんぶ)
 const effVilGrow = () => effGrowth() * (1 + effVal("yellowghost")/100);  // 村人の区画はさらに速い
 const effWater   = () => effVal("whitewizard")*HOUR;        // 水やりの持続(ミリ秒)
-const effQuality = () => effVal("pinkprincess")/100;        // 1段上の品質で穫れる確率
+const effMut     = () => MUT_RATE + effVal("pinkprincess")/100;  // 変異の確率(1% + 貴重品)
 const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の倍率
 const effGacha   = () => 1 - effVal("silverstar")/100;      // ガチャの値段の倍率
-const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き
+const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き(1つで最大45%、2つで最大90%)
 
 const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0); };
 const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult*effSell());
@@ -3598,7 +3600,12 @@ function isWet(fi,k,now,cov){
 function grow(p,add,base){
   const before=p.crop.grown, n=need(p.crop);
   p.crop.grown=Math.min(n, before+add);
-  if(p.crop.grown>=n && !p.crop.ripeAt) p.crop.ripeAt=base+(n-before);
+  if(p.crop.grown>=n && !p.crop.ripeAt){
+    p.crop.ripeAt=base+(n-before);
+    // 実った瞬間に変異かどうかが決まる(畑で変異の絵が見える)
+    if(hasMut(p.crop.id) && Math.random()<effMut()) p.crop.mut=true;
+    p.crop.rolled=true;
+  }
 }
 function tick(now=Date.now()){
   const last=S.lastTick;
@@ -3638,6 +3645,7 @@ const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length
 function villagerAdvance(p,dt){
   let t=dt, guard=0;
   while(guard++<100000){
+    if(p.crop && p.crop.mut) break;                  // 変異が実っている: 手で収穫されるまで待つ
     if(!p.crop){
       const c=CROP[vilCropId()];
       if(S.money<c.cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
@@ -3649,16 +3657,14 @@ function villagerAdvance(p,dt){
     if(t<rem){ p.crop.grown+=t; break; }
     t-=rem;
     const c=CROP[p.crop.id];
-    p.crop=null;
-    let q=tierOf(c.id);                             // q: 品質(t は残り時間なので別名に)
-    if(q<2 && Math.random()<effQuality()) q++;
-    const num = 1 + (Math.random()<effDouble() ? 1 : 0);
-    if(hasMut(c.id) && Math.random()<MUT_RATE){      // 変異は売らずに収穫かごへ
-      invAdd(c.id,3,num);
-      for(let i=0;i<num;i++) recordHarvest(c.id,3,true);
-      S.vLog.mut=S.vLog.mut||{}; S.vLog.mut[c.id]=(S.vLog.mut[c.id]||0)+num;
-      continue;
+    if(hasMut(c.id) && Math.random()<effMut()){     // 変異: 収穫せずに畑に残し、一度だけ知らせる
+      p.crop.grown=n; p.crop.mut=true;
+      S.vLog.mutWait=S.vLog.mutWait||[]; S.vLog.mutWait.push(c.id);
+      break;
     }
+    p.crop=null;
+    const q=tierOf(c.id);                           // q: 品質(t は残り時間なので別名に)
+    const num = 1 + (Math.random()<effDouble() ? 1 : 0);
     const price=priceOf(c.id,q)*num;
     S.money+=price; S.totalSales+=price;
     for(let i=0;i<num;i++) recordHarvest(c.id,q,true);
@@ -3689,9 +3695,10 @@ function recordHarvest(id,t,quiet){
 }
 /* 村人の仕事ぶりをまとめて知らせる */
 function reportVillagers(){
-  const L=S.vLog; if(!L || (!L.h && !L.up && !L.mut)) return;
-  for(const [id,n] of Object.entries(L.mut||{})){
-    toast(`✦ 変異! 村人が ${icoQ(CROP[id],3)} ${esc(qName(id,3))}${n>1?` ×${n}`:""} を収穫しました(収穫かごに入れてあります)`,"good mut",7000,true);
+  const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait)) return;
+  for(const id of (L.mutWait||[])){
+    toast(`✦ 変異! 村人の畑で ${icoQ(CROP[id],3)} ${esc(qName(id,3))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,"good mut",9000,true);
+    sfx.vil();
   }
   const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${n}`);
   if(parts.length){
@@ -3930,7 +3937,7 @@ function buildPlanter(){
 }
 function cropStageIcon(p){
   const c=CROP[p.crop.id];
-  if(isRipe(p)) return {ic:ico(c), st:""};
+  if(isRipe(p)) return {ic:p.crop.mut?icoQ(c,3):ico(c), st:""};
   return p.crop.grown/need(p.crop)<0.4 ? {ic:"🌱", st:"st1"} : {ic:"🌿", st:"st2"};
 }
 function renderField(){
@@ -3954,8 +3961,8 @@ function renderField(){
     }
     const wet=isWet(S.cur,k,now,cov);
     const growing=p.crop && !isRipe(p);
-    el.className="plot "+p.s+(wet?" wet":"")+(growing?" growing":"")+(p.crop&&isRipe(p)?" ripe":"")+(p.vil?" vil":"")+gap+(k===selKey?" sel":"");
-    qb.textContent=(p.crop&&isRipe(p)) ? QUALITY[tierOf(p.crop.id)].mark : "";
+    el.className="plot "+p.s+(wet?" wet":"")+(growing?" growing":"")+(p.crop&&isRipe(p)?" ripe":"")+(p.crop&&p.crop.mut&&isRipe(p)?" mutp":"")+(p.vil?" vil":"")+gap+(k===selKey?" sel":"");
+    qb.textContent=(p.crop&&isRipe(p)) ? (p.crop.mut ? QUALITY[3].mark : QUALITY[tierOf(p.crop.id)].mark) : "";
     if(p.crop){
       const {ic,st}=cropStageIcon(p);
       cropEl.innerHTML=ic; cropEl.className="crop "+st;
@@ -3980,7 +3987,10 @@ function renderInfo(){
     sub.push("素手(1)で拾うと、手持ちに戻ります");
   }else if(p.vil){
     big=`${selKey} ・ 👩‍🌾 村人が世話をしています`;
-    if(p.crop){
+    if(p.crop && p.crop.mut && isRipe(p)){
+      big=`${selKey} ・ ${icoQ(CROP[p.crop.id],3)} ${esc(qName(p.crop.id,3))} が実っています(変異)`;
+      sub.push("村人は変異を収穫せずに残しています。素手(1)で収穫すると、村人がまた育て始めます");
+    }else if(p.crop){
       const c=CROP[p.crop.id];
       sub.push(`${ico(c)} ${esc(c.name)} 育成 ${Math.floor(p.crop.grown/need(p.crop)*100)}% ・ あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
     }else if(p.vWait){
@@ -3997,9 +4007,9 @@ function renderInfo(){
   }else{
     const c=CROP[p.crop.id];
     if(isRipe(p)){
-      const t=tierOf(c.id);
-      big=`${selKey} ・ ${ico(c)} ${esc(qName(c.id,t))} 収穫できます`;
-      sub.push(`素手(1)で収穫 ・ 売値 ${priceOf(c.id,t)}ネジ`);
+      const t=p.crop.mut?3:tierOf(c.id);
+      big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===3?"(変異)":""}`;
+      sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}ネジ${t===3?" ・ 変異は自動売却されません":""}`);
       if(t<2){ const left=QUALITY[t+1].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,t+1)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
@@ -4091,7 +4101,8 @@ function hit(k){
 function harvestOne(k){
   const f=field(), p=f[k];
   if(!p.crop || !isRipe(p)) return;
-  const c=CROP[p.crop.id];
+  // 変異は実ったときに決まっている(この変更より前に実っていた作物だけ、収穫のときに決める)
+  const c=CROP[p.crop.id], cropMut=!!p.crop.mut, rolled=!!p.crop.rolled;
   p.crop=null; p.emptySince=Date.now();
   if(c.treasure){
     S.treas[c.id]=(S.treas[c.id]||0)+1; S.totalHarvest++;
@@ -4100,8 +4111,7 @@ function harvestOne(k){
     return;
   }
   let t=tierOf(c.id);
-  if(t<2 && Math.random()<effQuality()) t++;
-  const mut = hasMut(c.id) && Math.random()<MUT_RATE;   // 1%で変異
+  const mut = cropMut || (!rolled && hasMut(c.id) && Math.random()<effMut());
   if(mut) t=3;
   const num = 1 + (Math.random()<effDouble() ? 1 : 0);
   if(autoCrop(c.id) && !mut){                           // 変異は自動売却しない
@@ -4130,8 +4140,9 @@ function act(k){
     nope(k, p.obj ? "案山子を回収するには 6 で案山子を持って押します" : "P は案山子置き場です。6 で案山子を持って置けます");
     save(); renderAll(); return;
   }
-  // 村人の区画は、肥料と「村人を外す」以外は触れない
-  if(p.vil && S.tool!==5 && !(S.tool===6 && S.objSel==="vil")){
+  // 村人の区画は、肥料と「村人を外す」以外は触れない(村人が残した変異の収穫だけはできる)
+  const vilMut = p.vil && S.tool===1 && p.crop && p.crop.mut && isRipe(p);
+  if(p.vil && !vilMut && S.tool!==5 && !(S.tool===6 && S.objSel==="vil")){
     nope(k,"村人が世話をしている区画です(6 で村人を持って押すと外せます)");
     save(); renderAll(); return;
   }
@@ -4148,7 +4159,7 @@ function act(k){
         nope(k, p.crop ? "まだ実っていません" : null);
         break;
       }
-      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]) && !f[x].vil);
+      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]) && (!f[x].vil || f[x].crop.mut));
       for(const x of targets) harvestOne(x);
       sfx.harvest();
       checkUnlocks();
@@ -4322,7 +4333,7 @@ function shopRows(){
     const fOk=meets(FERT.unlock);
     rows.push({ locked:!fOk, ic: fOk?FERT.icon:"❔",
       nm: fOk?`${FERT.name} <span style="color:var(--ink-l)">${FERT.cost}ネジ</span>`:"？？？",
-      ds: fOk?`育成中の作物にまくと、必要な時間の${FERT_BOOST*100}%ぶん一気に育ちます(5 で持つ)。1つの作物には2回まで ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
+      ds: fOk?`育成中の作物にまくと、必要な時間の${Math.round(effFert()*100)}%ぶん一気に育ちます(5 で持つ)。1つの作物には2回まで ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
       keys: fOk?"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個":"", enter:()=>fOk&&buyFert(1), shift:()=>fOk&&buyFert(10) });
     for(const id of OBJ_ORDER){
       const o=OBJS[id], ok=meets(o.unlock);
@@ -4820,7 +4831,7 @@ function renderBook(){
       <div class="lore unknown">${c.gacha?`${gachaText()}(レア度 ${c.r})。引き当てると、名前がわかります。`:(c.day!=null?`${dayText(c)}。`:`${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。`)}</div>`;
   }else{
     const cond = t===0 ? (c.gacha?`${gachaText()}(レア度 ${c.r})`:(c.day!=null?dayText(c):"種を植えて育てれば穫れます"))
-      : t===3 ? `${c.name}を収穫するたびに ${MUT_RATE*100}% の確率で変異します(村人の収穫でも穫れます)`
+      : t===3 ? `${c.name}を収穫するたびに ${+(effMut()*100).toFixed(1)}% の確率で変異します(村人の畑では収穫されずに残ります)`
       : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
     const mutKnown = t===3 && n>0;   // 変異は一度穫れるまで名前と絵を伏せる
