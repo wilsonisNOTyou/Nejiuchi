@@ -4998,6 +4998,11 @@ function backupImport(){
      持ち主が閉じられたら、残ったほうが自動で持ち主になる
 ===================================================== */
 const SYNC_PATH="nejiuchi/saves", SYNC_KEEP=5, SYNC_ALIVE=45000;
+const SYNC_BACKUP_EVERY=10*60*1000;   // バックアップは10分に1回まで(細かく送っても古い記録が残るように)
+const SYNC_DEBOUNCE=2500;             // 操作が止まってから送るまで
+let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=null;
+/* タイピング中・結果画面では取り込まない(読み直しで遊んでいる途中が消えないように) */
+const syncBusyScene = () => scene==="game" || scene==="poem" || scene==="result";
 let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
 let syncMetaRef=null, syncOwnerRef=null, syncLiveRef=null, syncHeart=null;
 let syncPending=false, syncLastBundle="", syncPushAt=0, syncOwner=null, syncLive={}, syncOwnerLoaded=false, syncLiveLoaded=false;
@@ -5017,6 +5022,8 @@ const normSyncCode = v => String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
 const showSyncCode = c => /^[A-Z0-9]{16}$/.test(c) ? c.replace(/(.{4})(?=.)/g,"$1 ") : c;
 const syncDevLabel = () => /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||"") ? "スマホ" : "PC";
 const bundleNow = () => JSON.stringify(collectAll().data);
+/* 時間が進んだだけ(庭の lastTick)は「変わった」とみなさない */
+const sameBundle = (a,b) => a===b || String(a).replace(/\\?"lastTick\\?":\d+/g,"")===String(b).replace(/\\?"lastTick\\?":\d+/g,"");
 const syncBase = () => db.ref(`${SYNC_PATH}/${syncCode}`);
 function syncInit(){
   syncDevice=lsGet("sync:device");
@@ -5033,22 +5040,40 @@ function syncCheckOwner(){
   if(!syncCode||!syncOwnerLoaded||!syncLiveLoaded) return;   // 両方読み終わるまで決めない
   const o=syncOwner && syncOwner.device;
   if(o===syncDevice){ setReadOnly(false); return; }
-  if(o && syncAlive(o)){ setReadOnly(true); return; }
+  // 持ち主になった直後(開いている印がまだ届いていない間)も、いるものとみなす
+  if(o && (syncAlive(o) || Date.now()-(+syncOwner.t||0) < SYNC_ALIVE)){ setReadOnly(true); return; }
   syncClaim();
 }
 function syncClaim(){
   if(!hasDB()||!syncCode) return Promise.resolve();
   syncOwner={ device:syncDevice, t:Date.now(), label:syncDevLabel() };
   setReadOnly(false);
-  return syncBase().child("owner").set(syncOwner).catch(e=>console.warn("[nejiuchi sync]",e));
+  const base=syncBase();
+  try{ base.child("live/"+syncDevice).set(Date.now()); }catch(e){}   // 開いている印を先に
+  return base.child("owner").set(syncOwner).catch(e=>console.warn("[nejiuchi sync]",e));
 }
 function setReadOnly(v){
   if(syncReadOnly===v) return;
   const wasRO=syncReadOnly;
+  // 持ち主を別のブラウザに渡すときは、まだ送っていない分を先に送る
+  if(!wasRO && v){ clearTimeout(syncDirtyTimer); syncPush(false,true); }
   syncReadOnly=v;
+  if(wasRO && !v) syncLastBundle=bundleNow();   // 見るだけの間の操作は、送っていない分に数えない
   renderSyncState();
   // 見るだけから持ち主に戻ったら、届いている記録を先に取り込む
-  if(wasRO && !v && scene==="title") syncOnTitle();
+  if(wasRO && !v) syncMaybePull();
+}
+/* 届いている記録があれば取り込む(遊んでいる最中・画面が隠れている間は待つ) */
+function syncMaybePull(){
+  if(!syncCode||!syncPending||syncBusyScene()) return;
+  if(document.visibilityState==="hidden") return;
+  syncPull();
+}
+/* 操作したら、少し待ってから送る(持ち主のときだけ) */
+function syncMarkDirty(){
+  if(!syncCode||syncReadOnly||window.nejiReplacing) return;
+  clearTimeout(syncDirtyTimer);
+  syncDirtyTimer=setTimeout(()=>{ if(!syncBusyScene()) syncPush(false); }, SYNC_DEBOUNCE);
 }
 function syncConnect(){
   if(!hasDB()||!syncCode) return;
@@ -5071,7 +5096,7 @@ function syncConnect(){
     if(m.t<=syncLastT) return;
     syncPending=true;                       // 遊んでいる最中は取り込まない
     renderSyncState();
-    if(scene==="title") syncPull();
+    syncMaybePull();
   });
 }
 function syncDisconnect(){
@@ -5106,20 +5131,32 @@ function syncErrText(e){
     ? "※クラウドへの保存が拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
     : "※クラウドに保存できませんでした。通信環境を確認してください";
 }
-async function syncPush(force){
+/* force: 変わっていなくても送る / urgent: 間隔をあけずに送る(閉じる・隠れる・持ち主を渡すとき) */
+async function syncPush(force,urgent){
   if(!hasDB()||!syncCode||syncReadOnly||window.nejiReplacing) return true;
+  if(syncPushing){ syncPushAgain=true; return true; }     // 送っている途中なら、終わってからもう一度
   const bundle=bundleNow();
-  if(!force && bundle===syncLastBundle) return true;
-  if(!force && Date.now()-syncPushAt<8000) return true; // 送りすぎない
-  syncPushAt=Date.now();
+  if(!force && sameBundle(bundle,syncLastBundle)) return true;
+  const wait=3000-(Date.now()-syncPushAt);
+  if(!force && !urgent && wait>0){                         // 送りすぎない(あとで送り直す)
+    clearTimeout(syncDirtyTimer); syncDirtyTimer=setTimeout(()=>syncPush(false),wait);
+    return true;
+  }
+  syncPushing=true; syncPushAt=Date.now();
   const base=syncBase(), t=Date.now();
   try{
-    const prev=await base.child("data").once("value");
-    if(prev.val()) await base.child("backups/"+(syncLastT||t)).set({ data:prev.val(), t:syncLastT||t });
+    // 前の記録は10分に1回だけバックアップに残す
+    if(syncBackupAt==null){
+      const last=await base.child("backups").orderByKey().limitToLast(1).once("value");
+      syncBackupAt=0; last.forEach(c=>{ syncBackupAt=+c.key||0; });
+    }
+    if(t-syncBackupAt>=SYNC_BACKUP_EVERY){
+      const prev=await base.child("data").once("value");
+      if(prev.val()){ await base.child("backups/"+t).set({ data:prev.val(), t }); syncBackupAt=t; await syncTrimBackups(base); }
+    }
     await base.child("data").set(b64enc(bundle));
     await base.child("meta").set({ t, by:syncDevice });
     syncLastT=t; syncLastBundle=bundle; lsSet("sync:t",String(t));
-    await syncTrimBackups(base);
     renderSyncState();
     return true;
   }catch(e){
@@ -5127,6 +5164,9 @@ async function syncPush(force){
     const n=$("bkSyncNote");
     if(n) n.textContent=syncErrText(e);
     return false;
+  }finally{
+    syncPushing=false;
+    if(syncPushAgain){ syncPushAgain=false; setTimeout(()=>syncPush(false),0); }
   }
 }
 async function syncTrimBackups(base){
@@ -5144,17 +5184,19 @@ async function syncPull(joining){
     const m=mS.val(), data=dS.val();
     if(!m||!data||!m.t||m.t<=syncLastT){ syncPending=false; renderSyncState(); return; }
     const mine=bundleNow();
-    if(!joining && mine!==syncLastBundle && !syncReadOnly){          // 矛盾: 両方で進んでいる
+    const changed=!sameBundle(mine,syncLastBundle);
+    if(!joining && changed && !syncReadOnly){          // 矛盾: 両方で進んでいる
       const useRemote=confirm("別のブラウザの記録のほうが新しいようです。\nこちらにも保存していない進みぶんがあります。\n\nOK: 向こうの記録を取り込む(こちらの進みはクラウドのバックアップに残します)\nキャンセル: こちらの記録を残して送る");
       if(!useRemote){ await syncPush(true); syncPending=false; renderSyncState(); return; }
     }
     // 置き換える前に、このブラウザの記録もバックアップに残しておく
-    if(joining || mine!==syncLastBundle){
+    if(joining || (!syncReadOnly && changed)){
       const t=Date.now();
       try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(取り込み前)" }); await syncTrimBackups(base); }catch(e){}
     }
     if(applyBundleString(data)){
       lsSet("sync:t",String(m.t));
+      try{ sessionStorage.setItem("nejiuchi:return", scene==="garden"?"garden":""); }catch(e){}
       location.reload();
     }
   }catch(e){}
@@ -5318,6 +5360,9 @@ function syncOnTitle(){
   if(syncPending) syncPull();
   else syncPush(false);
 }
+// 画面の切り替えやタップ・キー操作のたびに、少し待ってから送る
+document.addEventListener("pointerup",syncMarkDirty,true);
+document.addEventListener("keyup",syncMarkDirty,true);
 function refreshGardenStat(){
   const el=$("gardenStat"); if(!el) return;
   let s; try{ s=Garden.summary(); }catch(e){ return; }
@@ -5340,13 +5385,21 @@ refreshBestLine();
 refreshStatsLine();
 refreshGardenStat();
 syncInit();
-window.addEventListener("beforeunload",()=>{ try{ syncPush(true); }catch(e){} });
+// 取り込みで読み直したときは、庭にいたなら庭に戻す
+try{
+  if(sessionStorage.getItem("nejiuchi:return")==="garden") openGarden();
+  sessionStorage.removeItem("nejiuchi:return");
+}catch(e){}
+window.addEventListener("beforeunload",()=>{ try{ syncPush(false,true); }catch(e){} });
 // スマホはアプリの切り替えで閉じられることが多いので、隠れたときにも保存して送る
+// 戻ってきたときは、届いている記録を取り込む
 document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState!=="hidden" || window.nejiReplacing) return;
+  if(window.nejiReplacing) return;
+  if(document.visibilityState==="visible"){ syncMaybePull(); return; }
   try{ Garden.summary(); }catch(e){}
-  try{ syncPush(true); }catch(e){}
+  try{ clearTimeout(syncDirtyTimer); syncPush(false,true); }catch(e){}
 });
+window.addEventListener("focus",()=>{ if(!window.nejiReplacing) syncMaybePull(); });
 // 庭にいる間も、ときどきクラウドに送る
 setInterval(()=>{ if(scene==="garden" && syncCode) syncPush(false); }, 60000);
 setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
