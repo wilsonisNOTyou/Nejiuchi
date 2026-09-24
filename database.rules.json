@@ -1,0 +1,31 @@
+{
+  "rules": {
+    "nejiuchi": {
+      "scores": {
+        "$diff": {
+          ".read": true,
+          ".write": true,
+          ".indexOn": ["n", "s", "e"]
+        }
+      },
+      "stats": {
+        ".read": true,
+        ".write": true
+      },
+      "garden": {
+        "$metric": {
+          ".read": true,
+          ".write": true,
+          ".indexOn": ["s"]
+        }
+      },
+      "saves": {
+        "$code": {
+          ".read": true,
+          ".write": true,
+          ".validate": "$code.matches(/^[A-Z0-9]{16}$/)"
+        }
+      }
+    }
+  }
+}
