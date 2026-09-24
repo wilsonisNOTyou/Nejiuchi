@@ -4423,14 +4423,6 @@ function shopRows(){
     rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}ネジ</span>`:"畑チケット",
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
-    // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)
-    for(const n of GACHA_BIG){
-      const has=gachaPass(n);
-      rows.push({ ic:"🎟️",
-        nm: `${fmtNum(n)}連ガチャの権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(GACHA_PASS_PRICE[n])+"ネジ"}</span>`,
-        ds: `種ガチャで ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます${has?"":" ・ 結果は作物ごとにまとめて表示します"}`,
-        keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
-    }
   }else if(shopTab===2){
     // 効率化: 作物ごとの自動売却
     for(const c of CROPS){
@@ -4459,6 +4451,14 @@ function shopRows(){
         enter: ()=>a?toggleAuto(c.id,"c"):(ready&&buyAuto(c.id)),
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
       });
+    }
+    // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)
+    for(const n of GACHA_BIG){
+      const has=gachaPass(n);
+      rows.push({ ic:"🎟️",
+        nm: `${fmtNum(n)}連ガチャの権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(GACHA_PASS_PRICE[n])+"ネジ"}</span>`,
+        ds: `種ガチャで ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます${has?"":" ・ 結果は作物ごとにまとめて表示します"}`,
+        keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
     }
   }else{
     for(const c of CROPS) for(let t=0;t<4;t++){
@@ -4711,7 +4711,7 @@ let gachaBig=null;   // { n, groups:[{ r, total, items:[{id,n,isNew,sold}] }], s
 const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length);
 function drawGacha(n){
   if(gachaBusy()) return;                     // 演出中は引けない
-  if(GACHA_BIG.includes(n) && !gachaPass(n)){ sfx.nope(); toast(`${fmtNum(n)}連は、お店(道具・土地)で権利を買うと引けます`,"warn",3200); return; }
+  if(GACHA_BIG.includes(n) && !gachaPass(n)){ sfx.nope(); toast(`${fmtNum(n)}連は、お店(効率化)で権利を買うと引けます`,"warn",3200); return; }
   const cost=gachaCost(n);
   if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return; }
   S.money-=cost;
