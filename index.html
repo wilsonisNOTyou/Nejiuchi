@@ -218,6 +218,18 @@ h1{
 .bk-foot{display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-top:.5rem}
 .bk-foot .btn{padding:.5rem 1rem; font-size:.9rem}
 .bk-note{color:var(--steel); font-size:.85rem}
+.bk-codein{
+  background:#0d0f13; color:var(--ink); border:2px solid var(--line); border-radius:6px;
+  padding:.45rem .7rem; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.9rem;
+  letter-spacing:.1em; width:min(220px,60vw); user-select:text;
+}
+.bk-codein:focus{outline:none; border-color:var(--amber)}
+#bkSyncState b{color:var(--amber); font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:.08em}
+#bkSyncState.ro{color:#ffb38a}
+.syncnote{
+  display:inline-block; margin:-.6rem 0 1rem; padding:.35rem .9rem; border-radius:999px;
+  background:rgba(210,90,60,.18); border:1px solid #a4462f; color:#ffb9a0; font-size:.82rem;
+}
 /* ---- ランキング ---- */
 .name-input{
   font-family:inherit; font-size:1.05rem; color:var(--ink);
@@ -1021,6 +1033,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
     <h1>ネジ打ち</h1>
     <p class="subtitle">— 打てば打つほど、ネジが抜ける —</p>
     <div class="gstat" id="gardenStat"></div>
+    <div class="syncnote" id="syncNote" style="display:none"></div>
 
     <div class="mode-group">
       <div class="mode-head"><span class="sa">スコアアタック</span></div>
@@ -1358,11 +1371,20 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
     <h3>このブラウザの記録文字列</h3>
     <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkCopyNote"></span><button class="btn primary" id="bkCopy">コピーする (C)</button></div>
+    <h3>ブラウザ間の同期</h3>
+    <p class="bk-p" id="bkSyncState">同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。</p>
+    <div class="bk-foot" style="justify-content:flex-start; flex-wrap:wrap">
+      <button class="btn" id="bkSyncStart">同期を始める (S)</button>
+      <input id="bkCode" class="bk-codein" maxlength="16" placeholder="コードを入力して参加 (J)" autocomplete="off">
+      <button class="btn" id="bkJoin">参加する (Enter)</button>
+      <span class="bk-note" id="bkSyncNote"></span>
+    </div>
+
     <h3>記録文字列から読み込む</h3>
     <p class="bk-p">読み込むと、このブラウザにある記録はすべて置き換わります。読み込んだあとは自動で画面を読み直します。</p>
     <textarea class="bk-code" id="bkImport" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkImportNote"></span><button class="btn" id="bkLoad">読み込む (Enter)</button></div>
-    <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>K</b> / <b>Esc</b> 閉じる</p>
+    <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>S</b> 同期の開始/停止 ・ <b>J</b> コード入力 ・ <b>K</b> / <b>Esc</b> 閉じる</p>
   </div>
 </div>
 
@@ -2004,11 +2026,11 @@ function show(name){
   for(const k in screens) screens[k].classList.toggle("active",k===name);
   document.body.classList.toggle("washi", name==="poem");
   document.body.classList.toggle("garden", name==="garden");
-  if(name==="title"){ refreshStatsLine(); refreshGardenStat(); }
+  if(name==="title"){ refreshStatsLine(); refreshGardenStat(); syncOnTitle(); }
 }
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
-let timerId=null, lastWordKey=null, plateScrews=0, running=false, currentWord=null;
+let timerId=null, cdId=null, lastWordKey=null, plateScrews=0, running=false, currentWord=null;
 let elapsed=0;          // 一本勝負/タイムアタックの経過秒
 let taQueue=[], taGoal=0, nextWord=null; // タイムアタック用の出題キュー
 let oneshotStage=0;     // 一本勝負の緊張段階(0〜4)
@@ -2188,7 +2210,7 @@ function startGame(d){
   taQueue=[]; taGoal=0;
   gardenKeys=0;
   resetStage();
-  clearInterval(timerId);
+  clearInterval(timerId); clearInterval(cdId); cdId=null;
   clearWordPanel();                       // ← 前回の出題を消してからカウントダウン
   $("wordPanel").classList.remove("fatal","clear");
   if(ta) buildTaQueue(d);
@@ -2209,11 +2231,12 @@ function startGame(d){
   // 3,2,1 カウントダウン
   const cd=$("countdown"); let n=3;
   cd.style.display="flex"; cd.textContent=n;
-  const iv=setInterval(()=>{
+  clearInterval(cdId);
+  cdId=setInterval(()=>{
     n--;
     if(n>0){ cd.textContent=n; beep(880,.08,"square",.05); }
     else{
-      clearInterval(iv); cd.style.display="none";
+      clearInterval(cdId); cdId=null; cd.style.display="none";
       beep(1320,.15,"square",.07);
       running=true; pickWord(); startTimer();
     }
@@ -2247,7 +2270,7 @@ function finishTa(){
   endGame();
 }
 async function endGame(){
-  clearInterval(timerId); running=false;
+  clearInterval(timerId); clearInterval(cdId); cdId=null; running=false;
   resetStage();   // 背景の熱演出を戻す
   recordStats(score); // ランキング登録の有無に関係なく記録
   const ta=isTA(diff);
@@ -2293,6 +2316,7 @@ document.addEventListener("keydown",e=>{
       e.preventDefault();
       if(e.target.id==="poemName") $("poemRegBtn").click();
       else if(e.target.id==="bkImport") backupImport();
+      else if(e.target.id==="bkCode") syncJoin();
       else $("regBtn").click();
     }
     if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
@@ -2336,7 +2360,13 @@ document.addEventListener("keydown",e=>{
     return;
   }
   // ゲーム中
-  if(e.key==="Escape"){ clearInterval(timerId); running=false; resetStage(); clearWordPanel(); sendToGarden(gardenKeys,0); gardenKeys=0; show("title"); return; }
+  if(e.key==="Escape"){
+    clearInterval(timerId); clearInterval(cdId); cdId=null;   // カウントダウン中に抜けても始まらないように
+    $("countdown").style.display="none";
+    running=false; resetStage(); clearWordPanel();
+    sendToGarden(gardenKeys,0); gardenKeys=0;
+    show("title"); return;
+  }
   if(!running) return;
   const key=e.key;
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
@@ -3806,7 +3836,9 @@ function harvestOne(k){
     S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
     floatAt(k,"+"+ico(c)+QUALITY[t].mark+(num>1?"×2":""));
   }
+  const first=!((S.harvestQ[c.id]||[])[t]>0);
   for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
+  if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000,true);
   hit(k);
 }
 function act(k){
@@ -3824,45 +3856,24 @@ function act(k){
     save(); renderAll(); return;
   }
   switch(S.tool){
-    case 1: // 素手: 収穫 / 設置物を拾う
+    case 1: {   // 素手/カマ: 実っている区画を押すと、カマの範囲ぶんまとめて収穫する
       if(p.obj){
         if(p.obj==="crow"){ nope(k,"案山子を回収するには 6 で案山子を持って押します"); break; }
         const o=OBJS[p.obj];
         S.objs[p.obj]=(S.objs[p.obj]||0)+1; p.obj=null;
         S.objSel=o.id; floatAt(k,"拾った"); hit(k); sfx.pick();
-      }else if(p.crop && isRipe(p)){
-        // カマの範囲内で実っているものをまとめて収穫する
-        const extra=around(k,sickleInfo().area).filter(x=>f[x].crop && isRipe(f[x]) && !f[x].vil);
-        for(const x of extra) harvestOne(x);
-        const c=CROP[p.crop.id];
-        p.crop=null; p.emptySince=Date.now();
-        hit(k); sfx.harvest();
-        if(c.treasure){                        // 貴重品は売れない。持っているだけで庭にずっと効く
-          S.treas[c.id]=(S.treas[c.id]||0)+1;
-          S.totalHarvest++;
-          floatAt(k,"✨"+ico(c));
-          toast(`${ico(c)} ${esc(c.name)} を手に入れました。${esc(c.eff.text)}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000,true);
-          sfx.vil();
-        }else{
-          let t=tierOf(c.id);
-          if(t<2 && Math.random()<effQuality()) t++;            // 1段上の品質で穫れることがある
-          const num = 1 + (Math.random()<effDouble() ? 1 : 0);  // まれに2個
-          const first=!((S.harvestQ[c.id]||[])[t]>0);
-          if(autoCrop(c.id)){                                   // 自動売却(かごに入れずその場で売る)
-            const gain=priceOf(c.id,t)*num;
-            S.money+=gain; S.totalSales+=gain;
-            floatAt(k,`${ico(c)}${QUALITY[t].mark}${num>1?"×2":""} +${fmtNum(gain)}`);
-          }else{
-            S.inv[c.id]=S.inv[c.id]||[0,0,0]; S.inv[c.id][t]+=num;
-            floatAt(k,"+"+ico(c)+QUALITY[t].mark+(num>1?"×2":""));
-          }
-          for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
-          if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000,true);
-        }
-        checkUnlocks();
-      }else if(p.crop) nope(k,"まだ実っていません");
-      else nope(k);
+        break;
+      }
+      if(!(p.crop && isRipe(p))){        // 押した区画そのものが実っていないと収穫しない
+        nope(k, p.crop ? "まだ実っていません" : null);
+        break;
+      }
+      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]) && !f[x].vil);
+      for(const x of targets) harvestOne(x);
+      sfx.harvest();
+      checkUnlocks();
       break;
+    }
     case 2: { // クワ: 範囲内の草むらをまとめて耕す
       const targets=[k, ...around(k,hoeInfo().area)].filter(x=>f[x].s==="grass" && !f[x].obj && !f[x].vil);
       if(!targets.length){ nope(k, p.crop?"作物が植わっています":null); break; }
@@ -4702,7 +4713,7 @@ function collectAll(){
   try{
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
-      if(k && k.startsWith(LS_PREFIX)) data[k.slice(LS_PREFIX.length)]=localStorage.getItem(k);
+      if(k && k.startsWith(LS_PREFIX) && !k.startsWith(LS_PREFIX+"sync:")) data[k.slice(LS_PREFIX.length)]=localStorage.getItem(k);
     }
   }catch(e){}
   return { app:"nejiuchi", v:1, at:Date.now(), data };
@@ -4776,11 +4787,180 @@ function backupImport(){
   }
   note.textContent="ネジ打ちの記録ではないようです";
 }
+/* =====================================================
+   ブラウザ間の同期(Firebase)
+   共有コードでつながり、記録をまるごとクラウドに置く。
+   ・保存のたびに直前の記録をバックアップに残す(5世代)
+   ・別のブラウザが新しければ、区切りのいいところで取り込む
+   ・同時に開いていると、後から開いたほうは保存しない(見るだけ)
+===================================================== */
+const SYNC_PATH="nejiuchi/saves", SYNC_KEEP=5, SYNC_ALIVE=45000;
+let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
+let syncMetaRef=null, syncHeart=null, syncPending=false, syncLastBundle="", syncPushAt=0;
+const lsGet = k => { try{ return localStorage.getItem(LS_PREFIX+k); }catch(e){ return null; } };
+const lsSet = (k,v) => { try{ localStorage.setItem(LS_PREFIX+k,v); }catch(e){} };
+const lsDel = k => { try{ localStorage.removeItem(LS_PREFIX+k); }catch(e){} };
+const hasDB = () => { try{ return !!db; }catch(e){ return false; } };
+function newSyncCode(){
+  const s="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const p=n=>Array.from({length:n},()=>s[Math.floor(Math.random()*s.length)]).join("");
+  return `NEJI-${p(4)}-${p(4)}`;
+}
+const bundleNow = () => JSON.stringify(collectAll().data);
+function syncInit(){
+  syncDevice=lsGet("sync:device");
+  if(!syncDevice){ syncDevice=Math.random().toString(36).slice(2)+Date.now().toString(36); lsSet("sync:device",syncDevice); }
+  syncCode=lsGet("sync:code")||null;
+  syncLastT=+(lsGet("sync:t")||0);
+  syncLastBundle=bundleNow();
+  if(syncCode && hasDB()) syncConnect();
+  renderSyncState();
+}
+function syncConnect(){
+  if(!hasDB()||!syncCode) return;
+  const base=db.ref(`${SYNC_PATH}/${syncCode}`);
+  // 同時に開いているブラウザがないか調べる(先に開いていたほうが優先)
+  base.child("live").once("value").then(s=>{
+    const now=Date.now(); let other=false;
+    s.forEach(c=>{ if(c.key!==syncDevice && now-(+c.val()||0)<SYNC_ALIVE) other=true; });
+    syncReadOnly=other;
+    renderSyncState();
+  }).catch(()=>{});
+  const beat=()=>{ try{ base.child("live/"+syncDevice).set(Date.now()); }catch(e){} };
+  beat(); clearInterval(syncHeart); syncHeart=setInterval(beat,15000);
+  // 相手の保存を見張る
+  if(syncMetaRef) syncMetaRef.off();
+  syncMetaRef=base.child("meta");
+  syncMetaRef.on("value",snap=>{
+    const m=snap.val(); if(!m||!m.t) return;
+    if(m.by===syncDevice){ syncLastT=Math.max(syncLastT,m.t); lsSet("sync:t",String(syncLastT)); return; }
+    if(m.t<=syncLastT) return;
+    syncPending=true;                       // 遊んでいる最中は取り込まない
+    renderSyncState();
+    if(scene==="title") syncPull();
+  });
+}
+function syncDisconnect(){
+  if(syncMetaRef){ syncMetaRef.off(); syncMetaRef=null; }
+  clearInterval(syncHeart); syncHeart=null;
+}
+function syncStop(){
+  if(syncCode && hasDB()){ try{ db.ref(`${SYNC_PATH}/${syncCode}/live/${syncDevice}`).remove(); }catch(e){} }
+  syncDisconnect();
+  syncCode=null; syncPending=false; syncReadOnly=false;
+  lsDel("sync:code"); lsDel("sync:t");
+  renderSyncState();
+}
+async function syncPush(force){
+  if(!hasDB()||!syncCode||syncReadOnly) return;
+  const bundle=bundleNow();
+  if(!force && bundle===syncLastBundle) return;
+  if(!force && Date.now()-syncPushAt<8000) return;      // 送りすぎない
+  syncPushAt=Date.now();
+  const base=db.ref(`${SYNC_PATH}/${syncCode}`), t=Date.now();
+  try{
+    const prev=await base.child("data").once("value");
+    if(prev.val()) await base.child("backups/"+(syncLastT||t)).set({ data:prev.val(), t:syncLastT||t });
+    await base.child("data").set(b64enc(bundle));
+    await base.child("meta").set({ t, by:syncDevice });
+    syncLastT=t; syncLastBundle=bundle; lsSet("sync:t",String(t));
+    const bk=await base.child("backups").once("value");
+    const keys=[]; bk.forEach(c=>keys.push(c.key));
+    keys.sort((a,b)=>(+a)-(+b));
+    for(let i=0;i<keys.length-SYNC_KEEP;i++) await base.child("backups/"+keys[i]).remove();
+    renderSyncState();
+  }catch(e){}
+}
+/* 相手の記録を取り込む。こちらにも未送信の変更があるときだけ確認する */
+async function syncPull(){
+  if(!hasDB()||!syncCode) return;
+  const base=db.ref(`${SYNC_PATH}/${syncCode}`);
+  try{
+    const [mS,dS]=await Promise.all([ base.child("meta").once("value"), base.child("data").once("value") ]);
+    const m=mS.val(), data=dS.val();
+    if(!m||!data||!m.t||m.t<=syncLastT){ syncPending=false; renderSyncState(); return; }
+    const mine=bundleNow();
+    if(mine!==syncLastBundle){          // 矛盾: 両方で進んでいる
+      const useRemote=confirm("別のブラウザの記録のほうが新しいようです。\nこちらにも保存していない進みぶんがあります。\n\nOK: 向こうの記録を取り込む(こちらの進みは消えます)\nキャンセル: こちらの記録を残して送る");
+      if(!useRemote){ await syncPush(true); syncPending=false; renderSyncState(); return; }
+    }
+    if(applyBundleString(data)){
+      lsSet("sync:t",String(m.t));
+      location.reload();
+    }
+  }catch(e){}
+}
+function applyBundleString(s){
+  let o;
+  try{ o=JSON.parse(b64dec(s)); }catch(e){ return false; }
+  if(!o||typeof o!=="object") return false;
+  try{
+    const old=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k && k.startsWith(LS_PREFIX) && !k.startsWith(LS_PREFIX+"sync:")) old.push(k);
+    }
+    old.forEach(k=>localStorage.removeItem(k));
+    for(const [k,v] of Object.entries(o)) localStorage.setItem(LS_PREFIX+k,String(v));
+  }catch(e){ return false; }
+  return true;
+}
+async function syncBegin(){
+  if(!hasDB()){ $("bkSyncNote").textContent="※Firebase未設定のため同期できません"; return; }
+  syncCode=newSyncCode(); lsSet("sync:code",syncCode); syncLastT=0; syncReadOnly=false;
+  syncConnect();
+  await syncPush(true);
+  $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコードを入力してください";
+  renderSyncState();
+}
+async function syncJoin(){
+  const code=($("bkCode").value||"").trim().toUpperCase();
+  const note=$("bkSyncNote");
+  if(!code){ note.textContent="コードを入れてください"; return; }
+  if(!hasDB()){ note.textContent="※Firebase未設定のため同期できません"; return; }
+  note.textContent="つないでいます…";
+  try{
+    const snap=await db.ref(`${SYNC_PATH}/${code}/data`).once("value");
+    syncCode=code; lsSet("sync:code",code); syncReadOnly=false;
+    if(snap.val()){
+      syncLastT=0; lsSet("sync:t","0");
+      syncConnect();
+      note.textContent="記録を取り込みます…";
+      await syncPull();
+    }else{
+      syncLastT=0; syncConnect(); await syncPush(true);
+      note.textContent="このコードに、今の記録を置きました";
+    }
+    renderSyncState();
+  }catch(e){ note.textContent="つなげませんでした。通信環境を確認してください"; }
+}
+function renderSyncState(){
+  const el=$("bkSyncState");
+  if(el){
+    if(!syncCode) el.innerHTML="同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。";
+    else if(syncReadOnly) el.innerHTML=`同期中 <b>${syncCode}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザで開いています。この画面の記録はクラウドに送りません)`;
+    else el.innerHTML=`同期中 <b>${syncCode}</b> ・ 自動で保存しています${syncPending?" ・ 新しい記録が届いています(タイトルに戻ると取り込みます)":""}`;
+    el.classList.toggle("ro",!!syncReadOnly);
+  }
+  const n=$("syncNote");
+  if(n){
+    if(syncCode && syncReadOnly){ n.style.display=""; n.textContent="別のブラウザで開いているため、この画面の記録は保存されません(見るだけ)"; }
+    else if(syncCode && syncPending){ n.style.display=""; n.textContent="別のブラウザの記録が届いています。取り込んでいます…"; }
+    else n.style.display="none";
+  }
+  const b=$("bkSyncStart");
+  if(b) b.textContent = syncCode ? "同期を止める (S)" : "同期を始める (S)";
+}
+$("bkSyncStart").addEventListener("click",()=>{ syncCode?syncStop():syncBegin(); });
+$("bkJoin").addEventListener("click",syncJoin);
+
 function backupKey(e){
   const k=e.key;
   if(k==="Escape"||k==="k"||k==="K"){ e.preventDefault(); closeBackup(); return; }
   if(k==="c"||k==="C"){ e.preventDefault(); backupCopy(); return; }
   if(k==="i"||k==="I"){ e.preventDefault(); $("bkImport").focus(); return; }
+  if(k==="s"||k==="S"){ e.preventDefault(); syncCode?syncStop():syncBegin(); return; }
+  if(k==="j"||k==="J"){ e.preventDefault(); $("bkCode").focus(); return; }
   if(k==="Enter"){ e.preventDefault(); backupImport(); }
 }
 $("backupBtn").addEventListener("click",openBackup);
@@ -4789,6 +4969,11 @@ $("bkCopy").addEventListener("click",backupCopy);
 $("bkLoad").addEventListener("click",backupImport);
 $("backup").addEventListener("click",e=>{ if(e.target===$("backup")) closeBackup(); });
 /* タイトル画面に、所持ネジと庭でやること(収穫・水切れ)を出す */
+function syncOnTitle(){
+  if(!syncCode) return;
+  if(syncPending) syncPull();
+  else syncPush(false);
+}
 function refreshGardenStat(){
   const el=$("gardenStat"); if(!el) return;
   let s; try{ s=Garden.summary(); }catch(e){ return; }
@@ -4810,6 +4995,8 @@ $("poemGardenBtn").addEventListener("click",()=>{ stopPoem(); openGarden(); });
 refreshBestLine();
 refreshStatsLine();
 refreshGardenStat();
+syncInit();
+window.addEventListener("beforeunload",()=>{ try{ syncPush(true); }catch(e){} });
 setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
 </script>
 </body>
