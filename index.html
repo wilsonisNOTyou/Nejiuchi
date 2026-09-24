@@ -3563,7 +3563,7 @@ function villagerAdvance(p,dt){
 }
 /* 自動売却の設定(作物ごと) */
 /* 自動売却の値段はレア度で上がる(お店の作物は N・R の値段) */
-const AUTO_COSTS = { N:10000, R:30000, SR:100000, HR:300000, UR:1000000, GSR:3000000 };
+const AUTO_COSTS = { N:10000, R:30000, SR:80000, HR:200000, UR:500000, GSR:1000000 };
 const autoCost = id => AUTO_COSTS[(CROP[id]&&CROP[id].r)||"N"] || AUTO_COSTS.N;
 const autoOf = id => S.auto[id] || null;
 const autoCrop = id => { const a=autoOf(id); return !!(a && a.c); };
