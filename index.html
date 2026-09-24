@@ -976,6 +976,47 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
   #screen-garden .gmachine.shake, #screen-garden .gmachine.shake .gknob, #screen-garden .gcard.pop{animation:none}
 }
 
+/* ---- 庭: 大連ガチャ(1111連・11111連)のまとめ表示と演出 ---- */
+#g-gachaFlash{position:fixed; inset:0; pointer-events:none; z-index:3; opacity:0}
+#g-gachaFlash.on{animation:g-flash .7s ease-out}
+#g-gachaFlash.big{animation:g-flashbig 1.4s ease-out}
+@keyframes g-flash{0%{opacity:0; background:radial-gradient(circle at 50% 45%, var(--rc) 0, transparent 70%)}15%{opacity:.75; background:radial-gradient(circle at 50% 45%, var(--rc) 0, transparent 70%)}100%{opacity:0; background:radial-gradient(circle at 50% 45%, var(--rc) 0, transparent 70%)}}
+@keyframes g-flashbig{0%{opacity:0; background:conic-gradient(from 0deg,#ff8a3d,#e2589b,#6f8ef0,#5fd08a,#f4c542,#ff8a3d)}12%{opacity:.8; background:conic-gradient(from 90deg,#ff8a3d,#e2589b,#6f8ef0,#5fd08a,#f4c542,#ff8a3d)}40%{opacity:.35; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 35%, transparent 75%)}100%{opacity:0; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 35%, transparent 75%)}}
+#screen-garden .gsum{display:flex; flex-direction:column; gap:.5rem}
+#screen-garden .gsumtop{font-weight:800; font-size:.95rem}
+#screen-garden .gsumsec{border:2px solid var(--rc); border-radius:10px; background:#fff; padding:.4rem .5rem}
+#screen-garden .gsumsec.pop{animation:g-secin .45s cubic-bezier(.2,.9,.3,1.25)}
+@keyframes g-secin{0%{transform:translateY(10px) scale(.96); opacity:0}100%{transform:none; opacity:1}}
+#screen-garden .gsumsec.hi{box-shadow:0 0 14px color-mix(in srgb, var(--rc) 60%, transparent); background:linear-gradient(135deg,#fff,#fff9ee)}
+#screen-garden .gsumsec.UR, #screen-garden .gsumsec.GSR, #screen-garden .gsumsec.GHR{position:relative; overflow:hidden}
+#screen-garden .gsumsec.UR::after, #screen-garden .gsumsec.GSR::after, #screen-garden .gsumsec.GHR::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.7) 50%,rgba(255,255,255,0) 70%);
+  animation:g-shine 1.8s linear infinite;
+}
+#screen-garden .gsumhead{display:flex; align-items:baseline; gap:.6rem; margin-bottom:.3rem}
+#screen-garden .gsumhead b{color:var(--rc); font-size:1.05rem}
+#screen-garden .gsumhead span{color:var(--ink-l); font-size:.8rem}
+#screen-garden .gsumitems{display:flex; flex-wrap:wrap; gap:.3rem}
+#screen-garden .gsumit{position:relative; display:flex; align-items:center; gap:.25rem; background:#faf5ea; border-radius:999px; padding:.15rem .6rem .15rem .3rem; font-size:.82rem; font-weight:700}
+#screen-garden .gsumit .gi{font-size:1.15rem; line-height:1}
+#screen-garden .gsumit .gct{color:var(--ink-l); font-variant-numeric:tabular-nums}
+#screen-garden .gsumit .gnew{position:static; transform:none; margin-left:.2rem; animation:g-newpulse 1s ease-in-out infinite}
+#screen-garden .gsumit .gsold{color:#2e7d32; font-size:.72rem}
+#screen-garden .gsumit.new{background:#fff0f3; box-shadow:0 0 0 2px #d9573f, 0 0 10px rgba(217,87,63,.45)}
+@keyframes g-newpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+#screen-garden .gspot{border-radius:12px; padding:.6rem; background:linear-gradient(135deg,#fff8e6,#fdf0ff 50%,#eef6ff); box-shadow:inset 0 0 0 2px #e3c341; animation:g-secin .5s ease-out}
+#screen-garden .gspot.plain{box-shadow:inset 0 0 0 2px #e3d7bd; background:#fff; color:var(--ink-l); font-size:.88rem}
+#screen-garden .gspothead{font-weight:800; text-align:center; margin-bottom:.4rem; letter-spacing:.1em; color:#8a6a10}
+#screen-garden .gspot .gcards{min-height:0; justify-content:center}
+#screen-garden .gcard.spot{animation:g-spotin .6s cubic-bezier(.2,.9,.3,1.35) both}
+#screen-garden .gcard.spot .gcnt{position:absolute; right:.3rem; top:1.1rem; font-size:.66rem; font-weight:800; color:var(--ink-l)}
+@keyframes g-spotin{0%{transform:scale(.3) rotate(-12deg); opacity:0}70%{transform:scale(1.12) rotate(2deg); opacity:1}100%{transform:none}}
+#screen-garden .gacts .sbtn.big{background:linear-gradient(180deg,#f3e0ff,#e0c2f5); border-color:#8a5ab8}
+@media (prefers-reduced-motion:reduce){
+  #g-gachaFlash.on, #g-gachaFlash.big, #screen-garden .gsumsec.pop, #screen-garden .gcard.spot, #screen-garden .gsumit .gnew, #screen-garden .gsumsec::after{animation:none}
+}
+
 /* ---- 庭: ガチャ画面とアイテムリスト ---- */
 #screen-garden .tbtn.gacha{background:linear-gradient(180deg,#f3e0ff,#e0c2f5); border-color:#8a5ab8; box-shadow:0 3px 0 #8a5ab8}
 #screen-garden .gachapanel{width:min(820px,95vw)}
@@ -1461,6 +1502,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 
   <!-- 種ガチャ -->
   <div class="modal" id="g-gacha">
+    <div id="g-gachaFlash"></div>
     <div class="panel gachapanel">
       <div class="phead">
         <h2>種ガチャ</h2>
@@ -4300,7 +4342,7 @@ function openModal(name){
 }
 function closeModal(silent){
   if(!modal) return;
-  if(modal==="gacha" && gachaShown<gachaRes.length) gachaSkip();
+  if(modal==="gacha" && gachaBusy()) gachaSkip();
   if(!silent) sfx.close();
   $("g-"+modal).classList.remove("open");
   const ae=document.activeElement; if(ae && ae.blur) ae.blur();
@@ -4381,6 +4423,14 @@ function shopRows(){
     rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}ネジ</span>`:"畑チケット",
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
+    // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)
+    for(const n of GACHA_BIG){
+      const has=gachaPass(n);
+      rows.push({ ic:"🎟️",
+        nm: `${fmtNum(n)}連ガチャの権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(GACHA_PASS_PRICE[n])+"ネジ"}</span>`,
+        ds: `種ガチャで ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます${has?"":" ・ 結果は作物ごとにまとめて表示します"}`,
+        keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
+    }
   }else if(shopTab===2){
     // 効率化: 作物ごとの自動売却
     for(const c of CROPS){
@@ -4640,10 +4690,29 @@ function drawOne(minIdx){
   const r=rollRarity(minIdx), pool=poolOf(r);
   return { r, id: pool[Math.floor(Math.random()*pool.length)].id };
 }
+/* 1111連・11111連: お店で権利を買うと引けるようになる(ガチャ代は別) */
+const GACHA_COST1111=100000, GACHA_COST11111=1000000;
+const GACHA_BIG=[1111,11111];
+const GACHA_PASS_PRICE={ 1111:100000, 11111:1000000 };
+const gachaPass = n => !!(S.gachaPass && S.gachaPass[n]);
+const gachaCost = n => Math.max(1, Math.round((
+  n===11111 ? GACHA_COST11111 : n===1111 ? GACHA_COST1111 : n===111 ? GACHA_COST111 : n===11 ? GACHA_COST11 : GACHA_COST1*n
+)*effGacha()));
+function buyGachaPass(n){
+  if(gachaPass(n)) return;
+  if(!spend(GACHA_PASS_PRICE[n])) return;
+  S.gachaPass=S.gachaPass||{}; S.gachaPass[n]=true;
+  toast(`🎟️ ${fmtNum(n)}連ガチャの権利を買いました。ガチャで ${fmtNum(n)}連 が引けます`,"good",4200);
+  save(); renderAll();
+}
 let gachaRes=[], gachaShown=0, gachaTimer=null;
+/* 大連(1111連以上)の結果: 作物ごとにまとめ、低レアから順に出す */
+let gachaBig=null;   // { n, groups:[{ r, total, items:[{id,n,isNew,sold}] }], stage, soldAll, newKinds }
+const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length);
 function drawGacha(n){
-  if(gachaShown<gachaRes.length) return;      // 演出中は引けない
-  const cost = Math.max(1, Math.round((n===111 ? GACHA_COST111 : (n===11 ? GACHA_COST11 : GACHA_COST1*n))*effGacha()));
+  if(gachaBusy()) return;                     // 演出中は引けない
+  if(GACHA_BIG.includes(n) && !gachaPass(n)){ sfx.nope(); toast(`${fmtNum(n)}連は、お店(道具・土地)で権利を買うと引けます`,"warn",3200); return; }
+  const cost=gachaCost(n);
   if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return; }
   S.money-=cost;
   const res=[];
@@ -4651,8 +4720,8 @@ function drawGacha(n){
   // 11回ごとにSR以上を1つ確定(111回なら10回分)
   if(n>=11){
     for(let b=0; b+11<=n; b+=11){
-      const blk=res.slice(b,b+11);
-      if(!blk.some(x=>RARITY_ORDER.indexOf(x.r)>=2)) res[b+10]=drawOne(2);
+      let ok=false; for(let j=b;j<b+11;j++) if(RARITY_ORDER.indexOf(res[j].r)>=2){ ok=true; break; }
+      if(!ok) res[b+10]=drawOne(2);
     }
   }
   for(const x of res){
@@ -4667,11 +4736,33 @@ function drawGacha(n){
     }
   }
   S.gachaCount=(S.gachaCount||0)+n;
-  gachaRes=res; gachaShown=0;
   if(!ownedSeeds().includes(S.seedId)) S.seedId=res[0].id;
   checkUnlocks(); save();
+  if(n>=1111){
+    gachaRes=[]; gachaShown=0;
+    gachaBig=summarizeGacha(n,res);
+    renderGacha();
+    revealBigNext();
+    return;
+  }
+  gachaBig=null;
+  gachaRes=res; gachaShown=0;
   renderGacha();
   revealNext();
+}
+function summarizeGacha(n,res){
+  const by={};
+  for(const x of res){
+    const o=by[x.id]||(by[x.id]={ id:x.id, n:0, isNew:false, sold:0 });
+    o.n++; if(x.isNew) o.isNew=true; if(x.sold) o.sold+=x.sold;
+  }
+  const groups=[];
+  for(const r of RARITY_ORDER){
+    const items=poolOf(r).map(c=>by[c.id]).filter(Boolean);
+    if(items.length) groups.push({ r, items, total:items.reduce((a,x)=>a+x.n,0) });
+  }
+  const all=Object.values(by);
+  return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), newKinds:all.filter(x=>x.isNew).length };
 }
 function revealNext(){
   clearTimeout(gachaTimer);
@@ -4681,8 +4772,32 @@ function revealNext(){
   renderGacha();
   gachaTimer=setTimeout(revealNext, gachaRes.length>20 ? 70 : 360);
 }
+/* 大連: レア度ごとに1段ずつ出す。目玉(HR以上)・NEWのある段は光らせて、ゆっくり見せる */
+function revealBigNext(){
+  clearTimeout(gachaTimer);
+  const B=gachaBig; if(!B) return;
+  if(B.stage>=B.groups.length){ bigFinale(); return; }
+  const g=B.groups[B.stage++], ri=RARITY_ORDER.indexOf(g.r), hasNew=g.items.some(x=>x.isNew);
+  sfxGacha(g.r);
+  if(hasNew) setTimeout(sfxNew,260);
+  if(ri>=3 || hasNew) gachaFlash(g.r, ri>=4);
+  renderGacha();
+  gachaTimer=setTimeout(revealBigNext, ri>=5?2000 : ri===4?1600 : ri===3?1100 : hasNew?900 : 480);
+}
+function bigFinale(){
+  const B=gachaBig; if(!B) return;
+  B.done=true;
+  const best=B.groups.reduce((a,g)=>Math.max(a,RARITY_ORDER.indexOf(g.r)),0);
+  if(best>=3 || B.newKinds){ setTimeout(()=>{ sfxGacha(RARITY_ORDER[best]); gachaFlash(RARITY_ORDER[best], best>=4); },120); }
+  renderGacha(); renderBar(); save();
+}
 function gachaSkip(){
   clearTimeout(gachaTimer);
+  if(gachaBig && gachaBig.stage<gachaBig.groups.length){
+    gachaBig.stage=gachaBig.groups.length;
+    bigFinale();
+    return;
+  }
   if(!gachaRes.length) return;
   gachaShown=gachaRes.length;
   const best=gachaRes.reduce((a,x)=>Math.max(a,RARITY_ORDER.indexOf(x.r)),0);
@@ -4697,18 +4812,31 @@ function sfxGacha(r){
   else if(i===3) seq([1046,1318,1568,2093],70,"square",.055,.12);
   else seq([784,988,1318,1568,2093,2637],75,"square",.06,.16);
 }
+const sfxNew = () => seq([1568,2093,2637,3136],60,"triangle",.05,.12);
+/* 画面全体を一瞬光らせる(big: UR以上は虹色で長め) */
+function gachaFlash(r,big){
+  const f=$("g-gachaFlash"); if(!f) return;
+  f.style.setProperty("--rc", RARITY[r].color);
+  f.className=""; void f.offsetWidth; f.className="on"+(big?" big":"");
+}
 /* ガチャ画面: 機械・確率・引いた結果・アイテムリスト */
 function renderGacha(){
   $("g-gachaMoney").textContent=fmtNum(S.money);
-  $("g-gachaBody").innerHTML=gachaHTML()+gachaListHTML();
+  const body=$("g-gachaBody");
+  body.innerHTML=gachaHTML()+gachaListHTML();
+  // 大連の演出中は、いま出した段が見えるようにする
+  const cur=body.querySelector(".gsumsec.pop, .gspot");
+  if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest", behavior:"smooth"});
+  const bigBtns=GACHA_BIG.filter(gachaPass);
   if(window.IS_MOBILE){
-    $("g-gachaHint").innerHTML = gachaShown<gachaRes.length
+    $("g-gachaHint").innerHTML = gachaBusy()
       ? `<div class="acts gacts"><button class="sbtn main" data-g="skip">早送り</button></div>`
-      : `<div class="acts gacts"><button class="sbtn main" data-g="1">1回</button><button class="sbtn main" data-g="11">11回</button><button class="sbtn main" data-g="111">111回</button></div>`;
+      : `<div class="acts gacts"><button class="sbtn main" data-g="1">1回</button><button class="sbtn main" data-g="11">11回</button><button class="sbtn main" data-g="111">111回</button>${bigBtns.map(n=>`<button class="sbtn main big" data-g="${n}">${fmtNum(n)}回</button>`).join("")}</div>`;
     return;
   }
+  const bigKeys={1111:"A",11111:"S"};
   $("g-gachaHint").innerHTML =
-    (gachaShown<gachaRes.length ? "<b>Enter</b> 早送り" : "<b>Enter</b> 1回 ・ <b>Shift+Enter</b> 11回 ・ <b>Ctrl+Enter</b> 111回")+
+    (gachaBusy() ? "<b>Enter</b> 早送り" : "<b>Enter</b> 1回 ・ <b>Shift+Enter</b> 11回 ・ <b>Ctrl+Enter</b> 111回"+bigBtns.map(n=>` ・ <b>${bigKeys[n]}</b> ${fmtNum(n)}回`).join(""))+
     " ・ <b>↑ ↓</b> リストを見る ・ <b>7</b> / <b>Esc</b> 閉じる";
 }
 /* アイテムリスト: レア度ごとに、出る作物を並べる。未入手は影だけ見える */
@@ -4731,23 +4859,54 @@ function gachaListHTML(){
 $("g-gachaHint").addEventListener("click",e=>{
   const b=e.target.closest("[data-g]"); if(!b) return;
   if(b.dataset.g==="skip") gachaSkip();
-  else if(gachaShown>=gachaRes.length) drawGacha(+b.dataset.g);
+  else if(!gachaBusy()) drawGacha(+b.dataset.g);
 });
 function gachaKey(e){
   const k=e.key;
   if(k==="Escape"||k==="7"){ e.preventDefault(); closeModal(); return; }
   if(k==="Enter"){
     e.preventDefault();
-    if(gachaShown<gachaRes.length) gachaSkip();
+    if(gachaBusy()) gachaSkip();
     else drawGacha((e.ctrlKey||e.metaKey) ? 111 : (e.shiftKey?11:1));
     return;
   }
+  if(!gachaBusy() && (k==="a"||k==="A")){ e.preventDefault(); drawGacha(1111); return; }
+  if(!gachaBusy() && (k==="s"||k==="S")){ e.preventDefault(); drawGacha(11111); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-gachaBody").scrollBy(0, k==="ArrowDown"?90:-90); }
+}
+/* 大連の結果: 低レアから段ごとに、作物と個数を並べる。最後に目玉(HR以上)とNEWを大きく出す */
+function gachaBigHTML(){
+  const B=gachaBig;
+  const shown=B.groups.slice(0,B.stage);
+  const secs=shown.map((g,i)=>{
+    const ri=RARITY_ORDER.indexOf(g.r), last=i===shown.length-1 && !B.done;
+    return `<div class="gsumsec ${g.r}${ri>=3?" hi":""}${last?" pop":""}" style="--rc:${RARITY[g.r].color}">
+      <div class="gsumhead"><b>${RARITY[g.r].label}</b><span>${fmtNum(g.total)}個 ・ ${g.items.length}種</span></div>
+      <div class="gsumitems">${g.items.map(x=>{ const c=CROP[x.id]; return `<div class="gsumit${x.isNew?" new":""}">
+        <span class="gi">${ico(c)}</span><span class="gnm">${c.name}</span><span class="gct">×${fmtNum(x.n)}</span>
+        ${x.isNew?'<span class="gnew">NEW</span>':""}${x.sold?`<span class="gsold">+${fmtNum(x.sold)}</span>`:""}</div>`; }).join("")}</div>
+    </div>`;
+  }).join("");
+  let spot="";
+  if(B.done){
+    const picks=[];
+    for(const g of B.groups){ const ri=RARITY_ORDER.indexOf(g.r); for(const x of g.items) if(ri>=3 || x.isNew) picks.push({...x, r:g.r}); }
+    picks.sort((a,b)=>RARITY_ORDER.indexOf(b.r)-RARITY_ORDER.indexOf(a.r) || (b.isNew-a.isNew));
+    spot = picks.length
+      ? `<div class="gspot"><div class="gspothead">✨ 今回の目玉 ✨</div><div class="gcards">`+picks.map((x,i)=>{ const c=CROP[x.id]; return `<div class="gcard ${x.r} spot" style="animation-delay:${Math.min(i,20)*90}ms">
+          <span class="gtag">${RARITY[x.r].label}</span><span class="gic">${ico(c)}</span><span class="gnm">${c.name}</span>
+          ${x.isNew?'<span class="gnew">NEW</span>':""}<span class="gcnt">×${fmtNum(x.n)}</span></div>`; }).join("")+`</div></div>`
+      : `<div class="gspot plain">今回は HR 以上・NEW はありませんでした。また挑戦しましょう</div>`;
+  }
+  return `<div class="gsum">
+    <div class="gsumtop">${fmtNum(B.n)}連の結果${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}ネジ`:""}`:" ・ 開封中…"}</div>
+    ${secs}${spot}
+  </div>`;
 }
 function gachaHTML(){
   const rates=RARITY_ORDER.map(r=>
     `<div class="grate" style="--rc:${RARITY[r].color}"><b>${RARITY[r].label}</b><span>${RARITY[r].rate}%</span><small>${poolOf(r).length}種</small></div>`).join("");
-  const spinning = gachaShown<gachaRes.length;
+  const spinning = gachaBusy();
   const cards=gachaRes.slice(0,gachaShown).map((x,i)=>{
     const c=CROP[x.id];
     return `<div class="gcard ${x.r}${i===gachaShown-1?" pop":""}">
@@ -4765,12 +4924,12 @@ function gachaHTML(){
         <div class="gneck"></div>
         <div class="gbody"><span class="gknob"></span><span class="gout"></span></div>
       </div>
-      <div class="gcost">1回 <b>${fmtNum(Math.round(GACHA_COST1*effGacha()))}</b>ネジ<br>11回 <b>${fmtNum(Math.round(GACHA_COST11*effGacha()))}</b>ネジ<br>111回 <b>${fmtNum(Math.round(GACHA_COST111*effGacha()))}</b>ネジ<small>11回ごとにSR以上1つ確定${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
+      <div class="gcost">1回 <b>${fmtNum(gachaCost(1))}</b>ネジ<br>11回 <b>${fmtNum(gachaCost(11))}</b>ネジ<br>111回 <b>${fmtNum(gachaCost(111))}</b>ネジ${GACHA_BIG.filter(gachaPass).map(n=>`<br>${fmtNum(n)}回 <b>${fmtNum(gachaCost(n))}</b>ネジ`).join("")}<small>11回ごとにSR以上1つ確定${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
       <div class="gtotal">これまで ${fmtNum(S.gachaCount||0)}回</div>
     </div>
     <div class="gright">
       <div class="grates">${rates}</div>
-      <div class="gcards">${cards||'<div class="gempty">ここに引いた種が出ます</div>'}</div>
+      ${gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||'<div class="gempty">ここに引いた種が出ます</div>'}</div>`}
     </div>
   </div>`;
 }
