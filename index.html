@@ -862,6 +862,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 }
 
 /* ---- 庭: 変異(品質の4番目) ---- */
+#screen-garden .plot.ripe.mutp{box-shadow:0 0 0 3px #b27ce8, 0 0 16px rgba(178,124,232,.9), inset 0 -4px 0 rgba(0,0,0,.18)}
+#screen-garden .plot.mutp .qb{color:#e9d2ff}
 #screen-garden .cart.mut svg{filter:drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 0 5px rgba(190,120,255,.85))}
 #screen-garden .chip.q3{background:linear-gradient(135deg,#fff4fb,#f1e8ff 50%,#e8f6ff); box-shadow:inset 0 0 0 2px #b27ce8, 0 0 10px rgba(178,124,232,.55)}
 #screen-garden .bookdetail .bic.q3{filter:drop-shadow(0 0 10px rgba(178,124,232,.9))}
@@ -3598,7 +3600,12 @@ function isWet(fi,k,now,cov){
 function grow(p,add,base){
   const before=p.crop.grown, n=need(p.crop);
   p.crop.grown=Math.min(n, before+add);
-  if(p.crop.grown>=n && !p.crop.ripeAt) p.crop.ripeAt=base+(n-before);
+  if(p.crop.grown>=n && !p.crop.ripeAt){
+    p.crop.ripeAt=base+(n-before);
+    // 実った瞬間に変異かどうかが決まる(畑で変異の絵が見える)
+    if(hasMut(p.crop.id) && Math.random()<effMut()) p.crop.mut=true;
+    p.crop.rolled=true;
+  }
 }
 function tick(now=Date.now()){
   const last=S.lastTick;
@@ -3954,7 +3961,7 @@ function renderField(){
     }
     const wet=isWet(S.cur,k,now,cov);
     const growing=p.crop && !isRipe(p);
-    el.className="plot "+p.s+(wet?" wet":"")+(growing?" growing":"")+(p.crop&&isRipe(p)?" ripe":"")+(p.vil?" vil":"")+gap+(k===selKey?" sel":"");
+    el.className="plot "+p.s+(wet?" wet":"")+(growing?" growing":"")+(p.crop&&isRipe(p)?" ripe":"")+(p.crop&&p.crop.mut&&isRipe(p)?" mutp":"")+(p.vil?" vil":"")+gap+(k===selKey?" sel":"");
     qb.textContent=(p.crop&&isRipe(p)) ? (p.crop.mut ? QUALITY[3].mark : QUALITY[tierOf(p.crop.id)].mark) : "";
     if(p.crop){
       const {ic,st}=cropStageIcon(p);
@@ -4000,9 +4007,9 @@ function renderInfo(){
   }else{
     const c=CROP[p.crop.id];
     if(isRipe(p)){
-      const t=tierOf(c.id);
-      big=`${selKey} ・ ${ico(c)} ${esc(qName(c.id,t))} 収穫できます`;
-      sub.push(`素手(1)で収穫 ・ 売値 ${priceOf(c.id,t)}ネジ`);
+      const t=p.crop.mut?3:tierOf(c.id);
+      big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===3?"(変異)":""}`;
+      sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}ネジ${t===3?" ・ 変異は自動売却されません":""}`);
       if(t<2){ const left=QUALITY[t+1].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,t+1)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
@@ -4094,7 +4101,8 @@ function hit(k){
 function harvestOne(k){
   const f=field(), p=f[k];
   if(!p.crop || !isRipe(p)) return;
-  const c=CROP[p.crop.id], leftMut=!!p.crop.mut;   // 村人が残した変異
+  // 変異は実ったときに決まっている(この変更より前に実っていた作物だけ、収穫のときに決める)
+  const c=CROP[p.crop.id], cropMut=!!p.crop.mut, rolled=!!p.crop.rolled;
   p.crop=null; p.emptySince=Date.now();
   if(c.treasure){
     S.treas[c.id]=(S.treas[c.id]||0)+1; S.totalHarvest++;
@@ -4103,7 +4111,7 @@ function harvestOne(k){
     return;
   }
   let t=tierOf(c.id);
-  const mut = leftMut || (hasMut(c.id) && Math.random()<effMut());   // 1%(+貴重品)で変異
+  const mut = cropMut || (!rolled && hasMut(c.id) && Math.random()<effMut());
   if(mut) t=3;
   const num = 1 + (Math.random()<effDouble() ? 1 : 0);
   if(autoCrop(c.id) && !mut){                           // 変異は自動売却しない
