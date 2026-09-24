@@ -4034,7 +4034,15 @@ function renderBasket(){
   if(!any) b.innerHTML='<span class="empty">まだ何もありません。実った作物を素手(1)で収穫しましょう</span>';
 }
 /* 手持ちの種・設置物(1つ以上あるもの) */
-const ownedSeeds=()=>CROPS.filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id);
+/* 種の並びは売値の安い順(貴重品の種は最後)。◀ ▶ もこの順に動く */
+const seedRank = id => { const c=CROP[id]; return !c ? 0 : (c.treasure ? Infinity : c.price); };
+const ownedSeeds=()=>CROPS.filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id).sort((a,b)=>seedRank(a)-seedRank(b));
+/* 手持ちがなくなった種の次に持つ種: それより高い種のうち一番安いもの。無ければ手持ちで一番高い種 */
+function nextSeed(fromId){
+  const o=ownedSeeds(); if(!o.length) return fromId;
+  const base=seedRank(fromId);
+  return o.find(id=>seedRank(id)>base) || o[o.length-1];
+}
 const crowPlaced =()=>S.fields.some(f=>f[POST].obj==="crow");
 const ownedObjs =()=>OBJ_ORDER.filter(id=>(S.objs[id]||0)>0 || (id==="crow"&&crowPlaced())).concat(S.villagers>0?["vil"]:[]);
 function renderBar(){
@@ -4044,7 +4052,7 @@ function renderBar(){
   $("g-hoeName").textContent=hoeInfo().name;
   // 種
   const owned=ownedSeeds();
-  if(!owned.includes(S.seedId) && owned.length) S.seedId=owned[0];
+  if(!owned.includes(S.seedId) && owned.length) S.seedId=nextSeed(S.seedId);
   const n=S.seeds[S.seedId]||0;
   if(n>0){ const c=CROP[S.seedId]; $("g-seedIc").innerHTML=ico(c); $("g-seedNm").textContent=c.name+"の種"; $("g-seedCnt").textContent="×"+n; }
   else   { $("g-seedIc").innerHTML="🌱"; $("g-seedNm").textContent="種がありません"; $("g-seedCnt").textContent=""; }
@@ -4538,7 +4546,7 @@ function sellSeed(id,n){
   const gain=k*seedPrice(c);
   S.money+=gain; S.totalSales+=gain; sfx.sell();
   toast(`${ico(c)} ${esc(c.name)}の種を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good",2600,true);
-  if(!(S.seeds[S.seedId]>0)){ const o=ownedSeeds(); if(o.length) S.seedId=o[0]; }
+  if(!(S.seeds[S.seedId]>0)) S.seedId=nextSeed(S.seedId);
   save(); renderAll();
 }
 function sell(id,t,n){
