@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ネジ打ち</title>
+<script>
+/* スマホ・タブレット判定。?mobile=1 / ?pc=1 で切り替えて確かめられる */
+(function(){
+  var q=location.search, ua=navigator.userAgent||"";
+  var m=/[?&]mobile=1/.test(q) || (!/[?&]pc=1/.test(q) && (
+    /Mobi|Android|iPhone|iPod/i.test(ua) ||
+    (/iPad|Macintosh/.test(ua) && navigator.maxTouchPoints>1) ||
+    (window.matchMedia && matchMedia("(pointer:coarse)").matches && !matchMedia("(any-pointer:fine)").matches)
+  ));
+  window.IS_MOBILE=m;
+  if(m) document.documentElement.classList.add("mobile");
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho:wght@500;700;800&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -1024,6 +1037,133 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
   font-size:8rem; color:var(--amber); text-shadow:0 6px 0 #6b4e00;
   background:rgba(10,12,16,.55); z-index:10;
 }
+
+/* =====================================================
+   スマホ(html.mobile)
+   タイピングのモードは隠し、庭・ランキング・辞典・記録の引き継ぎだけにする。
+   縦持ち・横持ちそれぞれで並びを変える
+===================================================== */
+.m-only{display:none}
+html.mobile .m-only{display:block}
+html.mobile .pc-only{display:none}
+html{-webkit-text-size-adjust:100%}
+html.mobile button, html.mobile .plot, html.mobile .slot, html.mobile .fbtn, html.mobile .arr{touch-action:manipulation; -webkit-tap-highlight-color:transparent}
+/* キーの案内は出さない */
+html.mobile .kbd, html.mobile .kbdh, html.mobile .hint, html.mobile .keynav,
+html.mobile #screen-garden .tbtn .kb, html.mobile #screen-garden .slot .n{display:none}
+html.mobile #app{width:100%; padding:1rem 12px 1.5rem}
+html.mobile body{align-items:flex-start}
+
+/* タイトル: 庭と、ランキング・辞典・引き継ぎだけ */
+html.mobile #screen-title .mode-group:not(:has(.garden)){display:none}
+html.mobile #screen-title .mode-group .diff-btn:not(.garden){display:none}
+html.mobile #screen-title .diff-btn.garden{width:min(360px,100%); padding:1rem 1.2rem}
+html.mobile #screen-title .diff-btn.garden .name{font-size:1.5rem}
+html.mobile #screen-title .diff-btn.garden .desc{font-size:.85rem}
+html.mobile .mnote{color:var(--steel); font-size:.8rem; line-height:1.6; margin:.2rem auto .8rem; max-width:360px}
+html.mobile #screen-title .btn-row{flex-direction:column; align-items:center; gap:.6rem}
+html.mobile #screen-title .btn-row .btn{width:min(360px,100%); padding:.9rem 1rem}
+html.mobile .gstat{margin:-.6rem 0 1rem; font-size:.85rem}
+html.mobile h1{margin-top:.2em}
+html.mobile .subtitle{margin-bottom:1.1rem; letter-spacing:.12em; font-size:.9rem}
+
+/* ランキング・辞典 */
+html.mobile .rank-list{width:100%; max-height:none}
+html.mobile .rank-tabs .btn{padding:.55rem .8rem}
+html.mobile .rank-title{font-size:1.3rem}
+
+/* 記録の引き継ぎ */
+html.mobile .bk-modal{align-items:flex-start; padding:10px 0; overflow:auto}
+html.mobile .bk-panel{width:calc(100% - 20px); max-height:none; padding:1rem}
+html.mobile .bk-foot{flex-wrap:wrap}
+html.mobile .bk-codein{width:100%; font-size:16px}          /* 16px未満だとiPhoneが拡大してしまう */
+html.mobile .bk-code, html.mobile #screen-garden .rk-input, html.mobile .name-input{font-size:16px}
+
+/* ---- 庭 ---- */
+html.mobile body.garden #app{width:100%; padding:.6rem 8px 1.5rem}
+html.mobile #screen-garden .top{gap:.45rem; margin-bottom:.6rem}
+html.mobile #screen-garden .sign{font-size:1.15rem; padding:.25rem .7rem .3rem}
+html.mobile #screen-garden .money{font-size:1.1rem; padding:.2rem .7rem}
+html.mobile #screen-garden .rate{display:none}
+html.mobile #screen-garden .tbtn{padding:.5rem .7rem; font-size:.88rem}
+html.mobile #screen-garden .bar-row{gap:.4rem; margin-bottom:.6rem}
+html.mobile #screen-garden .slot{padding:.4rem .55rem; font-size:.88rem; gap:.3rem; min-height:2.8rem}
+html.mobile #screen-garden .seedsel .arr{
+  visibility:visible; font-size:1rem; padding:.35rem .5rem; margin:-.35rem 0;
+  border-radius:6px; background:rgba(0,0,0,.06); color:var(--ink);
+}
+html.mobile #screen-garden .fieldsel{gap:.35rem; padding:.3rem .5rem}
+html.mobile #screen-garden .fieldsel .fbtn{
+  font-size:1rem; padding:.35rem .6rem; border-radius:6px; background:rgba(0,0,0,.08); color:var(--ink); cursor:pointer;
+}
+html.mobile #screen-garden .plot .lbl{display:none}
+html.mobile #screen-garden .under{grid-template-columns:1fr; gap:.5rem; margin-top:1rem}
+html.mobile #screen-garden .help{font-size:.8rem}
+/* ウィンドウ */
+html.mobile #screen-garden .modal{align-items:flex-start; padding:8px 0}
+html.mobile #screen-garden .panel{width:calc(100% - 16px); max-height:calc(100dvh - 16px); padding:.8rem .8rem 1rem; display:flex; flex-direction:column}
+html.mobile #screen-garden .phead{flex-wrap:wrap; gap:.5rem; margin-bottom:.5rem}
+html.mobile #screen-garden .phead h2{font-size:1.15rem}
+html.mobile #screen-garden .tabs{flex-wrap:wrap}
+html.mobile #screen-garden .tabs::before, html.mobile #screen-garden .tabs::after{display:none}
+html.mobile #screen-garden .tab{flex:1; padding:.55rem .4rem; font-size:.9rem}
+html.mobile #screen-garden .plist{max-height:none; flex:1; min-height:0}
+html.mobile #screen-garden .gbody-scroll{max-height:none; flex:1; min-height:0}
+html.mobile #screen-garden .rowi .keyk{white-space:normal}
+html.mobile #screen-garden .sbtn{padding:.5rem .8rem; font-size:.88rem}
+html.mobile #screen-garden .keyhint{margin-top:.5rem; padding-top:.5rem}
+html.mobile #screen-garden .keyhint:empty{display:none}
+html.mobile #screen-garden .keyhint:not(#g-shopHint):not(#g-gachaHint){display:none}
+/* お知らせは下に出して、上のボタンを隠さない */
+html.mobile #screen-garden #g-toasts{top:auto; bottom:max(14px, env(safe-area-inset-bottom)); width:calc(100% - 24px)}
+html.mobile #screen-garden .toast{font-size:.9rem; padding:.45rem .8rem}
+html.mobile #screen-garden .gacts{justify-content:center}
+html.mobile #screen-garden .gacts .sbtn{flex:1; max-width:9rem; padding:.7rem .5rem; font-size:1rem}
+html.mobile #screen-garden .book{grid-template-columns:1fr 1.3fr; gap:.6rem; flex:1; min-height:0}
+html.mobile #screen-garden .book .booklist{max-height:none; overflow:auto}
+html.mobile #screen-garden .bookdetail{overflow:auto; min-height:0; padding:.8rem}
+html.mobile #screen-garden .btab{padding:.3rem .8rem; font-size:.85rem; cursor:pointer}
+html.mobile #screen-garden .tlist{grid-template-columns:1fr}
+
+/* 縦持ち: 3×3のまとまりを 2列×2段 に並べ、区画を大きくする */
+@media (orientation:portrait){
+  html.mobile #screen-garden{--k:min(62px, calc((100vw - 62px) / 6.3)); --g:5px}
+  html.mobile #screen-garden .planter{
+    display:grid; justify-content:center;
+    grid-template-columns:repeat(3,var(--k)) 12px repeat(3,var(--k));
+    grid-template-rows:repeat(3,var(--k)) 12px repeat(3,var(--k));
+    gap:var(--g); padding:12px;
+  }
+  html.mobile #screen-garden .krow{display:contents}
+  html.mobile #screen-garden .plot{grid-row:var(--gr); grid-column:var(--gc)}
+  html.mobile #screen-garden .plot.gap{margin-right:0}
+  html.mobile #screen-garden .top .sp{display:none}
+  html.mobile #screen-garden .top .tbtn{flex:1 1 auto}
+  html.mobile #screen-garden .bar-row .slot{flex:1 1 auto; justify-content:center}
+  html.mobile #screen-garden .fieldsel{margin-left:0; flex:1 1 100%; justify-content:center}
+  /* ウィンドウの中は縦に積む */
+  html.mobile #screen-garden .rowi{grid-template-columns:2.2rem 1fr}
+  html.mobile #screen-garden .rowi .keyk{grid-column:2 / -1; text-align:left}
+  html.mobile #screen-garden .rowi .acts{justify-content:flex-start}
+  html.mobile #screen-garden .book{grid-template-columns:1fr; grid-template-rows:minmax(8rem,34%) 1fr}
+  html.mobile #screen-garden .booklist .rowi{grid-template-columns:2rem 1fr auto}
+  html.mobile #screen-garden .gacha{grid-template-columns:1fr; gap:.6rem}
+  html.mobile #screen-garden .gleft{width:auto; display:flex; align-items:center; justify-content:center; gap:1rem}
+  html.mobile #screen-garden .gmachine{transform:scale(.8); margin:0}
+  html.mobile #screen-garden .gcards{min-height:6rem; justify-content:center}
+  html.mobile #screen-garden .gcard{width:4.4rem; height:5rem}
+}
+/* 横持ち: 高さが少ないので、キーボードの並びのまま区画の大きさを高さに合わせる */
+@media (orientation:landscape){
+  html.mobile #screen-garden{--k:min(64px, 7.8vw, calc((100dvh - 120px) / 3.3)); --g:min(6px,.8vw)}
+  html.mobile #screen-garden .planter{width:max-content; margin:0 auto}
+  html.mobile #screen-garden .under{grid-template-columns:1.3fr 1fr}
+  html.mobile #screen-garden .panel{width:min(820px, calc(100% - 16px))}
+  html.mobile #screen-garden .book .booklist, html.mobile #screen-garden .bookdetail{max-height:none}
+  html.mobile #screen-garden .gacha{grid-template-columns:auto 1fr}
+  html.mobile #screen-garden .gleft{width:120px}
+  html.mobile #screen-garden .gmachine{transform:scale(.75); transform-origin:top center; margin-bottom:-40px}
+}
 </style>
 </head>
 <body>
@@ -1090,6 +1230,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       </div>
     </div>
 
+    <p class="mnote m-only">タイピングのモードはパソコンで遊べます。スマホでは庭・ランキング・辞典・記録の引き継ぎが使えます</p>
     <p class="best-line" id="bestLine"></p>
     <p class="best-line" id="bestLineTa"></p>
     <p class="best-line" id="bestLinePoem"></p>
@@ -1243,7 +1384,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       <div class="slot" data-tool="6"><span class="n">6</span>
         <div class="seedsel"><span class="arr" id="g-objArrL">◀</span><span class="ic" id="g-objIc">📦</span><span id="g-objNm">設置</span><span class="cnt" id="g-objCnt"></span><span class="arr" id="g-objArrR">▶</span></div>
       </div>
-      <div class="fieldsel"><span class="arr">▲▼</span>畑 <span id="g-fieldNo">1</span> / <span id="g-fieldMax">1</span><span class="arr" id="g-fieldHint"></span></div>
+      <div class="fieldsel"><span class="arr fbtn" id="g-fieldUp">▲</span><span class="arr fbtn" id="g-fieldDn">▼</span>畑 <span id="g-fieldNo">1</span> / <span id="g-fieldMax">1</span><span class="arr" id="g-fieldHint"></span></div>
     </div>
 
     <div class="planter" id="g-planter"></div>
@@ -1251,7 +1392,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
     <div class="under">
       <div class="card" id="g-info">
         <h3>区画のようす</h3>
-        <div class="big" id="g-infoBig">キーを押すと、その区画のようすが表示されます</div>
+        <div class="big" id="g-infoBig"><span class="pc-only">キーを押すと、その区画のようすが表示されます</span><span class="m-only">区画をタップすると、そのようすが表示されます</span></div>
         <div class="sub" id="g-infoSub"></div>
       </div>
       <div class="card">
@@ -1260,7 +1401,11 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       </div>
     </div>
 
-    <p class="help">
+    <p class="help m-only">
+      道具を選んで区画をタップ ・ <b>◀ ▶</b> 種や設置物を選ぶ ・ <b>▲ ▼</b> 畑を移る<br>
+      作物は水が効いている間だけ育ちます。パソコンのネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
+    </p>
+    <p class="help pc-only">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
       <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
@@ -2208,6 +2353,7 @@ function clearWordPanel(){
 }
 
 function startGame(d){
+  if(window.IS_MOBILE) return;   // スマホではタイピングできない
   diff=d;
   const ta=isTA(d), oneshot=(d==="oneshot");
   words = (ta||oneshot) ? [] : WORD_SETS[d];
@@ -2644,6 +2790,7 @@ function renderPoemRomaji(){
 }
 
 function startPoem(p){
+  if(window.IS_MOBILE) return;
   // 他モードの状態を片付ける
   clearInterval(timerId); running=false; resetStage(); clearWordPanel();
   stopPoem();
@@ -3662,6 +3809,14 @@ function buildPlanter(){
       el.className="plot grass";
       el.innerHTML=`<span class="lbl">${k}</span><span class="drop">💧</span><span class="vb">👩‍🌾</span><span class="qb"></span><span class="crop"></span><div class="pb"><i></i></div>`;
       if(ci===2||ci===5) el.dataset.gap="1";   // 3区画ごとにすき間(3×3のまとまりが見えるように)
+      // スマホ縦持ち: 3×3のまとまりを 左上・右上・左下 に置き、案山子置き場は右下
+      const blk=Math.floor(ci/3);
+      // (列 1〜3 と 5〜7、行 1〜3 と 5〜7。4 はすき間)
+      if(k===POST){ el.style.setProperty("--gr","6"); el.style.setProperty("--gc","6"); }
+      else{
+        el.style.setProperty("--gr", String((blk===2?4:0)+ri+1));
+        el.style.setProperty("--gc", String((blk===1?4:0)+ci%3+1));
+      }
       el.addEventListener("click",()=>act(k));
       r.appendChild(el);
       plotEls[k]=el;
@@ -4139,14 +4294,29 @@ function renderShop(){
     body.innerHTML=rows.map((r,i)=>`<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
       <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
-      <div class="keyk">${i===cur?r.keys:""}</div></div>`).join("");
+      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("");
   }
   const total=invTotal().v;
+  if(window.IS_MOBILE){
+    $("g-shopHint").innerHTML = shopTab===3 && total>0
+      ? `<button class="sbtn main" data-sellall>作物をすべて売る(${fmtNum(total)}ネジ・種は売りません)</button>` : "";
+    keepVisible(body);
+    return;
+  }
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_TABS.map((t,i)=>i===shopTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
     (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}ネジ・種は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
+}
+/* 「<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個」から、タップ用のボタンを作る */
+function shopActBtns(keys){
+  if(!keys) return "";
+  return `<div class="acts">`+keys.split("<br>").map(part=>{
+    const m=part.match(/<b>(Shift\+)?Enter<\/b>\s*(.*)/); if(!m) return "";
+    const label=m[2].replace(/<[^>]*>/g,"").trim()||"決定";
+    return `<button class="sbtn${m[1]?"":" main"}" data-act="${m[1]?"shift":"enter"}">${label}</button>`;
+  }).join("")+`</div>`;
 }
 function shopKey(e){
   const k=e.key;
@@ -4283,8 +4453,15 @@ function sellAll(){
 /* マウスでも使えるように(キーボードだけで完結するのが基本) */
 $("g-shopBody").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
-  shopCur[shopTab]=+row.dataset.i; renderShop();
+  shopCur[shopTab]=+row.dataset.i;
+  const b=e.target.closest("[data-act]");
+  if(b){
+    const r=shopRowCache[shopCur[shopTab]];
+    if(r && !r.locked){ (b.dataset.act==="shift"?r.shift:r.enter)(); return; }
+  }
+  renderShop();
 });
+$("g-shopHint").addEventListener("click",e=>{ if(e.target.closest("[data-sellall]")) sellAll(); });
 root.querySelectorAll("#g-shopTabs .tab").forEach(t=>t.addEventListener("click",()=>{ shopTab=+t.dataset.tab; renderShop(); }));
 
 /* ---------- 種ガチャ ----------
@@ -4374,6 +4551,12 @@ function sfxGacha(r){
 function renderGacha(){
   $("g-gachaMoney").textContent=fmtNum(S.money);
   $("g-gachaBody").innerHTML=gachaHTML()+gachaListHTML();
+  if(window.IS_MOBILE){
+    $("g-gachaHint").innerHTML = gachaShown<gachaRes.length
+      ? `<div class="acts gacts"><button class="sbtn main" data-g="skip">早送り</button></div>`
+      : `<div class="acts gacts"><button class="sbtn main" data-g="1">1回</button><button class="sbtn main" data-g="11">11回</button><button class="sbtn main" data-g="111">111回</button></div>`;
+    return;
+  }
   $("g-gachaHint").innerHTML =
     (gachaShown<gachaRes.length ? "<b>Enter</b> 早送り" : "<b>Enter</b> 1回 ・ <b>Shift+Enter</b> 11回 ・ <b>Ctrl+Enter</b> 111回")+
     " ・ <b>↑ ↓</b> リストを見る ・ <b>7</b> / <b>Esc</b> 閉じる";
@@ -4395,6 +4578,11 @@ function gachaListHTML(){
       }).join("")+`</div></div>`;
   }).join("")+`</div>`;
 }
+$("g-gachaHint").addEventListener("click",e=>{
+  const b=e.target.closest("[data-g]"); if(!b) return;
+  if(b.dataset.g==="skip") gachaSkip();
+  else if(gachaShown>=gachaRes.length) drawGacha(+b.dataset.g);
+});
 function gachaKey(e){
   const k=e.key;
   if(k==="Escape"||k==="7"){ e.preventDefault(); closeModal(); return; }
@@ -4516,7 +4704,7 @@ function renderBook(){
       : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
     $("g-bookDetail").innerHTML=`
-      <div class="btabs">${[0,1,2].map(q=>`<span class="btab${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}">${q?QUALITY[q].mark:"ふつう"}</span>`).join("")}</div>
+      <div class="btabs">${[0,1,2].map(q=>`<span class="btab${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}" data-t="${q}">${q?QUALITY[q].mark:"ふつう"}</span>`).join("")}</div>
       <div class="bic q${t}">${ico(c)}${t?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
       <div class="bnm">${qName(c.id,t)}</div>
       <dl>
@@ -4543,6 +4731,10 @@ function bookKey(e){
     sfx.tab(); renderBook();
   }
 }
+$("g-bookDetail").addEventListener("click",e=>{
+  const b=e.target.closest && e.target.closest("[data-t]"); if(!b) return;
+  bookTier=+b.dataset.t; sfx.tab(); renderBook();
+});
 $("g-bookList").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
   bookCur=+row.dataset.i; renderBook();
@@ -4621,6 +4813,12 @@ function onKey(e){
   }
 }
 root.querySelectorAll(".slot").forEach(s=>s.addEventListener("click",()=>setTool(+s.dataset.tool)));
+// ◀ ▶ で種・設置物を選ぶ(タップ・クリック用)
+[["g-seedArrL",4,-1],["g-seedArrR",4,1],["g-objArrL",6,-1],["g-objArrR",6,1]].forEach(([id,tool,dir])=>{
+  $(id).addEventListener("click",e=>{ e.stopPropagation(); S.tool=tool; cycleSel(dir); });
+});
+$("g-fieldUp").addEventListener("click",e=>{ e.stopPropagation(); switchField(-1); });
+$("g-fieldDn").addEventListener("click",e=>{ e.stopPropagation(); switchField(1); });
 $("g-shopBtn").addEventListener("click",()=>openModal("shop"));
 $("g-gachaBtn").addEventListener("click",()=>openModal("gacha"));
 $("g-treasBtn").addEventListener("click",()=>openModal("treas"));
@@ -5142,6 +5340,14 @@ refreshStatsLine();
 refreshGardenStat();
 syncInit();
 window.addEventListener("beforeunload",()=>{ try{ syncPush(true); }catch(e){} });
+// スマホはアプリの切り替えで閉じられることが多いので、隠れたときにも保存して送る
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="hidden" || window.nejiReplacing) return;
+  try{ Garden.summary(); }catch(e){}
+  try{ syncPush(true); }catch(e){}
+});
+// 庭にいる間も、ときどきクラウドに送る
+setInterval(()=>{ if(scene==="garden" && syncCode) syncPush(false); }, 60000);
 setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
 </script>
 </body>
