@@ -226,6 +226,8 @@ h1{
 .bk-codein:focus{outline:none; border-color:var(--amber)}
 #bkSyncState b{color:var(--amber); font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:.08em}
 #bkSyncState.ro{color:#ffb38a}
+.bk-backups{display:flex; flex-direction:column; gap:.3rem; margin-top:.4rem; color:var(--steel); font-size:.85rem}
+.bk-backups .bk-bkitem{text-align:left; padding:.4rem .8rem; font-size:.82rem}
 .syncnote{
   display:inline-block; margin:-.6rem 0 1rem; padding:.35rem .9rem; border-radius:999px;
   background:rgba(210,90,60,.18); border:1px solid #a4462f; color:#ffb9a0; font-size:.82rem;
@@ -1377,14 +1379,17 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
       <button class="btn" id="bkSyncStart">同期を始める (S)</button>
       <input id="bkCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード (J)" autocomplete="off">
       <button class="btn" id="bkJoin">参加する (Enter)</button>
+      <button class="btn" id="bkTake" style="display:none">こちらで遊ぶ (T)</button>
+      <button class="btn" id="bkRestore" style="display:none">クラウドのバックアップ (R)</button>
       <span class="bk-note" id="bkSyncNote"></span>
     </div>
+    <div id="bkBackups" class="bk-backups"></div>
 
     <h3>記録文字列から読み込む</h3>
     <p class="bk-p">読み込むと、このブラウザにある記録はすべて置き換わります。読み込んだあとは自動で画面を読み直します。</p>
     <textarea class="bk-code" id="bkImport" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkImportNote"></span><button class="btn" id="bkLoad">読み込む (Enter)</button></div>
-    <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>S</b> 同期の開始/停止 ・ <b>J</b> コード入力 ・ <b>K</b> / <b>Esc</b> 閉じる</p>
+    <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>S</b> 同期の開始/停止 ・ <b>J</b> コード入力 ・ <b>T</b> こちらで遊ぶ ・ <b>R</b>→<b>1〜5</b> バックアップから戻す ・ <b>K</b> / <b>Esc</b> 閉じる</p>
   </div>
 </div>
 
@@ -3270,7 +3275,7 @@ function newState(){
 let S = newState();
 
 /* ---------- 保存 ---------- */
-function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ if(window.nejiReplacing) return; try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
 function isValidState(o){
   return o && typeof o==="object" && typeof o.money==="number" && Array.isArray(o.fields) && o.fields.length>0;
 }
@@ -3463,6 +3468,7 @@ function applySkip(minutes){
    タイトル画面に戻った時点でも受け取るので、庭に入る前から畑の状態が最新になる。
    お知らせは庭に入ったときにまとめて出す(タイトルでは画面に出せないため) */
 function consumeInbox(){
+  if(window.nejiReplacing) return;
   let box;
   try{ box=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); }catch(e){ box=null; }
   if(!box) return;
@@ -4770,6 +4776,7 @@ function backupImport(){
     if(!confirm("このブラウザの記録を、すべて読み込んだ記録に置き換えます。よろしいですか?")) return;
     try{
       const old=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith(LS_PREFIX)) old.push(k); }
+      window.nejiReplacing=true;
       old.forEach(k=>localStorage.removeItem(k));
       for(const [k,v] of Object.entries(o.data)) localStorage.setItem(LS_PREFIX+k, String(v));
     }catch(e){ note.textContent="保存できませんでした。ブラウザの設定を確認してください"; return; }
@@ -4780,7 +4787,7 @@ function backupImport(){
   // 庭の「記録」でコピーした、庭だけの文字列
   if(o && typeof o.money==="number" && Array.isArray(o.fields)){
     if(!confirm("ネジ抜きの庭の記録を、読み込んだ庭に置き換えます(ほかの記録はそのまま)。よろしいですか?")) return;
-    try{ localStorage.setItem(LS_PREFIX+"garden:save", JSON.stringify(o)); }catch(e){ note.textContent="保存できませんでした"; return; }
+    try{ window.nejiReplacing=true; localStorage.setItem(LS_PREFIX+"garden:save", JSON.stringify(o)); }catch(e){ note.textContent="保存できませんでした"; return; }
     note.textContent="庭を読み込みました。画面を読み直します…";
     setTimeout(()=>location.reload(),600);
     return;
@@ -4792,11 +4799,16 @@ function backupImport(){
    共有コードでつながり、記録をまるごとクラウドに置く。
    ・保存のたびに直前の記録をバックアップに残す(5世代)
    ・別のブラウザが新しければ、区切りのいいところで取り込む
-   ・同時に開いていると、後から開いたほうは保存しない(見るだけ)
+   ・同時に開いているときは「持ち主」の1台だけが保存する。
+     持ち主はそのコードで最後に「こちらで遊ぶ」を選んだブラウザ。
+     持ち主が閉じられたら、残ったほうが自動で持ち主になる
 ===================================================== */
 const SYNC_PATH="nejiuchi/saves", SYNC_KEEP=5, SYNC_ALIVE=45000;
 let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
-let syncMetaRef=null, syncHeart=null, syncPending=false, syncLastBundle="", syncPushAt=0;
+let syncMetaRef=null, syncOwnerRef=null, syncLiveRef=null, syncHeart=null;
+let syncPending=false, syncLastBundle="", syncPushAt=0, syncOwner=null, syncLive={}, syncOwnerLoaded=false, syncLiveLoaded=false;
+/* 記録をまるごと置き換えて読み直す途中は、古い状態を書き戻さない */
+window.nejiReplacing=false;
 const lsGet = k => { try{ return localStorage.getItem(LS_PREFIX+k); }catch(e){ return null; } };
 const lsSet = (k,v) => { try{ localStorage.setItem(LS_PREFIX+k,v); }catch(e){} };
 const lsDel = k => { try{ localStorage.removeItem(LS_PREFIX+k); }catch(e){} };
@@ -4809,7 +4821,9 @@ function newSyncCode(){
 /* 入力されたコードから英数字だけを取り出す(空白やハイフンは無視) */
 const normSyncCode = v => String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
 const showSyncCode = c => /^[A-Z0-9]{16}$/.test(c) ? c.replace(/(.{4})(?=.)/g,"$1 ") : c;
+const syncDevLabel = () => /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||"") ? "スマホ" : "PC";
 const bundleNow = () => JSON.stringify(collectAll().data);
+const syncBase = () => db.ref(`${SYNC_PATH}/${syncCode}`);
 function syncInit(){
   syncDevice=lsGet("sync:device");
   if(!syncDevice){ syncDevice=Math.random().toString(36).slice(2)+Date.now().toString(36); lsSet("sync:device",syncDevice); }
@@ -4819,20 +4833,43 @@ function syncInit(){
   if(syncCode && hasDB()) syncConnect();
   renderSyncState();
 }
+const syncAlive = dev => dev && Date.now()-(+syncLive[dev]||0) < SYNC_ALIVE;
+/* 持ち主を見直す。持ち主がいない・閉じられていれば自分が持ち主になる */
+function syncCheckOwner(){
+  if(!syncCode||!syncOwnerLoaded||!syncLiveLoaded) return;   // 両方読み終わるまで決めない
+  const o=syncOwner && syncOwner.device;
+  if(o===syncDevice){ setReadOnly(false); return; }
+  if(o && syncAlive(o)){ setReadOnly(true); return; }
+  syncClaim();
+}
+function syncClaim(){
+  if(!hasDB()||!syncCode) return Promise.resolve();
+  syncOwner={ device:syncDevice, t:Date.now(), label:syncDevLabel() };
+  setReadOnly(false);
+  return syncBase().child("owner").set(syncOwner).catch(e=>console.warn("[nejiuchi sync]",e));
+}
+function setReadOnly(v){
+  if(syncReadOnly===v) return;
+  const wasRO=syncReadOnly;
+  syncReadOnly=v;
+  renderSyncState();
+  // 見るだけから持ち主に戻ったら、届いている記録を先に取り込む
+  if(wasRO && !v && scene==="title") syncOnTitle();
+}
 function syncConnect(){
   if(!hasDB()||!syncCode) return;
-  const base=db.ref(`${SYNC_PATH}/${syncCode}`);
-  // 同時に開いているブラウザがないか調べる(先に開いていたほうが優先)
-  base.child("live").once("value").then(s=>{
-    const now=Date.now(); let other=false;
-    s.forEach(c=>{ if(c.key!==syncDevice && now-(+c.val()||0)<SYNC_ALIVE) other=true; });
-    syncReadOnly=other;
-    renderSyncState();
-  }).catch(()=>{});
-  const beat=()=>{ try{ base.child("live/"+syncDevice).set(Date.now()); }catch(e){} };
-  beat(); clearInterval(syncHeart); syncHeart=setInterval(beat,15000);
+  syncDisconnect();
+  const base=syncBase();
+  const me=base.child("live/"+syncDevice);
+  const beat=()=>{ try{ me.set(Date.now()); }catch(e){} syncCheckOwner(); };
+  // 閉じても印は消さない(読み直しの間に持ち主を取られないよう、45秒で切れたとみなす)
+  try{ me.set(Date.now()); }catch(e){}
+  syncHeart=setInterval(beat,15000);
+  syncLiveRef=base.child("live");
+  syncLiveRef.on("value",s=>{ syncLive=s.val()||{}; syncLiveLoaded=true; syncCheckOwner(); });
+  syncOwnerRef=base.child("owner");
+  syncOwnerRef.on("value",s=>{ syncOwner=s.val(); syncOwnerLoaded=true; syncCheckOwner(); renderSyncState(); });
   // 相手の保存を見張る
-  if(syncMetaRef) syncMetaRef.off();
   syncMetaRef=base.child("meta");
   syncMetaRef.on("value",snap=>{
     const m=snap.val(); if(!m||!m.t) return;
@@ -4844,33 +4881,50 @@ function syncConnect(){
   });
 }
 function syncDisconnect(){
-  if(syncMetaRef){ syncMetaRef.off(); syncMetaRef=null; }
+  for(const r of [syncMetaRef,syncOwnerRef,syncLiveRef]) if(r) r.off();
+  syncMetaRef=syncOwnerRef=syncLiveRef=null;
   clearInterval(syncHeart); syncHeart=null;
+  syncOwner=null; syncLive={}; syncOwnerLoaded=syncLiveLoaded=false;
 }
 function syncStop(){
-  if(syncCode && hasDB()){ try{ db.ref(`${SYNC_PATH}/${syncCode}/live/${syncDevice}`).remove(); }catch(e){} }
+  if(syncCode && hasDB()){
+    try{
+      const base=syncBase(), me=base.child("live/"+syncDevice);
+      me.remove();
+      if(syncOwner && syncOwner.device===syncDevice) base.child("owner").remove();
+    }catch(e){}
+  }
   syncDisconnect();
   syncCode=null; syncPending=false; syncReadOnly=false;
   lsDel("sync:code"); lsDel("sync:t");
   renderSyncState();
 }
+/* 見るだけのブラウザを持ち主にする */
+async function syncTakeOver(){
+  if(!syncCode||!syncReadOnly) return;
+  await syncClaim();
+  $("bkSyncNote").textContent="このブラウザで保存するようにしました";
+}
+function syncErrText(e){
+  const m=String(e&&(e.code||e.message)||"");
+  return /permission/i.test(m)
+    ? "※クラウドへの保存が拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
+    : "※クラウドに保存できませんでした。通信環境を確認してください";
+}
 async function syncPush(force){
-  if(!hasDB()||!syncCode||syncReadOnly) return true;
+  if(!hasDB()||!syncCode||syncReadOnly||window.nejiReplacing) return true;
   const bundle=bundleNow();
   if(!force && bundle===syncLastBundle) return true;
   if(!force && Date.now()-syncPushAt<8000) return true; // 送りすぎない
   syncPushAt=Date.now();
-  const base=db.ref(`${SYNC_PATH}/${syncCode}`), t=Date.now();
+  const base=syncBase(), t=Date.now();
   try{
     const prev=await base.child("data").once("value");
     if(prev.val()) await base.child("backups/"+(syncLastT||t)).set({ data:prev.val(), t:syncLastT||t });
     await base.child("data").set(b64enc(bundle));
     await base.child("meta").set({ t, by:syncDevice });
     syncLastT=t; syncLastBundle=bundle; lsSet("sync:t",String(t));
-    const bk=await base.child("backups").once("value");
-    const keys=[]; bk.forEach(c=>keys.push(c.key));
-    keys.sort((a,b)=>(+a)-(+b));
-    for(let i=0;i<keys.length-SYNC_KEEP;i++) await base.child("backups/"+keys[i]).remove();
+    await syncTrimBackups(base);
     renderSyncState();
     return true;
   }catch(e){
@@ -4880,24 +4934,29 @@ async function syncPush(force){
     return false;
   }
 }
-function syncErrText(e){
-  const m=String(e&&(e.code||e.message)||"");
-  return /permission/i.test(m)
-    ? "※クラウドへの保存が拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
-    : "※クラウドに保存できませんでした。通信環境を確認してください";
+async function syncTrimBackups(base){
+  const bk=await base.child("backups").once("value");
+  const keys=[]; bk.forEach(c=>{ keys.push(c.key); });
+  keys.sort((a,b)=>(+a)-(+b));
+  for(let i=0;i<keys.length-SYNC_KEEP;i++) await base.child("backups/"+keys[i]).remove();
 }
 /* 相手の記録を取り込む。こちらにも未送信の変更があるときだけ確認する */
-async function syncPull(){
+async function syncPull(joining){
   if(!hasDB()||!syncCode) return;
-  const base=db.ref(`${SYNC_PATH}/${syncCode}`);
+  const base=syncBase();
   try{
     const [mS,dS]=await Promise.all([ base.child("meta").once("value"), base.child("data").once("value") ]);
     const m=mS.val(), data=dS.val();
     if(!m||!data||!m.t||m.t<=syncLastT){ syncPending=false; renderSyncState(); return; }
     const mine=bundleNow();
-    if(mine!==syncLastBundle){          // 矛盾: 両方で進んでいる
-      const useRemote=confirm("別のブラウザの記録のほうが新しいようです。\nこちらにも保存していない進みぶんがあります。\n\nOK: 向こうの記録を取り込む(こちらの進みは消えます)\nキャンセル: こちらの記録を残して送る");
+    if(!joining && mine!==syncLastBundle && !syncReadOnly){          // 矛盾: 両方で進んでいる
+      const useRemote=confirm("別のブラウザの記録のほうが新しいようです。\nこちらにも保存していない進みぶんがあります。\n\nOK: 向こうの記録を取り込む(こちらの進みはクラウドのバックアップに残します)\nキャンセル: こちらの記録を残して送る");
       if(!useRemote){ await syncPush(true); syncPending=false; renderSyncState(); return; }
+    }
+    // 置き換える前に、このブラウザの記録もバックアップに残しておく
+    if(joining || mine!==syncLastBundle){
+      const t=Date.now();
+      try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(取り込み前)" }); await syncTrimBackups(base); }catch(e){}
     }
     if(applyBundleString(data)){
       lsSet("sync:t",String(m.t));
@@ -4909,6 +4968,7 @@ function applyBundleString(s){
   let o;
   try{ o=JSON.parse(b64dec(s)); }catch(e){ return false; }
   if(!o||typeof o!=="object") return false;
+  window.nejiReplacing=true;
   try{
     const old=[];
     for(let i=0;i<localStorage.length;i++){
@@ -4917,13 +4977,63 @@ function applyBundleString(s){
     }
     old.forEach(k=>localStorage.removeItem(k));
     for(const [k,v] of Object.entries(o)) localStorage.setItem(LS_PREFIX+k,String(v));
-  }catch(e){ return false; }
+  }catch(e){ window.nejiReplacing=false; return false; }
   return true;
+}
+/* ---- クラウドのバックアップから戻す ---- */
+let syncBackupList=[];
+function bundleSummary(s){
+  try{
+    const o=JSON.parse(b64dec(s));
+    const g=JSON.parse(o["garden:save"]||"null");
+    const st=JSON.parse(o.stats||"null");
+    const parts=[];
+    if(g && typeof g.money==="number") parts.push(`🔩 ${Math.floor(g.money).toLocaleString("ja-JP")}`);
+    if(st && st.plays) parts.push(`${st.plays}回プレイ`);
+    return parts.join(" ・ ")||"記録";
+  }catch(e){ return "読めない記録"; }
+}
+async function syncShowBackups(){
+  const box=$("bkBackups"), note=$("bkSyncNote");
+  if(!syncCode||!hasDB()){ note.textContent="同期しているときだけ使えます"; return; }
+  box.innerHTML="読み込み中…";
+  try{
+    const bk=await syncBase().child("backups").once("value");
+    const list=[]; bk.forEach(c=>{ const v=c.val(); if(v&&v.data) list.push({ t:+v.t||+c.key, data:v.data, from:v.from||"" }); });
+    list.sort((a,b)=>b.t-a.t);
+    syncBackupList=list;
+    if(!list.length){ box.innerHTML="バックアップはまだありません"; return; }
+    box.innerHTML="";
+    list.forEach((b,i)=>{
+      const d=new Date(b.t);
+      const when=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+      const btn=document.createElement("button");
+      btn.className="btn bk-bkitem";
+      btn.textContent=`${i+1}. ${when} ・ ${bundleSummary(b.data)}${b.from?" ・ "+b.from:""}`;
+      btn.addEventListener("click",()=>syncRestore(i));
+      box.appendChild(btn);
+    });
+  }catch(e){ box.innerHTML=""; note.textContent=syncErrText(e); }
+}
+async function syncRestore(i){
+  const b=syncBackupList[i]; if(!b) return;
+  if(!confirm("この時点の記録に戻して、同期しているすべてのブラウザに送ります。よろしいですか?")) return;
+  if(syncReadOnly) await syncClaim();
+  try{
+    const base=syncBase(), t=Date.now();
+    const cur=await base.child("data").once("value");
+    if(cur.val()) await base.child("backups/"+t).set({ data:cur.val(), t, from:"戻す前" });
+    await base.child("data").set(b.data);
+    await base.child("meta").set({ t:t+1, by:syncDevice });
+    await syncTrimBackups(base);
+    if(applyBundleString(b.data)){ lsSet("sync:t",String(t+1)); location.reload(); }
+  }catch(e){ $("bkSyncNote").textContent=syncErrText(e); }
 }
 async function syncBegin(){
   if(!hasDB()){ $("bkSyncNote").textContent="※Firebase未設定のため同期できません"; return; }
   syncCode=newSyncCode(); lsSet("sync:code",syncCode); syncLastT=0; syncReadOnly=false;
   syncConnect();
+  await syncClaim();
   if(!await syncPush(true)){ syncStop(); return; }
   $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコード(英数字16文字)を入力してください";
   renderSyncState();
@@ -4936,15 +5046,16 @@ async function syncJoin(){
   if(!hasDB()){ note.textContent="※Firebase未設定のため同期できません"; return; }
   note.textContent="つないでいます…";
   try{
-    const snap=await db.ref(`${SYNC_PATH}/${code}/data`).once("value");
+    const snap=await syncBaseOf(code).child("data").once("value");
+    if(syncCode) syncStop();
     syncCode=code; lsSet("sync:code",code); syncReadOnly=false;
+    syncLastT=0; lsSet("sync:t","0");
+    await syncClaim();                       // 参加したブラウザで続きを遊ぶ
+    syncConnect();
     if(snap.val()){
-      syncLastT=0; lsSet("sync:t","0");
-      syncConnect();
       note.textContent="記録を取り込みます…";
-      await syncPull();
+      await syncPull(true);                  // 参加前の記録は確認なしで置き換える(バックアップには残す)
     }else{
-      syncLastT=0; syncConnect();
       if(!await syncPush(true)){ syncStop(); return; }
       note.textContent="このコードに、今の記録を置きました";
     }
@@ -4957,25 +5068,33 @@ async function syncJoin(){
       : "つなげませんでした。通信環境を確認してください";
   }
 }
+const syncBaseOf = code => db.ref(`${SYNC_PATH}/${code}`);
 function renderSyncState(){
   const el=$("bkSyncState");
+  const who = syncOwner && syncOwner.label ? `(${syncOwner.label})` : "";
   if(el){
     if(!syncCode) el.innerHTML="同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。";
-    else if(syncReadOnly) el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザで開いています。この画面の記録はクラウドに送りません)`;
+    else if(syncReadOnly) el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザ${who}で遊んでいます。この画面の記録はクラウドに送りません。<b>T</b> でこちらに切り替え)`;
     else el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ 自動で保存しています${syncPending?" ・ 新しい記録が届いています(タイトルに戻ると取り込みます)":""}`;
     el.classList.toggle("ro",!!syncReadOnly);
   }
   const n=$("syncNote");
   if(n){
-    if(syncCode && syncReadOnly){ n.style.display=""; n.textContent="別のブラウザで開いているため、この画面の記録は保存されません(見るだけ)"; }
+    if(syncCode && syncReadOnly){ n.style.display=""; n.textContent=`別のブラウザ${who}で遊んでいるため、この画面の記録は保存されません。「記録の引き継ぎ」で T を押すとこちらで遊べます`; }
     else if(syncCode && syncPending){ n.style.display=""; n.textContent="別のブラウザの記録が届いています。取り込んでいます…"; }
     else n.style.display="none";
   }
   const b=$("bkSyncStart");
   if(b) b.textContent = syncCode ? "同期を止める (S)" : "同期を始める (S)";
+  const tk=$("bkTake");
+  if(tk) tk.style.display = syncCode && syncReadOnly ? "" : "none";
+  const rb=$("bkRestore");
+  if(rb) rb.style.display = syncCode ? "" : "none";
 }
 $("bkSyncStart").addEventListener("click",()=>{ syncCode?syncStop():syncBegin(); });
 $("bkJoin").addEventListener("click",syncJoin);
+$("bkTake").addEventListener("click",syncTakeOver);
+$("bkRestore").addEventListener("click",syncShowBackups);
 
 function backupKey(e){
   const k=e.key;
@@ -4984,6 +5103,9 @@ function backupKey(e){
   if(k==="i"||k==="I"){ e.preventDefault(); $("bkImport").focus(); return; }
   if(k==="s"||k==="S"){ e.preventDefault(); syncCode?syncStop():syncBegin(); return; }
   if(k==="j"||k==="J"){ e.preventDefault(); $("bkCode").focus(); return; }
+  if((k==="t"||k==="T") && syncReadOnly){ e.preventDefault(); syncTakeOver(); return; }
+  if((k==="r"||k==="R") && syncCode){ e.preventDefault(); syncShowBackups(); return; }
+  if(/^[1-9]$/.test(k) && syncBackupList[+k-1] && $("bkBackups").children.length){ e.preventDefault(); syncRestore(+k-1); return; }
   if(k==="Enter"){ e.preventDefault(); backupImport(); }
 }
 $("backupBtn").addEventListener("click",openBackup);
