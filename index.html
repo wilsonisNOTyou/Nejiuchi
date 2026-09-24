@@ -241,6 +241,9 @@ h1{
 #bkSyncState.ro{color:#ffb38a}
 .bk-backups{display:flex; flex-direction:column; gap:.3rem; margin-top:.4rem; color:var(--steel); font-size:.85rem}
 .bk-backups .bk-bkitem{text-align:left; padding:.4rem .8rem; font-size:.82rem}
+.syncnote .sn-take{padding:.3rem .8rem; font-size:.82rem; margin-left:.5rem; vertical-align:middle}
+html.mobile .syncnote{border-radius:14px; padding:.6rem .9rem; margin:-.4rem 0 1rem}
+html.mobile .syncnote .sn-take{display:block; margin:.45rem auto 0; padding:.55rem 1.2rem}
 .syncnote{
   display:inline-block; margin:-.6rem 0 1rem; padding:.35rem .9rem; border-radius:999px;
   background:rgba(210,90,60,.18); border:1px solid #a4462f; color:#ffb9a0; font-size:.82rem;
@@ -2477,6 +2480,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="r"||e.key==="R") openRanking(rankCur,playerName);
     if(e.key==="d"||e.key==="D") openDict(dictCur);
     if(e.key==="k"||e.key==="K") openBackup();
+    if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
     if(e.key==="9"||e.key==="g"||e.key==="G") openGarden();
     return;
   }
@@ -3558,7 +3562,9 @@ function villagerAdvance(p,dt){
   }
 }
 /* 自動売却の設定(作物ごと) */
-const AUTO_COST = 10000;
+/* 自動売却の値段はレア度で上がる(お店の作物は N・R の値段) */
+const AUTO_COSTS = { N:10000, R:30000, SR:100000, HR:300000, UR:1000000, GSR:3000000 };
+const autoCost = id => AUTO_COSTS[(CROP[id]&&CROP[id].r)||"N"] || AUTO_COSTS.N;
 const autoOf = id => S.auto[id] || null;
 const autoCrop = id => { const a=autoOf(id); return !!(a && a.c); };
 const autoSeed = id => { const a=autoOf(id); return !!(a && a.s); };
@@ -4240,7 +4246,7 @@ function shopRows(){
         locked: !a && !ready,
         ic: ico(c),
         nm: a?`${c.name}の自動売却 <span style="color:var(--ink-l)">購入済み</span>`
-             :(ready?`${c.name}の自動売却 <span style="color:var(--ink-l)">${fmtNum(AUTO_COST)}ネジ</span>`
+             :(ready?`${c.name}の自動売却 <span style="color:var(--ink-l)">${fmtNum(autoCost(c.id))}ネジ</span>`
                     :`${c.name}の自動売却 <span style="color:var(--ink-l)">未解禁</span>`),
         ds: a?`収穫物 ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}ネジ) ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}ネジ)<br>穫れた${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売ります`
              :(ready?`収穫した${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売れるようになります(それぞれオンオフできます)`
@@ -4388,7 +4394,7 @@ function buyVilUp(){
 function buyAuto(id){
   if(S.auto[id]) return;
   if(tierOf(id)<2){ sfx.nope(); toast(`${CROP[id].name}が ${QUALITY[2].mark} になると買えます`,"warn"); return; }
-  if(!spend(AUTO_COST)) return;
+  if(!spend(autoCost(id))) return;
   S.auto[id]={c:true,s:true};
   toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の自動売却を買いました(収穫物・種ともオン)`,"good",4200,true);
   save(); renderAll();
@@ -5092,6 +5098,7 @@ async function syncTakeOver(){
   if(!syncCode||!syncReadOnly) return;
   await syncClaim();
   $("bkSyncNote").textContent="このブラウザで保存するようにしました";
+  renderSyncState();
 }
 function syncErrText(e){
   const m=String(e&&(e.code||e.message)||"");
@@ -5268,7 +5275,11 @@ function renderSyncState(){
   }
   const n=$("syncNote");
   if(n){
-    if(syncCode && syncReadOnly){ n.style.display=""; n.textContent=`別のブラウザ${who}で遊んでいるため、この画面の記録は保存されません。「記録の引き継ぎ」で T を押すとこちらで遊べます`; }
+    if(syncCode && syncReadOnly){
+      n.style.display="";
+      n.innerHTML=`別のブラウザ${who.replace(/[<>&"]/g,"")}で遊んでいるため、この画面の記録は保存されません <button class="btn sn-take" id="snTake">こちらで遊ぶ<span class="kbdh">T</span></button>`;
+      $("snTake").addEventListener("click",syncTakeOver);
+    }
     else if(syncCode && syncPending){ n.style.display=""; n.textContent="別のブラウザの記録が届いています。取り込んでいます…"; }
     else n.style.display="none";
   }
