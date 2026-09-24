@@ -221,7 +221,7 @@ h1{
 .bk-codein{
   background:#0d0f13; color:var(--ink); border:2px solid var(--line); border-radius:6px;
   padding:.45rem .7rem; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.9rem;
-  letter-spacing:.1em; width:min(220px,60vw); user-select:text;
+  letter-spacing:.1em; width:min(260px,70vw); text-transform:uppercase; user-select:text;
 }
 .bk-codein:focus{outline:none; border-color:var(--amber)}
 #bkSyncState b{color:var(--amber); font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:.08em}
@@ -1375,7 +1375,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
     <p class="bk-p" id="bkSyncState">同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。</p>
     <div class="bk-foot" style="justify-content:flex-start; flex-wrap:wrap">
       <button class="btn" id="bkSyncStart">同期を始める (S)</button>
-      <input id="bkCode" class="bk-codein" maxlength="16" placeholder="コードを入力して参加 (J)" autocomplete="off">
+      <input id="bkCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード (J)" autocomplete="off">
       <button class="btn" id="bkJoin">参加する (Enter)</button>
       <span class="bk-note" id="bkSyncNote"></span>
     </div>
@@ -4804,8 +4804,11 @@ const hasDB = () => { try{ return !!db; }catch(e){ return false; } };
 function newSyncCode(){
   const s="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const p=n=>Array.from({length:n},()=>s[Math.floor(Math.random()*s.length)]).join("");
-  return `NEJI-${p(4)}-${p(4)}`;
+  return p(16);
 }
+/* 入力されたコードから英数字だけを取り出す(空白やハイフンは無視) */
+const normSyncCode = v => String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+const showSyncCode = c => /^[A-Z0-9]{16}$/.test(c) ? c.replace(/(.{4})(?=.)/g,"$1 ") : c;
 const bundleNow = () => JSON.stringify(collectAll().data);
 function syncInit(){
   syncDevice=lsGet("sync:device");
@@ -4852,10 +4855,10 @@ function syncStop(){
   renderSyncState();
 }
 async function syncPush(force){
-  if(!hasDB()||!syncCode||syncReadOnly) return;
+  if(!hasDB()||!syncCode||syncReadOnly) return true;
   const bundle=bundleNow();
-  if(!force && bundle===syncLastBundle) return;
-  if(!force && Date.now()-syncPushAt<8000) return;      // 送りすぎない
+  if(!force && bundle===syncLastBundle) return true;
+  if(!force && Date.now()-syncPushAt<8000) return true; // 送りすぎない
   syncPushAt=Date.now();
   const base=db.ref(`${SYNC_PATH}/${syncCode}`), t=Date.now();
   try{
@@ -4869,7 +4872,19 @@ async function syncPush(force){
     keys.sort((a,b)=>(+a)-(+b));
     for(let i=0;i<keys.length-SYNC_KEEP;i++) await base.child("backups/"+keys[i]).remove();
     renderSyncState();
-  }catch(e){}
+    return true;
+  }catch(e){
+    console.warn("[nejiuchi sync] 保存できませんでした",e);
+    const n=$("bkSyncNote");
+    if(n) n.textContent=syncErrText(e);
+    return false;
+  }
+}
+function syncErrText(e){
+  const m=String(e&&(e.code||e.message)||"");
+  return /permission/i.test(m)
+    ? "※クラウドへの保存が拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
+    : "※クラウドに保存できませんでした。通信環境を確認してください";
 }
 /* 相手の記録を取り込む。こちらにも未送信の変更があるときだけ確認する */
 async function syncPull(){
@@ -4909,14 +4924,15 @@ async function syncBegin(){
   if(!hasDB()){ $("bkSyncNote").textContent="※Firebase未設定のため同期できません"; return; }
   syncCode=newSyncCode(); lsSet("sync:code",syncCode); syncLastT=0; syncReadOnly=false;
   syncConnect();
-  await syncPush(true);
-  $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコードを入力してください";
+  if(!await syncPush(true)){ syncStop(); return; }
+  $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコード(英数字16文字)を入力してください";
   renderSyncState();
 }
 async function syncJoin(){
-  const code=($("bkCode").value||"").trim().toUpperCase();
+  const code=normSyncCode($("bkCode").value);
   const note=$("bkSyncNote");
   if(!code){ note.textContent="コードを入れてください"; return; }
+  if(code.length!==16){ note.textContent=`コードは英数字16文字です(いま${code.length}文字)`; return; }
   if(!hasDB()){ note.textContent="※Firebase未設定のため同期できません"; return; }
   note.textContent="つないでいます…";
   try{
@@ -4928,18 +4944,25 @@ async function syncJoin(){
       note.textContent="記録を取り込みます…";
       await syncPull();
     }else{
-      syncLastT=0; syncConnect(); await syncPush(true);
+      syncLastT=0; syncConnect();
+      if(!await syncPush(true)){ syncStop(); return; }
       note.textContent="このコードに、今の記録を置きました";
     }
     renderSyncState();
-  }catch(e){ note.textContent="つなげませんでした。通信環境を確認してください"; }
+  }catch(e){
+    console.warn("[nejiuchi sync] 読み込めませんでした",e);
+    syncCode=null; lsDel("sync:code");
+    note.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
+      ? "※クラウドの読み込みが拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
+      : "つなげませんでした。通信環境を確認してください";
+  }
 }
 function renderSyncState(){
   const el=$("bkSyncState");
   if(el){
     if(!syncCode) el.innerHTML="同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。";
-    else if(syncReadOnly) el.innerHTML=`同期中 <b>${syncCode}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザで開いています。この画面の記録はクラウドに送りません)`;
-    else el.innerHTML=`同期中 <b>${syncCode}</b> ・ 自動で保存しています${syncPending?" ・ 新しい記録が届いています(タイトルに戻ると取り込みます)":""}`;
+    else if(syncReadOnly) el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザで開いています。この画面の記録はクラウドに送りません)`;
+    else el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ 自動で保存しています${syncPending?" ・ 新しい記録が届いています(タイトルに戻ると取り込みます)":""}`;
     el.classList.toggle("ro",!!syncReadOnly);
   }
   const n=$("syncNote");
