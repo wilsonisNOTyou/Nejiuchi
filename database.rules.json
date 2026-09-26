@@ -5,7 +5,11 @@
         "$diff": {
           ".read": true,
           ".write": true,
-          ".indexOn": ["n", "s", "e"]
+          ".indexOn": [
+            "n",
+            "s",
+            "e"
+          ]
         }
       },
       "stats": {
@@ -16,7 +20,9 @@
         "$metric": {
           ".read": true,
           ".write": true,
-          ".indexOn": ["s"]
+          ".indexOn": [
+            "s"
+          ]
         }
       },
       "saves": {
@@ -24,6 +30,12 @@
           ".read": true,
           ".write": true,
           ".validate": "$code.matches(/^[A-Z0-9]{16}$/)"
+        }
+      },
+      "feedback": {
+        "$id": {
+          ".write": "!data.exists()",
+          ".validate": "newData.hasChildren(['c', 'x', 't']) && newData.child('c').isString() && newData.child('c').val().matches(/^(word|crop|gacha|feature|bug|other)$/) && newData.child('x').isString() && newData.child('x').val().length >= 1 && newData.child('x').val().length <= 1000 && newData.child('t').isNumber() && (!newData.child('n').exists() || (newData.child('n').isString() && newData.child('n').val().length <= 20)) && (!newData.child('d').exists() || (newData.child('d').isString() && newData.child('d').val().length <= 10))"
         }
       }
     }
