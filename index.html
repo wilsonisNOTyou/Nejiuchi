@@ -1116,6 +1116,104 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 ===================================================== */
 .m-only{display:none}
 html.mobile .m-only{display:block}
+html.mobile .bk-pconly{display:none}
+#imeWarn{position:fixed; left:50%; top:38%; transform:translate(-50%,-50%); z-index:72; display:none;
+  background:#fff3cd; color:#5a4300; border:3px solid #c79100; border-radius:12px; padding:.7rem 1rem;
+  font-weight:800; max-width:min(520px,calc(100vw - 24px)); text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#imeWarn.show{display:block}
+/* ---- はじめてガイド ---- */
+#tutRing{position:fixed; display:none; z-index:70; pointer-events:none; border-radius:12px;
+  border:3px solid #ffd75e; box-shadow:0 0 0 4px rgba(255,215,94,.25), 0 0 24px rgba(255,215,94,.7);
+  animation:tutpulse 1.4s ease-in-out infinite; transition:left .2s, top .2s, width .2s, height .2s}
+@keyframes tutpulse{0%,100%{box-shadow:0 0 0 4px rgba(255,215,94,.25), 0 0 18px rgba(255,215,94,.55)}50%{box-shadow:0 0 0 8px rgba(255,215,94,.15), 0 0 30px rgba(255,215,94,.85)}}
+#tutBubble{position:fixed; display:none; z-index:71; width:min(380px,calc(100vw - 16px)); text-align:left;
+  background:#fffaf0; color:#2f2a1f; border:3px solid #c79100; border-radius:12px; padding:.7rem .9rem .75rem;
+  box-shadow:0 6px 0 #8a6a10, 0 12px 30px rgba(0,0,0,.45); font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif}
+#tutStep{font-size:.72rem; font-weight:800; color:#a8801c; letter-spacing:.08em; margin-bottom:.25rem}
+#tutText{font-size:.95rem; font-weight:700; line-height:1.65; white-space:pre-line}
+#tutActs{display:flex; gap:.4rem; justify-content:flex-end; margin-top:.55rem; flex-wrap:wrap}
+#tutActs .btn{padding:.35rem .9rem; font-size:.85rem; font-family:inherit}
+#tutActs .kbdh{background:rgba(0,0,0,.12); color:inherit; opacity:.8; border:none}
+#tutActs .btn.tut-skip{background:none; color:#8a7a60; border-color:#d9ccb0; box-shadow:none}
+#tutBubble.mini{width:min(560px,calc(100vw - 16px)); padding:.4rem .75rem .45rem; opacity:.96}
+#tutBubble.mini #tutText{font-size:.85rem; line-height:1.5}
+#tutBubble.mini #tutStep{margin-bottom:.1rem}
+#tutBubble.mini #tutActs{margin-top:.3rem}
+@media (prefers-reduced-motion:reduce){ #tutRing{animation:none; transition:none} }
+#tutBubble.ask{width:min(440px,calc(100vw - 16px)); box-shadow:0 6px 0 #8a6a10, 0 0 0 100vmax rgba(8,10,14,.55)}
+#tutBubble.ask #tutText{font-size:1rem}
+#screen-garden .tbtn.goal{position:relative}
+#screen-garden .tbtn.goal .gbadge:not(:empty){display:inline-grid; place-items:center; min-width:1.3em; height:1.3em; margin-left:.3rem; padding:0 .3em; border-radius:999px; background:var(--alert); color:#fff; font-size:.75rem}
+#screen-garden .rowi .goalok{color:#2e7d32; font-weight:800}
+#screen-garden .rowi.claimed{opacity:.55}
+#screen-garden .rowi .gprog{height:6px; border-radius:3px; background:#e7dfcc; margin-top:.3rem; overflow:hidden}
+#screen-garden .rowi .gprog i{display:block; height:100%; background:#8fbf5a}
+#g-goalBody .ghead{display:flex; justify-content:space-between; align-items:baseline; margin:.7rem .2rem .25rem; padding-bottom:.2rem;
+  border-bottom:2px solid #d9ccb0; font-weight:800; color:#6b5a3a; font-size:.9rem}
+#g-goalBody .ghead:first-child{margin-top:.1rem}
+#g-goalBody .ghead span{font-size:.78rem; color:#9a8a6a; font-weight:700}
+/* ---- タイピング単語帳 ---- */
+.diff-btn.books{border-color:#5b6f9a; width:min(220px,90vw)}
+.diff-btn.books .name{color:#a9c4ff}
+.diff-btn.books:hover,.diff-btn.books:focus-visible{border-color:#a9c4ff}
+.wb-list{display:flex; flex-direction:column; gap:.5rem; width:min(620px,100%); margin:1rem auto 0; text-align:left}
+.wb-item{display:flex; align-items:center; gap:.8rem; padding:.7rem .9rem; border:1px solid var(--line); border-radius:8px; background:rgba(0,0,0,.18)}
+.wb-item .wb-no{color:var(--amber); width:1.4em; text-align:center}
+.wb-item{cursor:pointer}
+.wb-item.cur{border-color:var(--amber); box-shadow:0 0 0 1px var(--amber), 0 0 12px rgba(242,193,78,.25); background:rgba(242,193,78,.06)}
+.wb-words li.cur{background:rgba(242,193,78,.12); outline:1px solid var(--amber)}
+.wb-info{flex:1; min-width:0}
+.wb-info b{display:block; color:var(--ink); font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.wb-info small{color:var(--steel); font-size:.8rem}
+.wb-acts{display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end}
+.wb-acts .btn{padding:.4rem .8rem; font-size:.85rem}
+.wb-acts .btn.wb-del{border-color:#7a3b3b}
+.wb-empty{color:var(--steel); text-align:center; padding:1rem}
+.wb-editor{width:min(620px,100%); margin:1rem auto 0; text-align:left}
+.wb-lbl{display:block; color:var(--steel); font-size:.85rem; margin:.8rem 0 .3rem}
+.wb-in{font-family:inherit; font-size:1rem; color:var(--ink); background:#0f1511; border:2px solid var(--line); border-radius:6px; padding:.5rem .7rem; width:100%; user-select:text}
+.wb-in:focus{outline:none; border-color:var(--amber)}
+.wb-add{display:grid; grid-template-columns:1fr 1fr auto; gap:.5rem}
+.wb-add .btn{padding:.5rem 1rem; font-size:.9rem}
+.wb-hint{color:#7d8b80; font-size:.78rem; margin-top:.35rem; line-height:1.6}
+.wb-bulk{margin-top:.6rem; color:var(--steel); font-size:.85rem}
+.wb-bulk summary{cursor:pointer}
+.wb-bulk textarea{margin-top:.4rem; resize:vertical}
+.wb-note{min-height:1.3em; color:#ffb38a; font-size:.85rem; margin:.5rem 0}
+.wb-words{list-style:none; max-height:40vh; overflow:auto; border:1px solid var(--line); border-radius:8px}
+.wb-words:empty{display:none}
+.wb-words li{display:grid; grid-template-columns:2.4em 1fr 1fr auto; gap:.5rem; align-items:center; padding:.4rem .6rem; border-bottom:1px dashed #3a473d}
+.wb-words li:last-child{border-bottom:none}
+.wb-words .no{color:var(--steel); font-size:.8rem}
+.wb-words .k{color:var(--steel); font-size:.85rem}
+.wb-words .x{background:none; border:1px solid var(--line); color:var(--steel); border-radius:5px; cursor:pointer; padding:.1rem .5rem; font-family:inherit}
+.wb-words .x:hover{border-color:var(--miss); color:var(--miss)}
+@media (max-width:560px){ .wb-add{grid-template-columns:1fr} .wb-item{flex-wrap:wrap} .wb-acts{width:100%; justify-content:flex-start} .wb-words li{grid-template-columns:2em 1fr auto} .wb-words .k{grid-column:2} }
+html.mobile .wb-in{font-size:16px}
+/* ---- 要望・バグ報告 ---- */
+.fb-cats{display:flex; flex-wrap:wrap; gap:.4rem}
+.fb-cats .btn{padding:.4rem .8rem; font-size:.85rem}
+.fb-cats .btn.on{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
+.fb-text{height:8rem; font-size:.95rem !important}
+.fb-name{width:min(300px,100%); margin-top:.5rem}
+html.mobile .fb-text{font-size:16px !important}
+/* ---- プレイヤー名 ---- */
+.name-line{margin:.3rem 0 0; font-size:.9rem; color:var(--steel)}
+.name-line .btn{padding:.25rem .8rem; font-size:.82rem; margin-left:.4rem}
+.reg-as{margin:.2rem 0 .4rem; font-size:1rem}
+.reg-as b{font-size:1.15rem; color:var(--accent,#e0b44a)}
+#regStatus .btn{padding:.25rem .8rem; font-size:.82rem; margin-left:.4rem}
+.nm-panel{max-width:460px}
+/* スマホ: 同期していないときは同期の画面だけ */
+#mGate{display:none; position:fixed; inset:0; z-index:60; overflow:auto; background:var(--bg,#16181c); padding:24px 16px; color:#e9e4d6}
+html.mobile.gated #mGate{display:block}
+html.mobile.gated body{overflow:hidden}
+#mGate .mg-panel{max-width:460px; margin:0 auto; text-align:left; line-height:1.7}
+#mGate h2{text-align:center; margin:.4rem 0 1rem; color:#e0b44a}
+#mGate .mg-lead{font-weight:800; font-size:1.1rem; text-align:center}
+#mGate ol{padding-left:1.4rem; margin:.6rem 0 1rem}
+#mGate .bk-codein{width:100%; box-sizing:border-box; font-size:1.1rem; margin-bottom:.6rem}
+#mGate .btn{width:100%}
 html.mobile .pc-only{display:none}
 html{-webkit-text-size-adjust:100%}
 html.mobile button, html.mobile .plot, html.mobile .slot, html.mobile .fbtn, html.mobile .arr{touch-action:manipulation; -webkit-tap-highlight-color:transparent}
@@ -1127,8 +1225,8 @@ html.mobile body{align-items:flex-start}
 
 /* タイトル: 庭と、ランキング・辞典・引き継ぎだけ */
 html.mobile #screen-title .mode-group:not(:has(.garden)){display:none}
-html.mobile #screen-title .mode-group .diff-btn:not(.garden){display:none}
-html.mobile #screen-title .diff-btn.garden{width:min(360px,100%); padding:1rem 1.2rem}
+html.mobile #screen-title .mode-group .diff-btn:not(.garden):not(.books){display:none}
+html.mobile #screen-title .diff-btn.garden, html.mobile #screen-title .diff-btn.books{width:min(360px,100%); padding:1rem 1.2rem}
 html.mobile #screen-title .diff-btn.garden .name{font-size:1.5rem}
 html.mobile #screen-title .diff-btn.garden .desc{font-size:.85rem}
 html.mobile .mnote{color:var(--steel); font-size:.8rem; line-height:1.6; margin:.2rem auto .8rem; max-width:360px}
@@ -1292,6 +1390,10 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
           <div class="name">ネジの詩<span class="kbd">8</span></div>
           <div class="desc">詩を一行ずつ詠み上げる<br>読み終えるまでのタイム勝負</div>
         </button>
+        <button class="diff-btn books" data-diff="books">
+          <div class="name">タイピング単語帳<span class="kbd">0</span></div>
+          <div class="desc">自分で言葉とよみがなを登録して<br>その単語帳で練習する</div>
+        </button>
         <button class="diff-btn garden" data-diff="garden">
           <div class="name">ネジ抜きの庭<span class="kbd">9</span></div>
           <div class="desc">作物を育ててネジを増やす<br>ここで打つほど庭の時間が進む</div>
@@ -1299,17 +1401,20 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       </div>
     </div>
 
-    <p class="mnote m-only">タイピングのモードはパソコンで遊べます。スマホでは庭・ランキング・辞典・記録の引き継ぎが使えます</p>
+    <p class="mnote m-only">スマホでは、パソコンと同期した記録で <b>ネジ抜きの庭</b> と <b>タイピング単語帳</b>(単語帳づくり)が遊べます。タイピングはパソコンで遊んでください</p>
     <p class="best-line" id="bestLine"></p>
     <p class="best-line" id="bestLineTa"></p>
     <p class="best-line" id="bestLinePoem"></p>
     <p class="best-line" id="statsLine"></p>
+    <p class="name-line"><span id="nameLineText"></span> <button class="btn" id="nameBtn">名前を決める <span class="kbdh">N</span></button></p>
     <div class="btn-row" style="margin-top:.2rem">
       <button class="btn" id="rankBtn">ランキングを見る <span class="kbdh">R</span></button>
       <button class="btn" id="dictBtn">ネジ抜き辞典 <span class="kbdh">D</span></button>
-      <button class="btn" id="backupBtn">記録の引き継ぎ <span class="kbdh">K</span></button>
+      <button class="btn" id="backupBtn">別端末と同期 <span class="kbdh">K</span></button>
+      <button class="btn" id="fbBtn">要望・バグ報告 <span class="kbdh">F</span></button>
+      <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
     </div>
-    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 辞典 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9・0 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 辞典 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>0 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard"></div>
   </section>
 
@@ -1342,13 +1447,14 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p class="result-sub" id="resultSubLine"></p>
     <p class="result-new" id="resultNew"></p>
     <div class="register" id="registerBox">
+      <p class="reg-as" id="regAs" style="display:none"><b id="regAsName"></b> としてランキングに登録します</p>
       <input id="nameInput" class="name-input" maxlength="10" placeholder="プレイヤー名" autocomplete="off">
       <div class="btn-row" style="margin-top:.8rem">
         <button class="btn primary" id="regBtn">ランキングに登録 <span class="kbdh">Enter</span></button>
       </div>
       <p class="reg-status" id="regStatus"></p>
     </div>
-    <p class="keynav"><b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる</p>
+    <p class="keynav" id="resultKeys"><b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる</p>
     <div class="btn-row">
       <button class="btn primary" id="retryBtn">もう一回 (Enter)</button>
       <button class="btn" id="titleBtn">タイトルへ (Esc)</button>
@@ -1380,6 +1486,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="rank-tabs">
       <button class="btn gtab" id="tab-g-money">所持ネジ</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
+      <button class="btn gtab" id="tab-g-book">図鑑</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
@@ -1410,12 +1517,13 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div class="big"><span id="poemResTime">0.00</span><small>秒</small></div>
         <p class="sub" id="poemResSub"></p>
         <p class="newrec" id="poemResNew"></p>
+        <p class="reg-as" id="poemRegAs" style="display:none"><b id="poemRegAsName"></b> として番付に載せます</p>
         <input id="poemName" class="w-input" maxlength="10" placeholder="詠み人の名" autocomplete="off">
         <div class="btn-row" style="margin-top:.8rem">
           <button class="w-btn primary" id="poemRegBtn">番付に載せる</button>
         </div>
         <p class="w-status" id="poemRegStatus"></p>
-        <p class="poem-hint" style="margin-top:.3rem">N で名を記す → Enter で番付に載せる</p>
+        <p class="poem-hint" id="poemRegHint" style="margin-top:.3rem">N で名を記す → Enter で番付に載せる</p>
         <div class="btn-row">
           <button class="w-btn" id="poemRetryBtn">もう一度詠む (Enter)</button>
           <button class="w-btn" id="poemBackBtn">戻る (Esc)</button>
@@ -1439,6 +1547,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="tbtn treas" id="g-treasBtn">貴重品<span class="kb">8</span></button>
       <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
       <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
+      <button class="tbtn goal" id="g-goalBtn">実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">0</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
     </div>
 
@@ -1476,7 +1585,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </p>
     <p class="help pc-only">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
-      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
+      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
@@ -1544,21 +1653,36 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
   </div>
 
+  <!-- 実績 -->
+  <div class="modal" id="g-goal">
+    <div class="panel">
+      <div class="phead">
+        <h2>実績</h2>
+        <div class="money" id="g-goalRate"></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <p class="tnote">実績を解除すると、ごほうびのネジを受け取れます。次に何をするか迷ったら、ここを見てください。</p>
+      <div id="g-goalBody" class="plist"></div>
+      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>0</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
   <!-- 番付に載せる -->
   <div class="modal" id="g-rank">
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持ネジと累計収穫数の番付(ランキング)に載せます。名前ごとに1件で、一度載せると庭を出るたびに自動で更新されます。</p>
+      <p>所持ネジ・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
-      <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">載せる(Enter)</button></div>
+      <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
         <button class="tab" data-rk="g-money">所持ネジ</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
+        <button class="tab" data-rk="g-book">図鑑</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint">名前を入れて <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計収穫 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1566,6 +1690,44 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
   </section>
 
   <!-- ネジ抜き辞典画面 -->
+  <!-- タイピング単語帳 -->
+  <section id="screen-books" class="screen">
+    <h2 class="rank-title">タイピング単語帳</h2>
+    <p class="reg-status">言葉とよみがなを登録して、自分だけの単語帳でタイピングの練習ができます。全部の言葉を打ち終えるまでのタイムを計ります</p>
+    <div id="wbListView">
+      <div id="wbList" class="wb-list"></div>
+      <p class="reg-status m-only">スマホでは単語帳の作成・編集・削除ができます。プレイはパソコンで遊べます</p>
+      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
+      <div class="btn-row">
+        <button class="btn primary" id="wbNew">新しい単語帳を作る (N)</button>
+        <button class="btn" id="wbBack">タイトルへ (Esc)</button>
+      </div>
+    </div>
+    <div id="wbEditor" class="wb-editor" style="display:none">
+      <label class="wb-lbl">単語帳の名前</label>
+      <input id="wbName" class="wb-in" maxlength="20" placeholder="例: 理科の用語" autocomplete="off">
+      <label class="wb-lbl">言葉を追加</label>
+      <div class="wb-add">
+        <input id="wbT" class="wb-in" maxlength="40" placeholder="言葉(例: 光合成)" autocomplete="off">
+        <input id="wbK" class="wb-in" maxlength="60" placeholder="よみがな(例: こうごうせい)" autocomplete="off">
+        <button class="btn" id="wbAdd">追加 (Enter)</button>
+      </div>
+      <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です</p>
+      <details class="wb-bulk">
+        <summary>まとめて追加する</summary>
+        <textarea id="wbBulk" class="wb-in" rows="5" placeholder="1行に「言葉,よみがな」の形で書きます&#10;光合成,こうごうせい&#10;細胞,さいぼう"></textarea>
+        <div class="btn-row" style="margin-top:.4rem"><button class="btn" id="wbBulkAdd">まとめて追加</button></div>
+      </details>
+      <p class="wb-note" id="wbNote"></p>
+      <ol id="wbWords" class="wb-words"></ol>
+      <p class="keynav" id="wbKeys"></p>
+      <div class="btn-row">
+        <button class="btn primary" id="wbSave">保存する (S)</button>
+        <button class="btn" id="wbCancel">やめる (Esc)</button>
+      </div>
+    </div>
+  </section>
+
   <section id="screen-dict" class="screen">
     <h2 class="rank-title">ネジ抜き辞典</h2>
     <p class="reg-status" id="dictRate"></p>
@@ -1583,19 +1745,69 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 </div>
 
 <div id="heatLayer"></div>
+<div id="tutRing"></div>
+<div id="tutBubble"><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
 <div id="stagePop"></div>
 <div id="countdown"></div>
+<div id="imeWarn">日本語入力がオンになっています。<b>半角英数</b>(「英数」キーや「半角/全角」キー)に切り替えてください</div>
 
-<!-- 記録の引き継ぎ(ネジ打ち全体) -->
+<!-- 要望・バグ報告 -->
+<div id="fb" class="bk-modal">
+  <div class="bk-panel">
+    <div class="bk-head"><h2>要望・バグ報告</h2><button class="btn bk-x" id="fbClose">閉じる ✕</button></div>
+    <p class="bk-p">追加してほしい語録・作物・ガチャ・機能や、見つけたバグを自由に書いて送ってください。送られた内容は作者が確認して、今後の参考にします(個別の返信はできません)。</p>
+    <h3>種類</h3>
+    <div class="fb-cats" id="fbCats">
+      <button class="btn" data-c="word">語録</button>
+      <button class="btn" data-c="crop">作物</button>
+      <button class="btn" data-c="gacha">ガチャ</button>
+      <button class="btn on" data-c="feature">機能</button>
+      <button class="btn" data-c="bug">バグ</button>
+      <button class="btn" data-c="other">その他</button>
+    </div>
+    <h3>内容</h3>
+    <textarea class="bk-code fb-text" id="fbText" maxlength="1000" placeholder="例: ハードに入れてほしい語録があります / ガチャに○○の作物がほしい / スマホで○○を押すと動かない"></textarea>
+    <input class="bk-codein fb-name" id="fbName" maxlength="20" placeholder="名前(なくても大丈夫です)" autocomplete="off">
+    <div class="bk-foot"><span class="bk-note" id="fbNote"></span><button class="btn primary" id="fbSend">送る</button></div>
+    <p class="keynav"><b>1〜6</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
+  </div>
+</div>
+
+<!-- プレイヤー名 -->
+<div id="nm" class="bk-modal">
+  <div class="bk-panel nm-panel">
+    <div class="bk-head"><h2>プレイヤー名</h2><button class="btn bk-x" id="nmClose">閉じる ✕</button></div>
+    <p class="bk-p" id="nmNow"></p>
+    <input class="bk-codein" id="nmInput" maxlength="10" placeholder="名前(10文字まで)" autocomplete="off">
+    <div class="bk-foot"><span class="bk-note" id="nmNote"></span><button class="btn primary" id="nmSave">決める</button></div>
+    <p class="keynav"><b>Enter</b> 決める ・ <b>Esc</b> 閉じる</p>
+  </div>
+</div>
+
+<!-- スマホ: 同期していないときは、この画面だけ -->
+<div id="mGate">
+  <div class="mg-panel">
+    <h2>ネジ打ち</h2>
+    <p class="mg-lead">スマホでは、パソコンの記録を同期して遊びます</p>
+    <p>スマホで遊べるのは <b>ネジ抜きの庭</b> と <b>タイピング単語帳</b>(単語帳づくり)です。タイピングはパソコンで遊んでください。パソコンで打った分だけ、スマホの庭も育ちます。</p>
+    <ol>
+      <li>パソコンでネジ打ちを開く</li>
+      <li>タイトルの「別端末と同期」→「同期を始める」を押す</li>
+      <li>出てきた英数字16文字のコードを、下に入れる</li>
+    </ol>
+    <input id="mgCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード" autocomplete="off" autocapitalize="characters">
+    <button class="btn primary" id="mgJoin">同期する</button>
+    <p class="bk-note" id="mgNote"></p>
+  </div>
+</div>
+
+<!-- 別端末と同期(ネジ打ち全体) -->
 <div id="backup" class="bk-modal">
   <div class="bk-panel">
-    <div class="bk-head"><h2>記録の引き継ぎ</h2><button class="btn bk-x" id="bkClose">閉じる ✕</button></div>
-    <p class="bk-p">別のパソコンやブラウザで続きを遊ぶための記録です。自己ベスト・ネジ抜き辞典・プレイヤー名・統計・ネジ抜きの庭・まだ庭で受け取っていないタイピングの分まで、まとめて移せます。ランキングはもともとネット上にあるので、移さなくても同じです。</p>
-    <h3>このブラウザの記録文字列</h3>
-    <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
-    <div class="bk-foot"><span class="bk-note" id="bkCopyNote"></span><button class="btn primary" id="bkCopy">コピーする (C)</button></div>
+    <div class="bk-head"><h2>別端末と同期</h2><button class="btn bk-x" id="bkClose">閉じる ✕</button></div>
     <h3>ブラウザ間の同期</h3>
-    <p class="bk-p" id="bkSyncState">同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。</p>
+    <p class="bk-p">パソコンとスマホなど、別の端末(ブラウザ)で同じ記録を使えます。自己ベスト・ネジ抜き辞典・プレイヤー名・統計・ネジ抜きの庭・単語帳まで、自動で同じになります。ランキングはもともとネット上にあるので、同期しなくても同じです。</p>
+    <p class="bk-p" id="bkSyncState">同期していません。</p>
     <div class="bk-foot" style="justify-content:flex-start; flex-wrap:wrap">
       <button class="btn" id="bkSyncStart">同期を始める (S)</button>
       <input id="bkCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード (J)" autocomplete="off">
@@ -1606,10 +1818,17 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
     <div id="bkBackups" class="bk-backups"></div>
 
+    <div class="bk-pconly">
+    <h3>記録の引き継ぎ(記録文字列)</h3>
+    <p class="bk-p">同期を使わずに、記録を文字列にして別のブラウザへ移すこともできます。</p>
+    <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
+    <div class="bk-foot"><span class="bk-note" id="bkCopyNote"></span><button class="btn primary" id="bkCopy">コピーする (C)</button></div>
     <h3>記録文字列から読み込む</h3>
     <p class="bk-p">読み込むと、このブラウザにある記録はすべて置き換わります。読み込んだあとは自動で画面を読み直します。</p>
     <textarea class="bk-code" id="bkImport" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkImportNote"></span><button class="btn" id="bkLoad">読み込む (Enter)</button></div>
+    </div>
+    <p class="bk-p m-only">記録文字列での引き継ぎは、パソコンだけで使えます。スマホは同期で記録を受け取ります。</p>
     <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>S</b> 同期の開始/停止 ・ <b>J</b> コード入力 ・ <b>T</b> こちらで遊ぶ ・ <b>R</b>→<b>1〜5</b> バックアップから戻す ・ <b>K</b> / <b>Esc</b> 閉じる</p>
   </div>
 </div>
@@ -1930,7 +2149,7 @@ const firebaseConfig = {
   messagingSenderId: "299129471044",
   appId: "1:299129471044:web:c2a338200c068bfae83c11"
 };
-const MAX_ENTRIES_PER_PLAYER = 2;  // ランキング掲載は1人2件まで
+const MAX_ENTRIES_PER_PLAYER = 1;  // ランキング掲載は1つの名前につき1件
 const RANKING_SIZE = 20;           // 表示件数
 let db = null;
 try{
@@ -1946,6 +2165,8 @@ try{
    (ブラウザを閉じても消えない)。使えない環境では
    window.storage → メモリの順にフォールバック */
 const memStore={};
+/* デバッグ用の合言葉で解放した記録は、ランキング・番付・みんなの統計に載せない */
+const isDebugSave = () => { try{ return localStorage.getItem("nejiuchi:debug")==="1"; }catch(e){ return false; } };
 const store={
   async get(key){
     try{
@@ -1985,9 +2206,10 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 → ネジの詩 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY), "g-money","g-harvest"];
-const isGardenRank = d => d==="g-money" || d==="g-harvest";
-DIFF_LABEL["g-money"]="ネジ抜きの庭 所持ネジ"; DIFF_LABEL["g-harvest"]="ネジ抜きの庭 累計収穫";
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY), "g-money","g-harvest","g-book"];
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book";
+const gRankUnit = d => d==="g-money" ? "ネジ" : (d==="g-book" ? "項目" : "個");
+DIFF_LABEL["g-money"]="ネジ抜きの庭 所持ネジ"; DIFF_LABEL["g-harvest"]="ネジ抜きの庭 累計収穫"; DIFF_LABEL["g-book"]="ネジ抜きの庭 図鑑";
 for(const p of POEMS) DIFF_LABEL[POEM_KEY(p)] = "ネジの詩「"+p.title+"」";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
@@ -1997,6 +2219,8 @@ const TA_MODES = {
   "ta-hard":   { set:"hard",   goal:5  },
 };
 const isTA = d => Object.prototype.hasOwnProperty.call(TA_MODES,d);
+/* 決まった言葉を全部打つまでのタイムを計るモード(タイムアタック・単語帳) */
+const isQ = d => isTA(d) || d==="book";
 /* タイム系(小さいほど良い)のモードか */
 const isTimeRanked = d => isTA(d) || isPoem(d);
 
@@ -2246,7 +2470,7 @@ const fmtTime = s => Number(s).toFixed(2)+"秒";
 
 /* ---------- 画面制御 ---------- */
 const $=id=>document.getElementById(id);
-const screens={title:$("screen-title"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),poem:$("screen-poem"),garden:$("screen-garden")};
+const screens={title:$("screen-title"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),poem:$("screen-poem"),books:$("screen-books"),garden:$("screen-garden")};
 let scene="title";
 function show(name){
   scene=name;
@@ -2259,6 +2483,7 @@ function show(name){
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
 let timerId=null, cdId=null, lastWordKey=null, plateScrews=0, running=false, currentWord=null;
+const usedWords=new Set();   // スコアアタックで、このプレイ中に出した語録
 let elapsed=0;          // 一本勝負/タイムアタックの経過秒
 let taQueue=[], taGoal=0, nextWord=null; // タイムアタック用の出題キュー
 let oneshotStage=0;     // 一本勝負の緊張段階(0〜4)
@@ -2388,7 +2613,7 @@ function setCurrentWord(w){
 }
 function renderNextWord(){
   const el=$("nextWord");
-  if(!isTA(diff)){ el.innerHTML="&nbsp;"; return; }
+  if(!isQ(diff)){ el.innerHTML="&nbsp;"; return; }
   if(nextWord){
     el.innerHTML='<span class="lbl">NEXT</span>';
     el.appendChild(document.createTextNode(nextWord.t));
@@ -2398,7 +2623,7 @@ function renderNextWord(){
 }
 
 function pickWord(){
-  if(isTA(diff)){
+  if(isQ(diff)){
     // キューの先頭を出題し、その次を先読み表示する
     const w=taQueue.shift();
     if(!w){ finishTa(); return; }
@@ -2409,9 +2634,17 @@ function pickWord(){
   }
   const pool = (diff==="oneshot") ? pickOneshotSet() : words;
   let w;
-  for(let tries=0;tries<12;tries++){
-    w=pool[Math.floor(Math.random()*pool.length)];
-    if(pool.length<=1 || w.k!==lastWordKey) break;
+  if(diff==="oneshot"){
+    for(let tries=0;tries<12;tries++){
+      w=pool[Math.floor(Math.random()*pool.length)];
+      if(pool.length<=1 || w.k!==lastWordKey) break;
+    }
+  }else{
+    // スコアアタック: 1回のプレイで一度打った語録は出さない(全部出たら、直前の語以外からまた選ぶ)
+    let left=pool.filter(x=>!usedWords.has(x.k));
+    if(!left.length){ usedWords.clear(); left=pool.filter(x=>x.k!==lastWordKey); if(!left.length) left=pool; }
+    w=left[Math.floor(Math.random()*left.length)];
+    usedWords.add(w.k);
   }
   lastWordKey=w.k;
   setCurrentWord(w);
@@ -2433,16 +2666,18 @@ function clearWordPanel(){
 function startGame(d){
   if(window.IS_MOBILE) return;   // スマホではタイピングできない
   diff=d;
-  const ta=isTA(d), oneshot=(d==="oneshot");
+  const ta=isQ(d), oneshot=(d==="oneshot");
+  if(d==="book" && !(bookPlay && bookPlay.words && bookPlay.words.length)) return;
   words = (ta||oneshot) ? [] : WORD_SETS[d];
-  score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false;
+  score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false; usedWords.clear();
   taQueue=[]; taGoal=0;
   gardenKeys=0;
   resetStage();
   clearInterval(timerId); clearInterval(cdId); cdId=null;
   clearWordPanel();                       // ← 前回の出題を消してからカウントダウン
   $("wordPanel").classList.remove("fatal","clear");
-  if(ta) buildTaQueue(d);
+  if(d==="book") buildBookQueue();
+  else if(ta) buildTaQueue(d);
   // HUD/タイムバーをモードごとに切り替え
   $("scoreLabel").textContent = ta ? "残り " : "抜いたネジ ";
   $("score").textContent = ta ? taGoal : 0;
@@ -2473,7 +2708,7 @@ function startGame(d){
 }
 function startTimer(){
   const t0=Date.now();
-  if(isTA(diff) || diff==="oneshot"){
+  if(isQ(diff) || diff==="oneshot"){
     // 時間無制限: 経過時間を数え上げるだけ
     timerId=setInterval(()=>{
       elapsed=(Date.now()-t0)/1000;
@@ -2500,8 +2735,12 @@ function finishTa(){
 }
 async function endGame(){
   clearInterval(timerId); clearInterval(cdId); cdId=null; running=false;
+  $("imeWarn").classList.remove("show");
   resetStage();   // 背景の熱演出を戻す
   recordStats(score); // ランキング登録の有無に関係なく記録
+  if(diff==="book"){ endBookGame(); return; }
+  $("registerBox").style.display="";
+  $("titleBtn").textContent="タイトルへ (Esc)";
   const ta=isTA(diff);
   const value = ta ? Number(elapsed.toFixed(2)) : score;
   const best=await loadBest(diff);
@@ -2527,7 +2766,9 @@ async function endGame(){
   $("nameInput").value=playerName;
   $("regBtn").disabled=false;
   $("regStatus").textContent=db?"":"※Firebase未設定のためランキング登録はできません";
-  show("result");
+  showRegName();
+  show("result"); resultAt=Date.now();
+  if(playerName && db) registerResult();   // 名前が決まっていれば自動で登録
   refreshBestLine();
 }
 
@@ -2539,13 +2780,39 @@ document.addEventListener("keydown",e=>{
   if(backupOpen && !(e.target && (e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"))){
     backupKey(e); return;
   }
+  // 名前のウィンドウ: Enter で決める、Esc で閉じる
+  if(nmOpen){
+    if(e.key==="Enter"){ e.preventDefault(); nmSave(); }
+    else if(e.key==="Escape"){ e.preventDefault(); closeNameWin(); }
+    return;
+  }
+  // 要望・バグ報告のウィンドウが開いているときは、そちらだけを操作
+  if(fbOpen && !(e.target && (e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"))){
+    const k=e.key;
+    if(k==="Escape"){ e.preventDefault(); closeFeedback(); }
+    else if(/^[1-6]$/.test(k)){ e.preventDefault(); $("fbCats").querySelectorAll("[data-c]")[+k-1].click(); }
+    else if(k==="t"||k==="T"){ e.preventDefault(); $("fbText").focus(); }
+    else if(k==="n"||k==="N"){ e.preventDefault(); $("fbName").focus(); }
+    else if(k==="Enter"){ e.preventDefault(); fbSend(); }
+    return;
+  }
   // 名前入力中はゲーム操作を無効化(Enterで登録)
   if(e.target && (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")){
+    const id=e.target.id;
+    if(e.key==="Enter" && (e.ctrlKey||e.metaKey)){
+      if(id==="wbBulk"){ e.preventDefault(); wbBulkAdd(); return; }
+      if(id==="wbName"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
+      if(id==="fbText"||id==="fbName"){ e.preventDefault(); fbSend(); return; }
+    }
     if(e.key==="Enter"){
+      if(id==="wbBulk"||id==="fbText") return;       // 複数行の入力欄は改行する
       e.preventDefault();
-      if(e.target.id==="poemName") $("poemRegBtn").click();
-      else if(e.target.id==="bkImport") backupImport();
-      else if(e.target.id==="bkCode") syncJoin();
+      if(id==="poemName") $("poemRegBtn").click();
+      else if(id==="bkImport") backupImport();
+      else if(id==="bkCode") syncJoin();
+      else if(id==="wbT"||id==="wbK") wbAddWord();
+      else if(id==="wbName") $("wbT").focus();
+      else if(id==="fbName") fbSend();
       else $("regBtn").click();
     }
     if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
@@ -2557,11 +2824,16 @@ document.addEventListener("keydown",e=>{
     if(e.key==="r"||e.key==="R") openRanking(rankCur,playerName);
     if(e.key==="d"||e.key==="D") openDict(dictCur);
     if(e.key==="k"||e.key==="K") openBackup();
+    if(e.key==="0") openBooks();
+    if(e.key==="f"||e.key==="F") openFeedback();
+    if(e.key==="h"||e.key==="H") tutAsk(false);
+    if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
     if(e.key==="9"||e.key==="g"||e.key==="G") openGarden();
     return;
   }
   if(scene==="poem"){ poemKey(e); return; }
+  if(scene==="books"){ booksKey(e); return; }
   if(scene==="ranking"){
     if(e.key==="Escape") show("title");
     else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
@@ -2583,9 +2855,11 @@ document.addEventListener("keydown",e=>{
     return;
   }
   if(scene==="result"){
+    if(Date.now()-resultAt<800) return;   // 時間切れの直後に打ち続けたキーで、名前欄などが動かないように
     if(e.key==="Enter") startGame(diff);
-    if(e.key==="Escape") show("title");
-    if(e.key==="n"||e.key==="N"){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
+    if(e.key==="Escape"){ if(diff==="book") openBooks(); else show("title"); }
+    if((e.key==="n"||e.key==="N") && !playerName){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
+    if((e.key==="r"||e.key==="R") && playerName) openRanking(diff,playerName);
     if(e.key==="g"||e.key==="G") openGarden();
     return;
   }
@@ -2595,10 +2869,12 @@ document.addEventListener("keydown",e=>{
     $("countdown").style.display="none";
     running=false; resetStage(); clearWordPanel();
     sendToGarden(gardenKeys,0); gardenKeys=0;
-    show("title"); return;
+    if(diff==="book") openBooks(); else show("title");
+    return;
   }
   if(!running) return;
   const key=e.key;
+  if(key==="Process" || e.isComposing){ imeWarn(); return; }
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
   e.preventDefault();
   const r=handleKey(key);
@@ -2615,8 +2891,8 @@ document.addEventListener("keydown",e=>{
       return;
     }
     sndMiss();
-    // タイムアタックはミスしてもペナルティ無し(回数だけ記録)
-    if(isTA(diff)) return;
+    // タイムアタック・単語帳はミスしてもペナルティ無し(回数だけ記録)
+    if(isQ(diff)) return;
     // ミス上限でネジが1本戻る
     if(miss % MISS_PENALTY[diff]===0 && score>0){
       score--; $("score").textContent=score;
@@ -2635,8 +2911,8 @@ document.addEventListener("keydown",e=>{
       score++;
       sndDone();
       removeScrew();
-      unlockWord(currentWord.k);
-      if(isTA(diff)){
+      if(diff!=="book") unlockWord(currentWord.k);   // 単語帳の言葉は辞典に載せない
+      if(isQ(diff)){
         // 残り本数とゲージを更新
         const remain=Math.max(taGoal-score,0);
         $("score").textContent=remain;
@@ -2655,14 +2931,24 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
   b.addEventListener("click",()=>{
     if(b.dataset.diff==="poem") startPoem(POEMS[0]);
     else if(b.dataset.diff==="garden") openGarden();
+    else if(b.dataset.diff==="books") openBooks();
     else startGame(b.dataset.diff);
   });
 });
 $("retryBtn").addEventListener("click",()=>startGame(diff));
-$("titleBtn").addEventListener("click",()=>show("title"));
+$("titleBtn").addEventListener("click",()=>{ if(diff==="book") openBooks(); else show("title"); });
+
+let resultAt=0;
+/* 日本語入力がオンのまま打つと文字が届かないので、知らせる */
+let imeWarnT=null;
+function imeWarn(){
+  const w=$("imeWarn"); w.classList.add("show");
+  clearTimeout(imeWarnT); imeWarnT=setTimeout(()=>w.classList.remove("show"),2600);
+}
 
 /* ---------- Firebase ランキング ---------- */
 let playerName="";
+try{ playerName=localStorage.getItem("nejiuchi:playerName")||""; }catch(e){}
 (async()=>{
   try{
     const r=await store.get("playerName");
@@ -2690,25 +2976,22 @@ function betterRecord(a,b,d){
   return 0;
 }
 
-/* 登録: 1人(同名)につき MAX_ENTRIES_PER_PLAYER 件まで。
-   既に上限なら、自分の一番弱い記録を上回った時だけ入れ替える */
+/* 登録: 1つの名前につき1件。今の記録を上回ったときだけ入れ替える
+   (前の決まりで2件残っている名前は、良いほうだけを残す) */
 async function submitScore(name,d,extra){
   const ref=db.ref("nejiuchi/scores/"+d);
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
   const mine=[];
   snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e, m:v.m}); });
-  const entry={n:name, s:extra.s, t:Date.now()};
+  const entry={n:name, s:extra.s, t:Date.now(), o:myId()};
   if(extra.e!=null) entry.e=extra.e;
   if(extra.m!=null) entry.m=extra.m;
-  if(mine.length>=MAX_ENTRIES_PER_PLAYER){
-    mine.sort((a,b)=>betterRecord(a,b,d)); // 弱い順
-    if(betterRecord(entry,mine[0],d)<=0) return {saved:false};
-    await ref.child(mine[0].key).remove();
-    // 万一3件以上あった場合の掃除
-    for(let i=1;i<=mine.length-MAX_ENTRIES_PER_PLAYER;i++){
-      await ref.child(mine[i].key).remove();
-    }
+  mine.sort((a,b)=>betterRecord(b,a,d));   // 良い順
+  if(mine.length && betterRecord(entry,mine[0],d)<=0){
+    for(const x of mine.slice(MAX_ENTRIES_PER_PLAYER)) await ref.child(x.key).remove();
+    return {saved:false};
   }
+  for(const x of mine) await ref.child(x.key).remove();
   await ref.push(entry);
   return {saved:true};
 }
@@ -2722,7 +3005,9 @@ async function fetchRanking(d){
   const rows=[];
   snap.forEach(c=>{ rows.push(c.val()); });
   rows.sort((a,b)=> -betterRecord(a,b,d) || a.t-b.t); // 優劣→同値なら先着順
-  return rows;
+  if(isGardenRank(d)) return rows;
+  const seen=new Set();                   // 1つの名前につき1件(良いほうだけ)
+  return rows.filter(r=>{ if(seen.has(r.n)) return false; seen.add(r.n); return true; });
 }
 
 let rankCur="normal", dictCur="easy";
@@ -2749,7 +3034,7 @@ async function openRanking(d,highlight){
       li.className="rank-row"+(i===0?" top1":"")+(highlight&&r.n===highlight?" me":"");
       let scoreText;
       if(isGardenRank(d)){
-        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + (d==="g-money"?"ネジ":"個");
+        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + gRankUnit(d);
       }else if(isTimeRanked(d)){
         const missText = (r.m==null) ? "" : ` <span style="color:var(--steel);font-size:.85em">ミス${r.m}</span>`;
         scoreText = `${r.e==null?"--":fmtTime(r.e)}${missText}`;
@@ -2767,13 +3052,21 @@ async function openRanking(d,highlight){
   }
 }
 
-$("regBtn").addEventListener("click",async()=>{
-  const name=$("nameInput").value.trim();
-  if(!name){ $("regStatus").textContent="プレイヤー名を入れてください"; return; }
+/* 結果画面の登録。名前が決まっていなければ、ここで決める(以後はその名前で自動登録) */
+async function registerResult(){
+  if(isDebugSave()){ $("regStatus").textContent="デバッグ用の記録はランキングに登録できません"; return; }
   if(!db){ $("regStatus").textContent="※Firebase未設定のため登録できません"; return; }
-  playerName=name;
-  try{ await store.set("playerName",name); }catch(e){}
-  $("regBtn").disabled=true;
+  if(!playerName){
+    const name=$("nameInput").value.trim();
+    if(!name){ $("regStatus").textContent="プレイヤー名を入れてください"; return; }
+    $("regBtn").disabled=true;
+    $("regStatus").textContent="名前を確かめています...";
+    const r=await setPlayerName(name);
+    if(!r.ok){ $("regStatus").textContent=r.msg; $("regBtn").disabled=false; return; }
+    $("nameInput").blur();
+  }
+  const name=playerName;
+  showRegName();
   $("regStatus").textContent="登録中...";
   try{
     const extra={s:score};
@@ -2781,21 +3074,128 @@ $("regBtn").addEventListener("click",async()=>{
     else if(diff==="oneshot"){ extra.e=Number(elapsed.toFixed(2)); }
     const res=await submitScore(name,diff,extra);
     if(res.saved){
-      $("regStatus").textContent="登録しました!";
-      setTimeout(()=>openRanking(diff,name),500);
+      $("regStatus").innerHTML=`ランキングを更新しました! <button class="btn" id="regView">ランキングを見る (R)</button>`;
+      $("regView").onclick=()=>openRanking(diff,name);
     }else{
       $("regStatus").textContent = isTA(diff)
-        ? "自分の既存記録2件より遅かったため掲載されませんでした(1人2件まで)"
+        ? "ランキングの記録(自己ベスト)より遅かったので、ランキングはそのままです"
         : (diff==="oneshot"
-            ? "自分の既存記録2件を超えられなかったため掲載されませんでした(同本数なら時間勝負)"
-            : "自分の既存記録2件より低いため掲載されませんでした(1人2件まで)");
-      $("regBtn").disabled=false;
+            ? "ランキングの記録(自己ベスト)を超えられなかったので、ランキングはそのままです(同じ本数なら時間勝負)"
+            : "ランキングの記録(自己ベスト)より少なかったので、ランキングはそのままです");
     }
   }catch(e){
     $("regStatus").textContent="登録に失敗しました。通信環境を確認してください。";
-    $("regBtn").disabled=false;
   }
-});
+}
+$("regBtn").addEventListener("click",registerResult);
+/* 結果画面: 名前が決まっていれば入力欄を隠して「〇〇として登録」と出す */
+function showRegName(){
+  const has=!!playerName;
+  $("nameInput").style.display=has?"none":"";
+  $("regBtn").style.display=has?"none":"";
+  $("regAs").style.display=has?"":"none";
+  $("regAsName").textContent=playerName;
+  $("resultKeys").innerHTML = has
+    ? '<b>Enter</b> もう一回 ・ <b>Esc</b> タイトルへ ・ <b>G</b> 庭へ ・ <b>R</b> ランキング'
+    : '<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる';
+}
+
+/* ---------- プレイヤー名(ランキングと番付で共通) ----------
+   一度決めた名前は固定。変えるときは、今までのランキングと番付の記録もまとめて新しい名前に移す */
+const SCORE_DIFFS=["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(p=>POEM_KEY(p))];
+const myId = () => { try{ return Garden.ownerId(); }catch(e){ return ""; } };
+const nameKey = name => encodeURIComponent(name).replace(/\./g,"%2E");   // 番付の保存場所(庭の rankKey と同じ)
+const nameError = n => !n ? "名前を入れてください" : ([...n].length>10 ? "名前は10文字までです" : "");
+/* ほかの人が使っている名前か(自分の印が付いていない記録があるか) */
+async function nameTaken(name){
+  const me=myId();
+  const g=(await db.ref(`nejiuchi/garden/money/${nameKey(name)}`).once("value")).val();
+  if(g && g.o && g.o!==me) return true;
+  for(const d of SCORE_DIFFS){
+    const snap=await db.ref("nejiuchi/scores/"+d).orderByChild("n").equalTo(name).once("value");
+    let other=false; snap.forEach(c=>{ const v=c.val(); if(v.o && v.o!==me) other=true; });
+    if(other) return true;
+  }
+  return false;
+}
+/* ランキングの記録を新しい名前に移す(同じ名前の記録が両方にあれば良いほうを残す) */
+async function moveScores(from,to){
+  const me=myId();
+  for(const d of SCORE_DIFFS){
+    const ref=db.ref("nejiuchi/scores/"+d), rows=[];
+    for(const n of [from,to]){
+      const snap=await ref.orderByChild("n").equalTo(n).once("value");
+      snap.forEach(c=>{ const v=c.val(); if(!v.o || v.o===me) rows.push({key:c.key, v}); });
+    }
+    if(!rows.length) continue;
+    rows.sort((a,b)=>betterRecord(b.v,a.v,d));
+    const best=Object.assign({}, rows[0].v, { n:to, o:me });
+    await ref.push(best);
+    for(const r of rows) await ref.child(r.key).remove();
+  }
+}
+let nameBusy=false;
+async function setPlayerName(name){
+  name=(name||"").trim();
+  const err=nameError(name); if(err) return {ok:false, msg:err};
+  if(name===playerName) return {ok:true};
+  if(nameBusy) return {ok:false, msg:"いま名前を変えています。少し待ってください"};
+  nameBusy=true;
+  const old=playerName;
+  try{
+    if(db && !isDebugSave()){
+      if(await nameTaken(name)) return {ok:false, msg:"その名前はほかの人が使っています。別の名前にしてください"};
+      if(old) await moveScores(old,name);
+    }
+    playerName=name;
+    try{ await store.set("playerName",name); }catch(e){}
+    try{ localStorage.setItem("nejiuchi:nameSet","1"); }catch(e){}
+    await Garden.useName(name, old);   // 番付も同じ名前で載せる(前の名前の分は消す)
+    refreshNameLine();
+    return {ok:true, moved:!!old};
+  }catch(e){
+    console.warn("[nejiuchi name]",e);
+    return {ok:false, msg:"名前を登録できませんでした。通信環境を確認してください"};
+  }finally{ nameBusy=false; }
+}
+window.setPlayerName=setPlayerName;
+/* タイトルの「名前」の行 */
+function refreshNameLine(){
+  $("nameLineText").textContent = playerName ? `プレイヤー名: ${playerName}` : "プレイヤー名: まだ決めていません";
+  $("nameBtn").innerHTML = (playerName ? "名前を変える" : "名前を決める")+' <span class="kbdh">N</span>';
+}
+/* 名前を決める・変えるウィンドウ */
+let nmOpen=false;
+function openNameWin(){
+  nmOpen=true;
+  $("nm").classList.add("open");
+  $("nmInput").value=playerName;
+  $("nmNow").textContent = playerName
+    ? `いまの名前は「${playerName}」です。変えると、ランキングと番付に載っている記録もすべて新しい名前になります。`
+    : "ランキングと庭の番付に使う名前です。一度決めると、次からはこの名前で自動で登録されます(あとで変えることもできます)。";
+  $("nmNote").textContent = db ? "" : "※Firebase未設定のため、名前はこのブラウザにだけ保存されます";
+  setTimeout(()=>{ $("nmInput").focus(); $("nmInput").select(); },30);
+}
+function closeNameWin(){
+  nmOpen=false;
+  $("nm").classList.remove("open");
+  const ae=document.activeElement; if(ae && ae.blur) ae.blur();
+}
+async function nmSave(){
+  const name=$("nmInput").value.trim(), note=$("nmNote");
+  if(name===playerName){ closeNameWin(); return; }
+  note.textContent = playerName ? "記録を新しい名前に移しています..." : "名前を確かめています...";
+  $("nmSave").disabled=true;
+  const r=await setPlayerName(name);
+  $("nmSave").disabled=false;
+  if(!r.ok){ note.textContent=r.msg; $("nmInput").focus(); return; }
+  note.textContent = r.moved ? "名前を変えました。ランキングと番付も新しい名前になりました" : "名前を決めました!";
+  setTimeout(closeNameWin,900);
+}
+$("nameBtn").addEventListener("click",openNameWin);
+$("nmSave").addEventListener("click",nmSave);
+$("nmClose").addEventListener("click",closeNameWin);
+refreshNameLine();
 
 $("rankBtn").addEventListener("click",()=>openRanking("normal",playerName));
 /* 詩のタブは POEMS から自動生成(詩を増やすとタブも増える) */
@@ -2917,13 +3317,16 @@ function startPoem(p){
 function poemKey(e){
   if(e.key==="Escape"){ stopPoem(); show("title"); return; }
   if(poemState==="done"){
+    if(Date.now()-resultAt<800) return;   // 詠み終えた直後に打ち続けたキーで、名前欄などが動かないように
     if(e.key==="Enter") startPoem(poem);
-    if(e.key==="n"||e.key==="N"){ e.preventDefault(); $("poemName").focus(); $("poemName").select&&$("poemName").select(); }
+    if((e.key==="n"||e.key==="N") && !playerName){ e.preventDefault(); $("poemName").focus(); $("poemName").select&&$("poemName").select(); }
+    if((e.key==="r"||e.key==="R") && playerName){ stopPoem(); openRanking(POEM_KEY(poem),playerName); }
     if(e.key==="g"||e.key==="G"){ stopPoem(); openGarden(); }
     return;
   }
   if(poemState!=="play") return;
   const key=e.key;
+  if(key==="Process" || e.isComposing){ imeWarn(); return; }
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
   e.preventDefault();
   const r=handleKey(key);
@@ -2948,7 +3351,7 @@ function poemKey(e){
 
 async function finishPoem(){
   clearInterval(poemTimer);
-  poemState="done";
+  poemState="done"; resultAt=Date.now();
   // 経過時間を確定(表示の最終更新)
   $("poemTime").textContent=poemElapsed.toFixed(1);
   poemRows.forEach(r=>{ r.row.classList.remove("cur","past"); r.row.classList.add("fin"); r.pr.innerHTML="&nbsp;"; });
@@ -2967,36 +3370,329 @@ async function finishPoem(){
   $("poemRegBtn").disabled=false;
   $("poemRegStatus").textContent=db?"":"※Firebase未設定のため番付に載せられません";
   $("poemHint").style.display="none";
+  showPoemRegName();
   $("poemResult").classList.add("show");
+  if(playerName && db) registerPoem();   // 名が決まっていれば自動で載せる
   refreshBestLine();
 }
 
-$("poemRegBtn").addEventListener("click",async()=>{
-  const name=$("poemName").value.trim();
+/* 詩の番付。名前が決まっていなければここで決める(以後はその名前で自動で載せる) */
+async function registerPoem(){
   const st=$("poemRegStatus");
-  if(!name){ st.textContent="詠み人の名を入れてください"; return; }
+  if(isDebugSave()){ st.textContent="デバッグ用の記録は番付に載せられません"; return; }
   if(!db){ st.textContent="※Firebase未設定のため番付に載せられません"; return; }
-  playerName=name;
-  try{ await store.set("playerName",name); }catch(e){}
-  $("poemRegBtn").disabled=true;
+  if(!playerName){
+    const name=$("poemName").value.trim();
+    if(!name){ st.textContent="詠み人の名を入れてください"; return; }
+    $("poemRegBtn").disabled=true;
+    st.textContent="名を確かめています…";
+    const r=await setPlayerName(name);
+    if(!r.ok){ st.textContent=r.msg; $("poemRegBtn").disabled=false; return; }
+    $("poemName").blur();
+  }
+  const name=playerName, key=POEM_KEY(poem);
+  showPoemRegName();
   st.textContent="記しています…";
-  const key=POEM_KEY(poem);
   try{
     const res=await submitScore(name,key,{s:poem.lines.length, e:Number(poemElapsed.toFixed(2)), m:poemMiss});
     if(res.saved){
-      st.textContent="番付に載りました";
-      setTimeout(()=>openRanking(key,name),600);
+      st.innerHTML=`番付に載りました <button class="w-btn" id="poemRegView">番付を見る (R)</button>`;
+      $("poemRegView").onclick=()=>{ stopPoem(); openRanking(key,name); };
     }else{
-      st.textContent="既存の記録2件より遅かったため載りませんでした(一人二件まで)";
-      $("poemRegBtn").disabled=false;
+      st.textContent="番付の記録(自己最速)より遅かったので、番付はそのままです";
     }
   }catch(e){
     st.textContent="記せませんでした。通信環境を確認してください。";
-    $("poemRegBtn").disabled=false;
   }
-});
+}
+$("poemRegBtn").addEventListener("click",registerPoem);
+/* 詩の結果: 名が決まっていれば入力欄を隠して「〇〇として載せる」と出す */
+function showPoemRegName(){
+  const has=!!playerName;
+  $("poemName").style.display=has?"none":"";
+  $("poemRegBtn").style.display=has?"none":"";
+  $("poemRegAs").style.display=has?"":"none";
+  $("poemRegAsName").textContent=playerName;
+  $("poemRegHint").textContent = has ? "Enter もう一度 ・ R 番付 ・ G 庭へ ・ Esc 戻る" : "N で名を記す → Enter で番付に載せる";
+}
 $("poemRetryBtn").addEventListener("click",()=>startPoem(poem));
 $("poemBackBtn").addEventListener("click",()=>{ stopPoem(); show("title"); });
+
+/* ---------- タイピング単語帳 ----------
+   自分で言葉とよみがなを登録して、その単語帳の言葉を全部打つまでのタイムを計る。
+   単語帳はこのブラウザに保存(記録の引き継ぎ・同期でほかのブラウザにも届く) */
+const WB_KEY="nejiuchi:books", WB_MAX_BOOKS=30, WB_MAX_WORDS=300;
+let wbBooks=[], wbEdit=null, bookPlay=null, wbCur=0, wbWordCur=-1;
+const escH = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wbLoad(){
+  try{ wbBooks=JSON.parse(localStorage.getItem(WB_KEY)||"[]"); }catch(e){ wbBooks=[]; }
+  if(!Array.isArray(wbBooks)) wbBooks=[];
+}
+function wbStore(){
+  try{ localStorage.setItem(WB_KEY, JSON.stringify(wbBooks)); return true; }
+  catch(e){ return false; }
+}
+/* よみがなを入力できる形にそろえる: カタカナ→ひらがな、全角英数→半角、英字は小文字、空白は取る */
+function wbNormKana(v){
+  return String(v||"")
+    .replace(/[ァ-ヶ]/g, c=>String.fromCharCode(c.charCodeAt(0)-0x60))
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/[\s　]/g,"")
+    .toLowerCase();
+}
+/* 打てない文字があれば、その文字を返す */
+function wbBadChars(k){
+  const bad=new Set();
+  for(const ch of Array.from(k)){          // 絵文字なども1文字として見る
+    if(/^[a-z0-9\-'!?,.~\/%&]$/.test(ch)) continue;
+    const c=tokenize(ch);
+    if(c.length!==1 || c[0].literal) bad.add(ch);
+  }
+  return [...bad];
+}
+/* 1語ぶんの入力を確かめる。よいときは {t,k}、だめなときは {err} */
+function wbCheckWord(t,k){
+  t=String(t||"").trim(); k=wbNormKana(k);
+  if(!k && /^[ぁ-んー、。！？・〜]+$/.test(wbNormKana(t))) k=wbNormKana(t);   // ひらがなだけの言葉は、よみがなを省ける
+  if(!t && k) t=k;
+  if(!t) return {err:"言葉を入れてください"};
+  if(!k) return {err:`「${t}」のよみがなを入れてください`};
+  const bad=wbBadChars(k);
+  if(bad.length) return {err:`「${t}」のよみがなに入力できない文字があります: ${bad.join(" ")}`};
+  if(k.length>60) return {err:`「${t}」のよみがなが長すぎます(60文字まで)`};
+  return {t:t.slice(0,40), k};
+}
+function openBooks(){
+  wbLoad(); wbEdit=null;
+  $("wbEditor").style.display="none"; $("wbListView").style.display="";
+  renderBooks();
+  show("books");
+}
+function renderBooks(){
+  const list=$("wbList");
+  if(!wbBooks.length){ list.innerHTML='<p class="wb-empty">まだ単語帳がありません。「新しい単語帳を作る」から作りましょう</p>'; return; }
+  wbCur=Math.max(0,Math.min(wbCur,wbBooks.length-1));
+  list.innerHTML=wbBooks.map((b,i)=>`<div class="wb-item${i===wbCur?" cur":""}" data-i="${i}">
+    <span class="wb-no">${i<9?i+1:""}</span>
+    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.words.length}語${b.best!=null?` ・ ベスト ${fmtTime(b.best)}`:""}</small></div>
+    <div class="wb-acts">
+      <button class="btn primary" data-play="${i}">プレイ</button>
+      <button class="btn" data-edit="${i}">編集</button>
+      <button class="btn wb-del" data-del="${i}">削除</button>
+    </div></div>`).join("");
+  const cur=list.querySelector(".wb-item.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+}
+function playBook(i){
+  const b=wbBooks[i]; if(!b) return;
+  if(window.IS_MOBILE){ alert("タイピングはパソコンで遊べます。スマホでは単語帳の作成・編集・削除ができます"); return; }
+  if(!b.words.length){ alert("この単語帳には言葉がありません。編集から追加してください"); return; }
+  bookPlay=b;
+  startGame("book");
+}
+function deleteBook(i){
+  const b=wbBooks[i]; if(!b) return;
+  if(!confirm(`単語帳「${b.name}」(${b.words.length}語)を削除します。元には戻せません。よろしいですか?`)) return;
+  wbBooks.splice(i,1); wbStore();
+  if(wbCur>=wbBooks.length) wbCur=wbBooks.length-1;
+  renderBooks();
+}
+function editBook(i){
+  if(i<0 && wbBooks.length>=WB_MAX_BOOKS){ alert(`単語帳は${WB_MAX_BOOKS}冊まで作れます`); return; }
+  const b=i>=0 ? wbBooks[i] : null;
+  wbEdit={ i, name:b?b.name:"", words:b?b.words.map(w=>({...w})):[] };
+  wbEdit.orig=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
+  wbWordCur=-1;
+  $("wbListView").style.display="none"; $("wbEditor").style.display="";
+  $("wbName").value=wbEdit.name; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
+  $("wbNote").textContent="";
+  $("wbKeys").innerHTML='入力中: <b>Enter</b> 追加 ・ <b>Tab</b> 次の欄 ・ <b>Ctrl+Enter</b> 保存(まとめて追加の欄では追加) ・ <b>Esc</b> 入力をやめる<br>'+
+    '入力していないとき: <b>T</b> 言葉を入力 ・ <b>M</b> 名前を入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
+  renderWbWords();
+  setTimeout(()=>$(b?"wbT":"wbName").focus(),30);
+}
+function renderWbWords(){
+  const ol=$("wbWords");
+  if(wbWordCur>=wbEdit.words.length) wbWordCur=wbEdit.words.length-1;
+  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}"><span class="no">${j+1}</span><span>${escH(w.t)}</span><span class="k">${escH(w.k)}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
+  const cur=ol.querySelector("li.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+}
+/* 編集をやめる(変えたところがあれば確かめる) */
+function wbCancelEdit(){
+  if(wbEdit){
+    wbEdit.name=$("wbName").value.trim();
+    const now=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
+    if(now!==wbEdit.orig && !confirm("変えたところを保存せずに戻ります。よろしいですか?")) return;
+  }
+  openBooks();
+}
+function wbAddOne(t,k){
+  const r=wbCheckWord(t,k);
+  if(r.err) return r.err;
+  if(wbEdit.words.length>=WB_MAX_WORDS) return `1冊に入れられるのは${WB_MAX_WORDS}語までです`;
+  if(wbEdit.words.some(w=>w.t===r.t && w.k===r.k)) return `「${r.t}」はもう入っています`;
+  wbEdit.words.push(r);
+  return "";
+}
+function wbAddWord(){
+  if(!wbEdit) return;
+  const err=wbAddOne($("wbT").value,$("wbK").value);
+  $("wbNote").textContent=err;
+  if(err) return;
+  $("wbT").value=""; $("wbK").value="";
+  renderWbWords();
+  const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight;
+  $("wbT").focus();
+}
+function wbBulkAdd(){
+  if(!wbEdit) return;
+  const lines=$("wbBulk").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  let ok=0; const errs=[];
+  for(const l of lines){
+    const [t,k=""]=l.split(/[,，、\t]/);
+    const err=wbAddOne(t,k);
+    if(err) errs.push(err); else ok++;
+  }
+  renderWbWords();
+  $("wbNote").textContent = `${ok}語を追加しました`+(errs.length?` ・ 追加できなかった行: ${errs.length}(${errs.slice(0,2).join(" / ")}${errs.length>2?" ほか":""})`:"");
+  if(!errs.length) $("wbBulk").value="";
+}
+function wbSaveBook(){
+  if(!wbEdit) return;
+  const name=$("wbName").value.trim();
+  if(!name){ $("wbNote").textContent="単語帳の名前を入れてください"; $("wbName").focus(); return; }
+  if(!wbEdit.words.length){ $("wbNote").textContent="言葉を1つ以上入れてください"; $("wbT").focus(); return; }
+  if(wbEdit.i>=0){
+    const b=wbBooks[wbEdit.i];
+    const changed=JSON.stringify(b.words)!==JSON.stringify(wbEdit.words);
+    b.name=name; b.words=wbEdit.words;
+    if(changed) b.best=null;              // 言葉が変わったらベストはリセット
+  }else{
+    wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words:wbEdit.words, best:null });
+  }
+  if(!wbStore()){ $("wbNote").textContent="保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"; return; }
+  openBooks();
+}
+function booksKey(e){
+  const k=e.key;
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(wbEdit){   // 編集中(入力欄の外)
+    const n=wbEdit.words.length;
+    if(k==="Escape"){ e.preventDefault(); wbCancelEdit(); return; }
+    if(k==="s"||k==="S"){ e.preventDefault(); wbSaveBook(); return; }
+    if(k==="t"||k==="T"){ e.preventDefault(); $("wbT").focus(); return; }
+    if(k==="m"||k==="M"){ e.preventDefault(); $("wbName").focus(); return; }
+    if(k==="b"||k==="B"){ e.preventDefault(); $("wbEditor").querySelector(".wb-bulk").open=true; $("wbBulk").focus(); return; }
+    if((k==="ArrowDown"||k==="ArrowUp") && n){
+      e.preventDefault();
+      wbWordCur = wbWordCur<0 ? (k==="ArrowDown"?0:n-1) : (wbWordCur+(k==="ArrowDown"?1:-1)+n)%n;
+      renderWbWords(); return;
+    }
+    if((k==="Delete"||k==="Backspace"||k==="x"||k==="X") && wbWordCur>=0 && n){
+      e.preventDefault();
+      wbEdit.words.splice(wbWordCur,1);
+      renderWbWords(); return;
+    }
+    return;
+  }
+  const n=wbBooks.length;
+  if(k==="Escape"){ show("title"); return; }
+  if(k==="n"||k==="N"){ e.preventDefault(); editBook(-1); return; }
+  if(/^[1-9]$/.test(k) && wbBooks[+k-1]){ e.preventDefault(); wbCur=+k-1; playBook(wbCur); return; }
+  if(!n) return;
+  if(k==="ArrowDown"||k==="ArrowUp"){ e.preventDefault(); wbCur=(wbCur+(k==="ArrowDown"?1:-1)+n)%n; renderBooks(); return; }
+  if(k==="Enter"||k===" "){ e.preventDefault(); playBook(wbCur); return; }
+  if(k==="e"||k==="E"){ e.preventDefault(); editBook(wbCur); return; }
+  if(k==="Delete"||k==="Backspace"||k==="x"||k==="X"){ e.preventDefault(); deleteBook(wbCur); return; }
+}
+$("wbList").addEventListener("click",e=>{
+  const row=e.target.closest(".wb-item"); if(row){ wbCur=+row.dataset.i; }
+  const b=e.target.closest("button"); if(!b){ renderBooks(); return; }
+  if(b.dataset.play!=null) playBook(+b.dataset.play);
+  else if(b.dataset.edit!=null) editBook(+b.dataset.edit);
+  else if(b.dataset.del!=null) deleteBook(+b.dataset.del);
+});
+$("wbWords").addEventListener("click",e=>{
+  const b=e.target.closest("[data-x]"); if(!b||!wbEdit) return;
+  wbEdit.words.splice(+b.dataset.x,1); renderWbWords();
+});
+$("wbNew").addEventListener("click",()=>editBook(-1));
+$("wbBack").addEventListener("click",()=>show("title"));
+$("wbAdd").addEventListener("click",wbAddWord);
+$("wbBulkAdd").addEventListener("click",wbBulkAdd);
+$("wbSave").addEventListener("click",wbSaveBook);
+$("wbCancel").addEventListener("click",wbCancelEdit);
+/* プレイ: 単語帳の言葉を全部、順番を混ぜて出す */
+function buildBookQueue(){
+  const pool=bookPlay.words.map(w=>({t:w.t,k:w.k}));
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  taGoal=pool.length; taQueue=pool;
+}
+function endBookGame(){
+  const time=Number(elapsed.toFixed(2));
+  wbLoad();
+  const b=wbBooks.find(x=>x.id===bookPlay.id);
+  const isNew = !!b && (b.best==null || time<b.best);
+  if(isNew){ b.best=time; wbStore(); bookPlay=b; }
+  const best = b ? b.best : null;
+  $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」 —`;
+  $("resultCount").classList.add("ta");
+  $("resultCaption").textContent=`${taGoal}語タイム`;
+  $("resultScore").textContent=elapsed.toFixed(2);
+  $("resultUnit").textContent="秒";
+  $("resultSubLine").textContent=`ミス ${miss}回 / この単語帳のベスト ${best==null?"--":fmtTime(best)}`;
+  $("resultNew").textContent=isNew?"★ ベスト更新! ★":"";
+  $("registerBox").style.display="none";   // 単語帳はランキングに載せない
+  $("resultKeys").innerHTML='<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 庭へ';
+  $("titleBtn").textContent="単語帳へ (Esc)";
+  show("result");
+}
+
+/* ---------- 要望・バグ報告 ----------
+   Firebase の nejiuchi/feedback に書き込むだけ(読むのは作者だけ) */
+let fbOpen=false, fbCat="feature";
+const FB_WAIT=30000;   // 送りすぎないよう、30秒あける
+function openFeedback(){
+  fbOpen=true;
+  $("fb").classList.add("open");
+  $("fbNote").textContent = db ? "" : "※Firebase未設定のため送れません";
+  setTimeout(()=>$("fbText").focus(),30);
+}
+function closeFeedback(){
+  fbOpen=false;
+  $("fb").classList.remove("open");
+  const ae=document.activeElement; if(ae && ae.blur) ae.blur();
+}
+async function fbSend(){
+  const note=$("fbNote"), text=$("fbText").value.trim(), name=$("fbName").value.trim();
+  if(!db){ note.textContent="※Firebase未設定のため送れません"; return; }
+  if(!text){ note.textContent="内容を書いてください"; $("fbText").focus(); return; }
+  let last=0; try{ last=+(localStorage.getItem("nejiuchi:sync:fbLast")||0); }catch(e){}
+  const wait=FB_WAIT-(Date.now()-last);
+  if(wait>0){ note.textContent=`続けて送るには、あと${Math.ceil(wait/1000)}秒待ってください`; return; }
+  $("fbSend").disabled=true; note.textContent="送っています…";
+  try{
+    const item={ c:fbCat, x:text.slice(0,1000), t:Date.now(), d:window.IS_MOBILE?"mobile":"pc" };
+    if(name) item.n=name.slice(0,20);
+    await db.ref("nejiuchi/feedback").push(item);
+    try{ localStorage.setItem("nejiuchi:sync:fbLast", String(Date.now())); }catch(e){}
+    $("fbText").value="";
+    note.textContent="送りました。ありがとうございます!";
+  }catch(e){
+    note.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
+      ? "※送れませんでした(Firebaseのルールで nejiuchi/feedback を許可してください)"
+      : "※送れませんでした。通信環境を確認してください";
+  }finally{ $("fbSend").disabled=false; }
+}
+$("fbBtn").addEventListener("click",openFeedback);
+$("fbClose").addEventListener("click",closeFeedback);
+$("fbSend").addEventListener("click",fbSend);
+$("fb").addEventListener("click",e=>{ if(e.target===$("fb")) closeFeedback(); });
+$("fbCats").addEventListener("click",e=>{
+  const b=e.target.closest("[data-c]"); if(!b) return;
+  fbCat=b.dataset.c;
+  $("fbCats").querySelectorAll("[data-c]").forEach(x=>x.classList.toggle("on",x===b));
+});
+
 
 /* ---------- ネジ抜き辞典 ----------
    開放記録は「読み(k)」単位のひとつの集合で管理する。
@@ -3073,7 +3769,7 @@ async function recordStats(screws){
     await store.set("stats",JSON.stringify(s));
   }catch(e){}
   // Firebaseに全プレイヤー合算で記録(ランキング登録不要)
-  if(db){
+  if(db && !isDebugSave()){
     try{
       db.ref("nejiuchi/stats/plays").transaction(v=>(v||0)+1);
       db.ref("nejiuchi/stats/screws").transaction(v=>(v||0)+screws);
@@ -4145,9 +4841,10 @@ function renderBar(){
   $("g-rate").textContent=`ネジ打ち1打で ${minPerKey()}分 進む`;
 }
 function renderAll(){
-  renderBar(); renderField(); renderInfo(); renderBasket();
+  renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge();
   if(modal==="shop") renderShop();
   if(modal==="book") renderBook();
+  if(modal==="goal") renderGoals();
 }
 
 /* ---------- 作業 ---------- */
@@ -4341,6 +5038,7 @@ function openModal(name){
   if(name==="treas") renderTreas();
   if(name==="book") renderBook();
   if(name==="rank") prepareRank();
+  if(name==="goal") renderGoals();
 }
 function closeModal(silent){
   if(!modal) return;
@@ -4719,6 +5417,7 @@ function drawGacha(n){
   S.money-=cost;
   const res=[];
   for(let i=0;i<n;i++) res.push(drawOne(0));
+  if(window.tutGachaEggplant && n===1){ window.tutGachaEggplant=false; res[0]={ r:"R", id:"eggplant" }; }   // はじめてガイドの1回はなす
   // 11回ごとにSR以上を1つ確定(111回なら10回分)
   if(n>=11){
     for(let b=0; b+11<=n; b+=11){
@@ -4983,12 +5682,17 @@ const bookSeen = c => c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.i
 let bookCur=0, bookTier=0;
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 const loreOf = (c,t) => t===0 ? c.lore : (t===3 ? MUTANT[c.id].lore : LORE_Q[c.id][t-1]);
-function renderBook(){
-  let gotAll=0, allEntries=0;
+/* 図鑑の埋まり具合: got 埋まった項目 / all 全項目(作物×品質・変異・貴重品) */
+function bookProgress(){
+  let got=0, all=0;
   for(const c of BOOK_CROPS){
-    if(c.treasure){ allEntries++; if(tre(c.id)>0) gotAll++; continue; }
-    for(let t=0;t<(hasMut(c.id)?4:3);t++){ allEntries++; if(qCount(c.id,t)>0) gotAll++; }
+    if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
+    for(let t=0;t<(hasMut(c.id)?4:3);t++){ all++; if(qCount(c.id,t)>0) got++; }
   }
+  return { got, all };
+}
+function renderBook(){
+  const { got:gotAll, all:allEntries }=bookProgress();
   $("g-bookRate").textContent=`図鑑 ${gotAll} / ${allEntries} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
   $("g-bookList").innerHTML=BOOK_CROPS.map((c,i)=>{
     const known=bookSeen(c);
@@ -5067,28 +5771,169 @@ $("g-bookList").addEventListener("click",e=>{
   bookCur=+row.dataset.i; renderBook();
 });
 
+/* ---------- 実績 ----------
+   達成するとごほうびのネジを受け取れる(S.goals に受け取り済みを記録) */
+const anyQ = t => Object.values(S.harvestQ||{}).some(a=>(a&&a[t])>0);
+const kindsQ = t => Object.values(S.harvestQ||{}).filter(a=>(a&&a[t])>0).length;          // その品質で収穫した作物の種類数
+const kinds = () => Object.values(S.harvestQ||{}).filter(a=>a&&a.some(x=>x>0)).length;    // 収穫した作物の種類数
+const gotRarity = r => CROPS.some(c=>c.r===r && !c.treasure && (S.got||{})[c.id]>0) ? 1 : 0;   // ガチャで引いたことがあるか
+const treasKinds = () => Object.values(S.treas||{}).filter(n=>n>0).length;
+const TREAS_ALL = CROPS.filter(c=>c.treasure).length;
+/* 実績(中身の名前は goal のまま)。ジャンル(cat)ごとに、やさしい順に並べる。need は数か、数を返す関数 */
+const GOALS = [
+  { cat:"収穫", id:"h1",    ic:"🧺", nm:"はじめての収穫",   ds:"作物を1個収穫する",            need:1,      now:()=>S.totalHarvest, rw:50 },
+  { cat:"収穫", id:"h10",   ic:"🧺", nm:"かごいっぱい",     ds:"作物を10個収穫する",           need:10,     now:()=>S.totalHarvest, rw:150 },
+  { cat:"収穫", id:"h100",  ic:"🧺", nm:"収穫名人",         ds:"作物を100個収穫する",          need:100,    now:()=>S.totalHarvest, rw:1000 },
+  { cat:"収穫", id:"h1000", ic:"🧺", nm:"伝説の収穫",       ds:"作物を1,000個収穫する",        need:1000,   now:()=>S.totalHarvest, rw:10000 },
+  { cat:"収穫", id:"h5000", ic:"🧺", nm:"収穫の神様",       ds:"作物を5,000個収穫する",        need:5000,   now:()=>S.totalHarvest, rw:30000 },
+  { cat:"収穫", id:"h10000",ic:"🧺", nm:"一万の実り",       ds:"作物を10,000個収穫する",       need:10000,  now:()=>S.totalHarvest, rw:60000 },
+  { cat:"作物の種類", id:"k5",  ic:"🥕", nm:"いろいろ育てる",   ds:"5種類の作物を収穫する",   need:5,  now:kinds, rw:500 },
+  { cat:"作物の種類", id:"k15", ic:"🥕", nm:"畑のレパートリー", ds:"15種類の作物を収穫する",  need:15, now:kinds, rw:3000 },
+  { cat:"作物の種類", id:"k25", ic:"🥕", nm:"なんでも育てる",   ds:"25種類の作物を収穫する",  need:25, now:kinds, rw:10000 },
+  { cat:"作物の種類", id:"k30", ic:"🥕", nm:"庭の主",         ds:"30種類の作物を収穫する",  need:30, now:kinds, rw:30000 },
+  { cat:"売上", id:"s1k",   ic:"💰", nm:"はじめての商い",   ds:"累計売上 1,000ネジ",           need:1000,     now:()=>S.totalSales, rw:200 },
+  { cat:"売上", id:"s10k",  ic:"💰", nm:"売れっ子農家",     ds:"累計売上 10,000ネジ",          need:10000,    now:()=>S.totalSales, rw:1000 },
+  { cat:"売上", id:"s100k", ic:"💰", nm:"大きな庭",           ds:"累計売上 100,000ネジ",         need:100000,   now:()=>S.totalSales, rw:8000 },
+  { cat:"売上", id:"s1m",   ic:"💰", nm:"百万長者",         ds:"累計売上 1,000,000ネジ",       need:1000000,  now:()=>S.totalSales, rw:30000 },
+  { cat:"売上", id:"s10m",  ic:"💰", nm:"ネジ財閥",   ds:"累計売上 10,000,000ネジ",      need:10000000, now:()=>S.totalSales, rw:150000 },
+  { cat:"実りの質", id:"q1",   ic:"⭐", nm:"腕が上がった",   ds:"☆の作物を収穫する",            need:1,  now:()=>anyQ(1)?1:0, rw:300 },
+  { cat:"実りの質", id:"q2",   ic:"🌟", nm:"極上の実り",     ds:"☆☆の作物を収穫する",          need:1,  now:()=>anyQ(2)?1:0, rw:2000 },
+  { cat:"実りの質", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
+  { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
+  { cat:"実りの質", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
+  { cat:"実りの質", id:"m20",  ic:"✦",  nm:"変異の研究者",   ds:"変異の作物を20種類収穫する",   need:20, now:()=>kindsQ(3),   rw:80000 },
+  { cat:"ガチャ", id:"g1",    ic:"🎰", nm:"はじめてのガチャ", ds:"ガチャを1回引く",             need:1,     now:()=>S.gachaCount||0, rw:100 },
+  { cat:"ガチャ", id:"g11",   ic:"🎰", nm:"ガチャ好き",       ds:"ガチャを合計11回引く",        need:11,    now:()=>S.gachaCount||0, rw:500 },
+  { cat:"ガチャ", id:"g100",  ic:"🎰", nm:"ガチャ通",         ds:"ガチャを合計100回引く",       need:100,   now:()=>S.gachaCount||0, rw:3000 },
+  { cat:"ガチャ", id:"g1000", ic:"🎰", nm:"ガチャの達人",     ds:"ガチャを合計1,000回引く",     need:1000,  now:()=>S.gachaCount||0, rw:20000 },
+  { cat:"ガチャ", id:"g10000",ic:"🎰", nm:"ガチャの王",       ds:"ガチャを合計10,000回引く",    need:10000, now:()=>S.gachaCount||0, rw:100000 },
+  { cat:"ガチャ", id:"rSR",   ic:"💎", nm:"キラリと光る",     ds:"ガチャでSRの種を引く",        need:1, now:()=>gotRarity("SR"),  rw:1000 },
+  { cat:"ガチャ", id:"rHR",   ic:"💎", nm:"ひと味ちがう",     ds:"ガチャでHRの種を引く",        need:1, now:()=>gotRarity("HR"),  rw:3000 },
+  { cat:"ガチャ", id:"rUR",   ic:"💎", nm:"ウルトラレア",     ds:"ガチャでURの種を引く",        need:1, now:()=>gotRarity("UR"),  rw:10000 },
+  { cat:"ガチャ", id:"rGSR",  ic:"👑", nm:"黄金の引き",       ds:"ガチャでGSRの種を引く",       need:1, now:()=>gotRarity("GSR"), rw:30000 },
+  { cat:"図鑑", id:"b10",  ic:"📖", nm:"図鑑づくり",       ds:"図鑑を10項目うめる",           need:10,  now:()=>bookProgress().got, rw:1000 },
+  { cat:"図鑑", id:"b30",  ic:"📖", nm:"図鑑が育ってきた", ds:"図鑑を30項目うめる",           need:30,  now:()=>bookProgress().got, rw:3000 },
+  { cat:"図鑑", id:"b60",  ic:"📖", nm:"分厚い図鑑",       ds:"図鑑を60項目うめる",           need:60,  now:()=>bookProgress().got, rw:10000 },
+  { cat:"図鑑", id:"b100", ic:"📚", nm:"図鑑の大家",       ds:"図鑑を100項目うめる",          need:100, now:()=>bookProgress().got, rw:30000 },
+  { cat:"図鑑", id:"bAll", ic:"🏆", nm:"図鑑コンプリート", ds:"図鑑をすべてうめる",           need:()=>bookProgress().all, now:()=>bookProgress().got, rw:300000 },
+  { cat:"庭づくり", id:"o1", ic:"💦", nm:"畑の道具",     ds:"スプリンクラーか案山子を置く", need:1, now:()=>S.fields.some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
+  { cat:"庭づくり", id:"f2", ic:"🎫", nm:"畑を広げる",   ds:"畑を2枚にする",                need:2, now:()=>S.fields.length, rw:1000 },
+  { cat:"庭づくり", id:"f3", ic:"🎫", nm:"広い庭",     ds:"畑を3枚にする",                need:3, now:()=>S.fields.length, rw:5000 },
+  { cat:"庭づくり", id:"f5", ic:"🎫", nm:"見渡すかぎりの畑", ds:"畑を5枚にする",            need:5, now:()=>S.fields.length, rw:30000 },
+  { cat:"庭づくり", id:"f10",ic:"🎫", nm:"果てしない畑",   ds:"畑を10枚にする",            need:10, now:()=>S.fields.length, rw:100000 },
+  { cat:"庭づくり", id:"v1", ic:"👩‍🌾", nm:"なかまができた", ds:"村人を雇う",               need:1, now:()=>S.villagers, rw:3000 },
+  { cat:"庭づくり", id:"v3", ic:"👩‍🌾", nm:"にぎやかな村",   ds:"村人を3人雇う",            need:3, now:()=>S.villagers, rw:20000 },
+  { cat:"貴重品", id:"t1",  ic:"✨", nm:"たからもの",       ds:"貴重品を手に入れる",           need:1, now:treasKinds, rw:10000 },
+  { cat:"貴重品", id:"t3",  ic:"✨", nm:"宝物庫",           ds:"貴重品を3種類手に入れる",      need:3, now:treasKinds, rw:50000 },
+  { cat:"貴重品", id:"tAll",ic:"🏆", nm:"すべての宝",       ds:"貴重品をすべて手に入れる",     need:()=>TREAS_ALL, now:treasKinds, rw:300000 },
+];
+const needOf = g => typeof g.need==="function" ? g.need() : g.need;
+let goalCur=0;
+const goalDone = g => g.now()>=needOf(g);
+const goalClaimed = g => !!(S.goals && S.goals[g.id]);
+const goalsReady = () => GOALS.filter(g=>goalDone(g) && !goalClaimed(g)).length;
+function renderGoalBadge(){ const n=goalsReady(); $("g-goalBadge").textContent = n ? n : ""; }
+function renderGoals(){
+  const done=GOALS.filter(goalClaimed).length;
+  $("g-goalRate").textContent=`解除 ${done} / ${GOALS.length}`;
+  goalCur=Math.max(0,Math.min(goalCur,GOALS.length-1));
+  $("g-goalBody").innerHTML=GOALS.map((g,i)=>{
+    const need=needOf(g), now=Math.min(g.now(),need), ok=goalDone(g), got=goalClaimed(g);
+    const cat=GOALS.filter(x=>x.cat===g.cat), head = i===0 || GOALS[i-1].cat!==g.cat
+      ? `<div class="ghead">${esc(g.cat)}<span>${cat.filter(goalClaimed).length} / ${cat.length}</span></div>` : "";
+    const right = got ? '<span class="goalok">受け取り済み</span>'
+      : ok ? `<button class="sbtn main" data-claim="${i}">受け取る +${fmtNum(g.rw)}</button>`
+      : `<span>ごほうび ${fmtNum(g.rw)}ネジ</span>`;
+    return head+`<div class="rowi ${i===goalCur?"cur":""} ${got?"claimed":""}" data-i="${i}">
+      <div class="ic">${g.ic}</div>
+      <div><div class="nm">${esc(g.nm)}</div><div class="ds">${esc(g.ds)} ・ ${fmtNum(now)} / ${fmtNum(need)}</div>
+        <div class="gprog"><i style="width:${Math.floor(now/need*100)}%"></i></div></div>
+      <div class="keyk">${right}</div></div>`;
+  }).join("");
+  keepVisible($("g-goalBody"));
+  renderGoalBadge();
+}
+function claimGoal(i){
+  const g=GOALS[i]; if(!g || goalClaimed(g)) return;
+  if(!goalDone(g)){ sfx.nope(); toast("まだ解除していません","warn"); return; }
+  S.goals=S.goals||{}; S.goals[g.id]=Date.now();
+  S.money+=g.rw; sfx.buy();
+  toast(`実績「${esc(g.nm)}」解除! ごほうび +${fmtNum(g.rw)}ネジ`,"good",3600,true);
+  save(); renderAll();
+  if(modal==="goal") renderGoals();
+}
+function goalKey(e){
+  const k=e.key;
+  if(k==="Escape"||k==="0"){ e.preventDefault(); closeModal(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); goalCur=(goalCur+(k==="ArrowDown"?1:-1)+GOALS.length)%GOALS.length; sfx.cursor(); renderGoals(); return; }
+  if(k==="Enter"){ e.preventDefault(); claimGoal(goalCur); }
+}
+$("g-goalBody").addEventListener("click",e=>{
+  const b=e.target.closest("[data-claim]"); if(b){ claimGoal(+b.dataset.claim); return; }
+  const row=e.target.closest(".rowi"); if(row){ goalCur=+row.dataset.i; renderGoals(); }
+});
+
+/* ---------- はじめてガイドのための窓口(ガイド本体は庭の外) ---------- */
+function tutState(){
+  const now=Date.now(); let soil=0, crops=0, wet=0, ripe=0, grass=0, empty=0, dry=0;
+  S.fields.forEach((f,fi)=>{
+    const cov=covered(fi);
+    for(const k of KEYS){
+      const p=f[k]; if(p.vil || p.s==="post") continue;
+      if(p.s==="soil") soil++;
+      if(p.obj) continue;
+      if(p.s==="grass") grass++;
+      else if(p.s==="soil" && !p.crop) empty++;
+      if(p.crop){ crops++; if(isRipe(p)) ripe++; else if(isWet(fi,k,now,cov)) wet++; else dry++; }
+    }
+  });
+  const seeds=Object.values(S.seeds||{}).reduce((a,n)=>a+(n||0),0);
+  const sellable=Object.entries(S.inv||{}).reduce((a,[id,q])=>a+(Array.isArray(q)?q.reduce((x,y)=>x+(y||0),0):0),0);
+  return { soil, crops, wet, ripe, grass, empty, dry, seeds, sellable, seedId:S.seedId,
+           harvest:S.totalHarvest, sales:S.totalSales, gacha:S.gachaCount||0,
+           money:S.money, tool:S.tool, modal, shopTab,
+           fresh:!S.totalHarvest && !S.gachaCount && !S.totalSales };
+}
+/* 2回目以降のガイドで種が1つもないときは、にんじんの種を1つ渡す */
+function tutSeed(){
+  S.seeds.carrot=(S.seeds.carrot||0)+1; S.seedId="carrot"; save();
+  if(document.body.classList.contains("garden")) renderAll();
+}
+function tutGive(n){ S.money+=n; save(); if(document.body.classList.contains("garden")) renderAll(); }
+/* スマホはタイピングできないので、ガイドの間だけ植えた作物を実らせる */
+function tutGrow(){
+  tick();
+  S.fields.forEach(f=>{ for(const k of KEYS){ const p=f[k]; if(p.crop && !p.vil && !isRipe(p)) grow(p, need(p.crop)-p.crop.grown, Date.now()); } });
+  save(); if(document.body.classList.contains("garden")) renderAll();
+}
+
 /* ---------- 番付(所持ネジ・累計収穫) ----------
    名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
 const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
+  if(isDebugSave()) return {ok:false, msg:"デバッグ用の記録は番付に載せられません"};
   const key=rankKey(name);
-  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`);
+  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`);
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now();
   await refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t });
   await refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t });
+  try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); }catch(e){}   // ルールが古いと書けないので、失敗しても続ける
   return {ok:true};
 }
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
+function prepareRankNow(){
+  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
+    (S.rankName?`<br>「${esc(S.rankName)}」として載っています。庭を出るたびに自動で更新されます`:"");
+}
 function prepareRank(){
   tick();
-  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個`+
-    (S.rankName?`<br>「${esc(S.rankName)}」として載っています。庭を出るたびに自動で更新されます`:"");
-  let nm=S.rankName; try{ nm=nm||playerName||""; }catch(e){}
+  prepareRankNow();
+  let nm=""; try{ nm=playerName||""; }catch(e){}
   $("g-rankName").value=nm;
   $("g-rankNote").textContent=hasDb()?"":"※Firebase未設定のため載せられません";
-  setTimeout(()=>{ const i=$("g-rankName"); i.focus(); i.select&&i.select(); },30);
+  if(!nm) setTimeout(()=>{ const i=$("g-rankName"); i.focus(); },30);   // 名前が決まっていないときだけ入力欄へ
   renderGardenRank();
 }
 /* 番付の中で、所持ネジ・累計収穫のランキングを見る */
@@ -5106,31 +5951,49 @@ async function renderGardenRank(){
     note.textContent=rows.length?"":"まだ誰も載っていません。一番乗りのチャンス!";
     list.innerHTML=rows.map((r,i)=>{
       const me=r.o===S.owner;
-      const val=fmtNum(Math.floor(r.s||0))+(tab==="g-money"?"ネジ":"個");
+      const val=fmtNum(Math.floor(r.s||0))+gRankUnit(tab);
       return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${esc(r.n||"")}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
+const G_RANK_TABS=["g-money","g-harvest","g-book"];
 function switchGardenRank(dir){
-  gRankTab = gRankTab==="g-money" ? "g-harvest" : "g-money";
+  const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
+  gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
   sfx.tab(); renderGardenRank();
 }
 root.querySelectorAll("#g-rankTabs .tab").forEach(t=>t.addEventListener("click",()=>{ gRankTab=t.dataset.rk; sfx.tab(); renderGardenRank(); }));
+/* 番付の名前はプレイヤー名と同じ。ここで変えると、ランキングの名前も一緒に変わる */
 async function submitRank(){
   const name=$("g-rankName").value.trim(), note=$("g-rankNote");
   if(!name){ note.textContent="名前を入れてください"; sfx.nope(); return; }
-  if(!hasDb()){ note.textContent="※Firebase未設定のため載せられません"; return; }
-  note.textContent="記しています…";
-  try{
-    const r=await pushRank(name);
-    if(!r.ok){ note.textContent=r.msg; sfx.nope(); return; }
-    S.rankName=name; save(); sfx.buy();
-    try{ playerName=name; store.set("playerName",name); }catch(e){}
-    note.textContent="載りました。庭を出るたびに自動で更新されます";
-    $("g-rankName").blur();
-    renderGardenRank();
-  }catch(e){ note.textContent="載せられませんでした。通信環境を確認してください"; }
+  const cur=(()=>{ try{ return playerName; }catch(e){ return ""; } })();
+  note.textContent = cur && name!==cur ? "記録を新しい名前に移しています…" : "記しています…";
+  const r=await window.setPlayerName(name);
+  if(!r.ok){ note.textContent=r.msg; sfx.nope(); return; }
+  if(name===cur && hasDb() && !isDebugSave()){ try{ await pushRank(name); }catch(e){} }
+  sfx.buy();
+  note.textContent = r.moved ? "名前を変えました。ランキングと番付も新しい名前になりました" : "載っています。庭を出るたびに自動で更新されます";
+  $("g-rankName").blur();
+  prepareRankNow(); renderGardenRank();
 }
+/* プレイヤー名が決まった・変わったとき: 番付も同じ名前で載せる(前の名前の分は消す) */
+async function useName(name, old){
+  S.rankName=name; save();
+  if(!hasDb() || isDebugSave()) return;
+  if(old && old!==name){
+    const k=rankKey(old);
+    for(const m of ["money","harvest","book"]){
+      try{
+        const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
+        if(v && v.o===S.owner) await ref.remove();
+      }catch(e){ if(m!=="book") throw e; }   // 図鑑はルールが古いと消せないので、失敗しても続ける
+    }
+  }
+  const r=await pushRank(name);
+  if(!r.ok) throw new Error(r.msg);
+}
+const ownerId = () => S.owner;
 $("g-rankBtn").addEventListener("click",submitRank);
 
 /* ---------- キー操作(本編の keydown から呼ばれる) ---------- */
@@ -5146,10 +6009,12 @@ function onKey(e){
   if(modal==="gacha"){ gachaKey(e); return; }
   if(modal==="treas"){ treasKey(e); return; }
   if(modal==="book"){ bookKey(e); return; }
+  if(modal==="goal"){ goalKey(e); return; }
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
-    else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); switchGardenRank(); }
+    else if(e.key==="n"||e.key==="N"){ e.preventDefault(); const i=$("g-rankName"); i.focus(); i.select(); }
+    else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); switchGardenRank(e.key==="ArrowLeft"?-1:1); }
     else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("g-rankList").scrollBy(0, e.key==="ArrowDown"?60:-60); }
     return;
   }
@@ -5161,6 +6026,7 @@ function onKey(e){
   if(k==="8"){ e.preventDefault(); openModal("treas"); return; }
   if(k===" "){ e.preventDefault(); openModal("book"); return; }
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
+  if(k==="0"){ e.preventDefault(); openModal("goal"); return; }
   if(k==="Escape"){ backToTitle(); return; }
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
@@ -5185,6 +6051,7 @@ $("g-treasBtn").addEventListener("click",()=>openModal("treas"));
 $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
+$("g-goalBtn").addEventListener("click",()=>openModal("goal"));
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
 root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) closeModal(); }));
@@ -5197,6 +6064,11 @@ const hadSave=load();
 tick(); checkUnlocks(); buildPlanter();
 function enter(){
   tick(); checkUnlocks(); renderAll(); save();
+  // 番付の名前をプレイヤー名にそろえる(前の名前で載っている分は移す)
+  try{
+    if(playerName && S.rankName!==playerName) useName(playerName, S.rankName).catch(()=>{});
+    else if(!playerName && S.rankName) window.setPlayerName(S.rankName);
+  }catch(e){}
   if(!hadSave && !welcomed){
     welcomed=true;
     toast("ようこそ。クワ(2)で耕し、種(4)を植え、じょうろ(3)で水をあげましょう","good",6000);
@@ -5259,7 +6131,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock };
+return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -5301,6 +6173,7 @@ async function backupCopy(){
   catch(e){ ta.focus(); ta.select(); try{ document.execCommand("copy"); $("bkCopyNote").textContent="コピーしました"; }catch(_){ $("bkCopyNote").textContent="選択しました。Ctrl+C でコピーしてください"; } }
 }
 function backupImport(){
+  if(window.IS_MOBILE) return;   // 記録文字列での引き継ぎはパソコンだけ
   const note=$("bkImportNote"), str=$("bkImport").value;
   if(!str.trim()){ note.textContent="記録文字列を貼り付けてください(I で貼り付け欄へ)"; return; }
   // デバッグ用の合言葉: すべての要素を解放した状態にする
@@ -5317,10 +6190,11 @@ function backupImport(){
       localStorage.setItem(LS_PREFIX+"best-ta-normal","28.4");
       localStorage.setItem(LS_PREFIX+"best-ta-hard","22.1");
       localStorage.setItem(LS_PREFIX+"best-oneshot","35");
-      for(const pm of POEMS) localStorage.setItem(LS_PREFIX+"best-"+POEM_KEY(pm),"42.5");
       localStorage.setItem(LS_PREFIX+"playerName","デバッグ");
       localStorage.setItem(LS_PREFIX+"stats", JSON.stringify({plays:100,screws:5000}));
       localStorage.setItem(LS_PREFIX+"garden:inbox", JSON.stringify({keys:0,screws:0}));
+      for(const pm of POEMS) localStorage.setItem(LS_PREFIX+"best-"+POEM_KEY(pm),"42.5");
+      localStorage.setItem(LS_PREFIX+"debug","1");   // この記録はランキングに載せない
       Garden.debugUnlock();     // 庭: 作物・道具・畑・村人・貴重品をすべて解放
     }catch(e){ note.textContent="うまくいきませんでした"; return; }
     note.textContent="すべて解放しました。画面を読み直します…";
@@ -5575,7 +6449,11 @@ async function syncPull(joining){
   try{
     const [mS,dS]=await Promise.all([ base.child("meta").once("value"), base.child("data").once("value") ]);
     const m=mS.val(), data=dS.val();
-    if(!m||!data||!m.t||m.t<=syncLastT){ syncPending=false; renderSyncState(); return; }
+    if(!m||!data||!m.t||m.t<=syncLastT){
+      syncPending=false; renderSyncState();
+      if(joining){ const n=$("bkSyncNote"); if(n) n.textContent = !data ? "※このコードには記録がまだありません。先に同期を始めたブラウザで、もう一度「同期を始める」を試してください" : "※記録の日時が読めませんでした。先に同期を始めたブラウザで何か操作してから、もう一度参加してください"; }
+      return;
+    }
     if(syncBusyScene()) return;                         // 遊んでいる最中なら、終わってから
     // こちらが持ち主で、送っていない操作がある: こちらを優先して送り直す(確認は出さない)
     if(!joining && !syncReadOnly && syncDirty){
@@ -5589,12 +6467,20 @@ async function syncPull(joining){
       const t=Date.now();
       try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(取り込み前)" }); await syncTrimBackups(base); }catch(e){}
     }
-    if(applyBundleString(data)){
+    saveLocalPrev(mine);
+    if(!applyBundleString(data)){ const n=$("bkSyncNote"); if(n) n.textContent="※届いた記録を読めませんでした(形式が違います)"; return; }
+    {
       lsSet("sync:t",String(m.t));
       try{ sessionStorage.setItem("nejiuchi:return", scene==="garden"?"garden":""); sessionStorage.setItem("nejiuchi:synced","1"); }catch(e){}
       location.reload();
     }
-  }catch(e){}
+  }catch(e){
+    console.warn("[nejiuchi sync] 取り込めませんでした",e);
+    const n=$("bkSyncNote");
+    if(n) n.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
+      ? "※クラウドの読み込みが拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
+      : "※記録を取り込めませんでした: "+String(e&&(e.code||e.message)||e).slice(0,80);
+  }
 }
 function applyBundleString(s){
   let o;
@@ -5633,6 +6519,7 @@ async function syncShowBackups(){
     const bk=await syncBase().child("backups").once("value");
     const list=[]; bk.forEach(c=>{ const v=c.val(); if(v&&v.data) list.push({ t:+v.t||+c.key, data:v.data, from:v.from||"" }); });
     list.sort((a,b)=>b.t-a.t);
+    try{ const lp=JSON.parse(localStorage.getItem(LS_PREFIX+"sync:prev")||"null"); if(lp&&lp.data) list.unshift({ t:lp.t, data:lp.data, from:"このブラウザの置き換え前(手元)" }); }catch(e){}
     syncBackupList=list;
     if(!list.length){ box.innerHTML="バックアップはまだありません"; return; }
     box.innerHTML="";
@@ -5661,51 +6548,79 @@ async function syncRestore(i){
     if(applyBundleString(b.data)){ lsSet("sync:t",String(t+1)); location.reload(); }
   }catch(e){ $("bkSyncNote").textContent=syncErrText(e); }
 }
+let syncPreparing=false;   // 最初の保存が終わるまでは、コードを見せない(途中で参加されないように)
 async function syncBegin(){
   if(!hasDB()){ $("bkSyncNote").textContent="※Firebase未設定のため同期できません"; return; }
-  syncCode=newSyncCode(); lsSet("sync:code",syncCode); syncLastT=0; syncReadOnly=false;
+  if(syncPreparing) return;
+  syncPreparing=true;
+  $("bkSyncNote").textContent="クラウドに記録を置いています…";
+  syncCode=newSyncCode(); syncLastT=0; syncReadOnly=false;
+  renderSyncState();
   syncConnect();
   await syncClaim();
-  if(!await syncPush(true)){ syncStop(); return; }
+  const ok=await syncPush(true);
+  syncPreparing=false;
+  if(!ok){ syncStop(); return; }
+  lsSet("sync:code",syncCode);             // 保存が終わってから、同期中として記録する
   $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコード(英数字16文字)を入力してください";
   renderSyncState();
 }
-async function syncJoin(){
-  const code=normSyncCode($("bkCode").value);
-  const note=$("bkSyncNote");
+async function syncJoin(inp, noteEl){
+  const code=normSyncCode((inp&&inp.value!=null ? inp : $("bkCode")).value);
+  const note=noteEl || $("bkSyncNote");
   if(!code){ note.textContent="コードを入れてください"; return; }
   if(code.length!==16){ note.textContent=`コードは英数字16文字です(いま${code.length}文字)`; return; }
   if(!hasDB()){ note.textContent="※Firebase未設定のため同期できません"; return; }
   note.textContent="つないでいます…";
   try{
-    const snap=await syncBaseOf(code).child("data").once("value");
+    const base=syncBaseOf(code);
+    const [dS,mS]=await Promise.all([ base.child("data").once("value"), base.child("meta").once("value") ]);
+    const data=dS.val(), m=mS.val();
+    if(data){
+      // 先に取り込めるか確かめる。だめなら、このブラウザは何も変えない(持ち主にもならない)
+      let ok=false; try{ const o=JSON.parse(b64dec(data)); ok=!!o && typeof o==="object"; }catch(e){}
+      if(!ok){ note.textContent="※このコードの記録を読めませんでした(形式が違います)。今の記録はそのままです"; return; }
+      note.textContent="記録を取り込みます…";
+      const mine=bundleNow(), t=Date.now();
+      saveLocalPrev(mine);                       // 参加前の記録を手元にも残す
+      try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(参加前)" }); }catch(e){}
+      if(syncCode) syncStop();
+      syncCode=code; lsSet("sync:code",code); syncReadOnly=false; syncDirty=false;
+      await syncClaim();                         // 取り込めるとわかってから、参加したブラウザが持ち主になる
+      applyBundleString(data);
+      lsSet("sync:t", String((m && +m.t) || t));
+      try{ sessionStorage.setItem("nejiuchi:return",""); sessionStorage.setItem("nejiuchi:synced","1"); }catch(e){}
+      location.reload();
+      return;
+    }
+    // このコードにまだ記録がない: このブラウザの記録を置く(スマホは同期される側だけなので置かない)
+    if(window.IS_MOBILE){ note.textContent="このコードの記録が見つかりません。パソコンで「同期を始める」を押して出たコードを入れてください"; return; }
     if(syncCode) syncStop();
     syncCode=code; lsSet("sync:code",code); syncReadOnly=false;
     syncLastT=0; lsSet("sync:t","0");
-    await syncClaim();                       // 参加したブラウザで続きを遊ぶ
+    await syncClaim();
     syncConnect();
-    if(snap.val()){
-      note.textContent="記録を取り込みます…";
-      await syncPull(true);                  // 参加前の記録は確認なしで置き換える(バックアップには残す)
-    }else{
-      if(!await syncPush(true)){ syncStop(); return; }
-      note.textContent="このコードに、今の記録を置きました";
-    }
+    if(!await syncPush(true)){ syncStop(); return; }
+    note.textContent="このコードに、今の記録を置きました";
     renderSyncState();
   }catch(e){
     console.warn("[nejiuchi sync] 読み込めませんでした",e);
-    syncCode=null; lsDel("sync:code");
     note.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
       ? "※クラウドの読み込みが拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
-      : "つなげませんでした。通信環境を確認してください";
+      : "つなげませんでした。通信環境を確認してください("+String(e&&(e.code||e.message)||e).slice(0,60)+")";
   }
+}
+/* 別の記録で置き換える前に、このブラウザの記録を手元に残す(クラウドのバックアップから戻せる) */
+function saveLocalPrev(bundle){
+  try{ localStorage.setItem(LS_PREFIX+"sync:prev", JSON.stringify({ t:Date.now(), data:b64enc(bundle) })); }catch(e){}
 }
 const syncBaseOf = code => db.ref(`${SYNC_PATH}/${code}`);
 function renderSyncState(){
   const el=$("bkSyncState");
   const who = syncOwner && syncOwner.label ? `(${syncOwner.label})` : "";
   if(el){
-    if(!syncCode) el.innerHTML="同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。";
+    if(!syncCode) el.innerHTML="同期していません。";
+    else if(syncPreparing) el.innerHTML="同期の準備中です。コードはクラウドへの保存が終わると表示されます…";
     else if(syncReadOnly) el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザ${who.replace(/[<>&"]/g,"")}で遊んでいます。この画面をさわると、こちらに切り替わって最新の記録を取り込みます)`;
     else el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ 自動で保存しています${syncPending?" ・ 新しい記録が届いています(タイトルに戻ると取り込みます)":""}`;
     el.classList.toggle("ro",!!syncReadOnly);
@@ -5726,9 +6641,20 @@ function renderSyncState(){
   if(tk) tk.style.display = syncCode && syncReadOnly ? "" : "none";
   const rb=$("bkRestore");
   if(rb) rb.style.display = syncCode ? "" : "none";
+  renderMGate();
 }
 $("bkSyncStart").addEventListener("click",()=>{ syncCode?syncStop():syncBegin(); });
-$("bkJoin").addEventListener("click",syncJoin);
+$("bkJoin").addEventListener("click",()=>syncJoin());
+/* スマホは同期される側だけ。同期していないときは同期の画面だけを出す */
+const mGated = () => !!window.IS_MOBILE && !syncCode;
+function renderMGate(){
+  document.documentElement.classList.toggle("gated", mGated());
+  if(!mGated()) return;
+  $("mgNote").textContent = hasDB() ? "" : "※Firebase未設定のため同期できません";
+  try{ if(tutStep()) tutEnd(); tutAskHide(); }catch(e){}
+}
+$("mgJoin").addEventListener("click",()=>syncJoin($("mgCode"),$("mgNote")));
+$("mgCode").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); syncJoin($("mgCode"),$("mgNote")); } });
 $("bkTake").addEventListener("click",syncTakeOver);
 $("bkRestore").addEventListener("click",syncShowBackups);
 
@@ -5762,7 +6688,7 @@ document.addEventListener("keyup",syncMarkDirty,true);
    記録の引き継ぎ画面の中は、同期を止めたりできるようにそのまま通す */
 function syncGuardInput(e){
   if(!syncCode||!syncReadOnly||window.nejiReplacing) return;
-  if(e.target && e.target.closest && e.target.closest("#backup")) return;
+  if(e.target && e.target.closest && e.target.closest("#backup, #fb")) return;
   if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
   e.preventDefault(); e.stopPropagation();
   syncActivate();
@@ -5787,6 +6713,265 @@ $("gardenStat").addEventListener("click",openGarden);
 $("toGardenBtn").addEventListener("click",openGarden);
 $("poemGardenBtn").addEventListener("click",()=>{ stopPoem(); openGarden(); });
 
+/* =====================================================
+   はじめてガイド(遊びながら進む「最初の1日」)
+   タイピング → ネジが抜ける → 庭で耕す・植える・水をやる → タイピングで育つ
+   → 収穫 → 売る → ガチャ(100ネジを渡して1回。なすが出る) の順に、画面を光らせて案内する。
+   進み具合は保存するので、途中でやめても続きから。タイトルの H でいつでも見直せる
+===================================================== */
+const TUT_KEY="nejiuchi:tut";
+const TUT_STEPS=["type","plate","name","toGarden","till","plant","water","grow","harvest","sell","gacha","done"];
+let tut=null, tutTimer=null;
+function tutLoad(){ try{ tut=JSON.parse(localStorage.getItem(TUT_KEY)||"null"); }catch(e){ tut=null; } }
+function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tut)); }catch(e){} }
+const tutStep = () => tut && !tut.done ? TUT_STEPS[tut.step] : null;
+function tutGo(i, skipped){
+  tut.step=i; tut.base=Garden.tutState(); tut.skipped=!!skipped;   // skipped: 前の手順を自動でとばした
+  if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; tut.gift=true; Garden.tutGive(100); }   // ガイドのたびに100ネジ
+  tutSave(); tutRender();
+}
+const tutTo = id => tutGo(TUT_STEPS.indexOf(id), true);
+const tutPass = () => tutGo(tut.step+1, true);   // できない手順をとばす
+const tutNext = () => tutGo(tut.step+1);
+function tutStart(){
+  tutAskHide();
+  tut={ step:0, done:false, gave:false };
+  tutGo(window.IS_MOBILE ? TUT_STEPS.indexOf("name") : 0);   // スマホはタイピングの部分をとばす
+  clearInterval(tutTimer); tutTimer=setInterval(tutTick,300);
+}
+function tutEnd(){
+  if(tut){ tut.done=true; tutSave(); }
+  window.tutGachaEggplant=false;
+  clearInterval(tutTimer); tutTimer=null;
+  $("tutRing").style.display="none"; $("tutBubble").style.display="none";
+}
+/* 進んだかどうかを見る */
+function tutTick(){
+  const id=tutStep(); if(!id){ tutEnd(); return; }
+  const st=Garden.tutState(), b=tut.base||st;
+  switch(id){
+    case "type":     if(scene==="game") return tutNext(); break;
+    case "plate":    if(scene==="result") return tutNext(); if(scene==="title") return tutGo(0); break;
+    case "name":     if(playerName || !db) return tutNext(); break;   // 名前が決まったら次へ(ランキングが使えないときはとばす)
+    case "toGarden": if(scene==="garden") return tutNext(); break;
+    // 2回目以降のガイドでは、畑のようすによってできない手順があるので、そのときはとばす
+    case "till":     if(st.soil>b.soil) return tutNext();
+                     if(st.empty>0 || st.grass===0) return tutPass();   // もう耕した区画がある・耕せる草むらがない
+                     break;
+    case "plant":    if(st.crops>b.crops) return tutNext();
+                     if(st.empty===0) return tutPass();                  // 植えられる区画がない
+                     if(st.seeds===0 && !b.seedGift){ b.seedGift=true; tutSave(); Garden.tutSeed(); }   // 種がなければ1つ渡す
+                     break;
+    case "water":    if(st.wet>b.wet) return tutNext();
+                     if(st.ripe>0 || st.dry===0) return tutPass(); break;
+    case "grow":     if(st.ripe>0) return tutNext();
+                     if(st.crops===0) return tutTo("sell");              // 育てる作物がない
+                     break;
+    case "harvest":  if(st.harvest>b.harvest) return tutNext();
+                     if(st.ripe===0 && st.crops===0) return tutPass();
+                     break;
+    case "sell":     if(st.sales>b.sales) return tutNext();
+                     if(st.sellable===0 && st.modal!=="shop") return tutPass();   // 売る物がない(自動売却など)
+                     break;
+    case "gacha":    window.tutGachaEggplant = st.gacha<=b.gacha;   // ガイドの1回目はなすが出る
+                     if(st.gacha>b.gacha && !(document.querySelector("#g-gacha .gmachine.shake"))) return tutNext();
+                     break;
+  }
+  tutRender();
+}
+/* いま見せる案内: { sel: 光らせる場所, text, acts: [[ボタン名, 処理]] } */
+function tutView(){
+  const id=tutStep(), st=Garden.tutState(), g=scene==="garden";
+  const toFarm = { sel: scene==="result" ? "#toGardenBtn" : (scene==="title" ? ".diff-btn.garden" : null),
+                   text:"ネジ抜きの庭へ行こう(タイトルでは 9、結果画面では G)" };
+  const M=!!window.IS_MOBILE;
+  // 道具を持ちかえる案内(lead: その手順でやること)
+  const hold = (tool,name,lead) => st.tool!==tool ? { sel:`.slot[data-tool="${tool}"]`,
+    text: M ? `${lead}。${name}に持ちかえよう(ここをタップ)` : `${lead}。${name}に持ちかえよう(キー ${tool} か、ここをクリック)` } : null;
+  switch(id){
+    case "type":
+      return scene==="title"
+        ? { sel:'.diff-btn[data-diff="easy"]', text:"ようこそ、ネジ打ちへ! 最初に1回タイピングしてみよう。イージーを押すか、キー 1 で始まります" }
+        : { sel:null, text:"タイトルに戻って、イージー(キー 1)を始めよう" };
+    case "plate":
+      return scene==="game"
+        ? { sel:"#plate", text:"正しく打つとネジが抜けます。抜いたネジは庭のお金に! 60秒がんばろう(日本語入力はオフで)" }
+        : { sel:null, text:"タイピングを最後まで遊んでみよう" };
+    case "name":
+      if(scene==="result") return { sel:"#registerBox",
+        text:"記録をランキングに載せよう! 名前を入れて Enter。次からはこの名前で自動で登録され、庭の番付にも載ります(タイトルの N で変えられます)" };
+      if(nmOpen) return { sel:"#nm .nm-panel", text: M ? "名前を入れて「決める」を押そう" : "名前を入れて Enter で決めよう" };
+      if(scene==="title") return { sel:"#nameBtn",
+        text: M ? "ようこそ、ネジ打ちへ! 最初に、ランキングと庭の番付に使う名前を決めよう。「名前を決める」を押してね"
+                : "ランキングと庭の番付に使う名前を決めよう。「名前を決める」を押すか、キー N" };
+      return { sel:null, text:"タイトルで名前を決めよう" };
+    case "toGarden":
+      return scene==="result" ? { sel:"#toGardenBtn", text:"抜いたネジは庭に届いています。庭へ行ってみよう(G)" }
+           : scene==="title" ? { sel:".diff-btn.garden", text: window.IS_MOBILE ? "ネジ抜きの庭を開こう" : "ネジ抜きの庭を開こう(キー 9)" }
+           : { sel:null, text:"ネジ抜きの庭へ行こう" };
+    case "till":
+      if(!g) return toFarm;
+      return hold(2,"クワ","畑を耕すところから始めよう") || { sel:"#g-planter .plot.grass", text: M ? "草むらの区画をタップして耕そう" : "草むらの区画をクリックして耕そう(区画に書いてある英字のキーでもOK)" };
+    case "plant":
+      if(!g) return toFarm;
+      return hold(4,"種", tut.skipped ? "耕した区画に種をまこう" : "耕せた! 次は種まき") || { sel:"#g-planter .plot.soil:not(.growing):not(.ripe):not(.obj)",
+        text: st.seedId==="carrot" ? "耕した区画に、にんじんの種を植えよう" : "耕した区画に、種を植えよう(← → で種を選べます)" };
+    case "water":
+      if(!g) return toFarm;
+      return hold(3,"じょうろ", tut.skipped ? "植えた作物に水をあげよう" : "植えられた! 次は水やり") || { sel:"#g-planter .plot.growing:not(.wet)", text:"植えた区画に水をあげよう。作物は水が効いている間だけ育ちます" };
+    case "grow":
+      if(window.IS_MOBILE){
+        return { sel: g ? "#g-planter .plot.growing" : null,
+                 text:"作物は、パソコンでタイピングするほど早く育ちます(1打で数分ぶん)。スマホでは打てないので、今回は特別に時間を進めましょう",
+                 acts:[["時間を進める", ()=>{ Garden.tutGrow(); }, "Enter"]] };
+      }
+      if(g) return { sel:"#g-backBtn", text:"水が効いている作物は、タイピングするほど早く育ちます(1打で数分ぶん)。タイトルに戻って(Esc)、もう1回打ってみよう" };
+      if(scene==="title") return { sel:'.diff-btn[data-diff="easy"]', text:"もう1回タイピングして、作物の時間を進めよう(にんじんは72打ほどで実ります)" };
+      if(scene==="game")  return { sel:null, text:"打つほど畑の時間が進んでいます!" };
+      if(scene==="result")return { sel:"#toGardenBtn", text:"庭で作物のようすを見てみよう(G)。まだ実っていなければ、もう1回打とう" };
+      return { sel:null, text:"タイピングで作物を育てよう" };
+    case "harvest":
+      if(!g) return toFarm;
+      return hold(1,"素手","実った! 収穫しよう") || { sel:"#g-planter .plot.ripe", text:"光っている区画を押して収穫しよう" };
+    case "sell":
+      if(!g) return toFarm;
+      if(st.modal!=="shop") return { sel:"#g-shopBtn", text: M ? "収穫した作物はお店で売れます。お店を開こう" : "収穫した作物はお店で売れます。お店を開こう(Tab)" };
+      if(st.shopTab!==3) return { sel:'#g-shopTabs .tab[data-tab="3"]', text: M ? "「売る」タブを開こう" : "「売る」タブを開こう(→ キーでも切り替えられます)" };
+      return { sel:"#g-shopBody .rowi", text: M ? "収穫した作物を売ろう。「1つ売る」か「全部売る」を押してね" : "収穫した作物を売ろう。Enter で1つ、Shift+Enter で全部売れます(ボタンでもOK)" };
+    case "gacha":
+      if(!g) return toFarm;
+      if(st.modal && st.modal!=="gacha") return { sel:`#g-${st.modal} [data-close]`,
+        text: M ? "売れた! 最後にガチャを紹介します。「閉じる」でお店を閉じてね" : "売れた! 最後にガチャを紹介します。お店を閉じてね(Esc)" };
+      if(st.modal!=="gacha")
+        return { sel:"#g-gachaBtn", text: "ごほうびに 100ネジ をプレゼントしました。ガチャを開いて、1回引いてみよう" + (M ? "" : "(キー 7)") };
+      return { sel:"#g-gachaHint", text: window.IS_MOBILE ? "「1回」を押して、種を1つ引いてみよう" : "Enter で1回引いてみよう。ガチャからは、お店にない種も出ます" };
+    case "done":
+      const got = "なすの種が出た! ";
+      const what = st.modal==="gacha" ? "ガチャ" : "開いている画面";
+      if(g && st.modal) return { sel:null, text: M ? `${got}「閉じる」で${what}を閉じよう` : `${got}${what}を閉じよう(Esc)` };
+      return { sel: g ? "#g-goalBtn" : null,
+               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、ネジを増やしていこう。次に何をするか迷ったら「実績」${M?"":"(キー 0)"}を見てね`,
+               acts:[["ガイドをおわる", ()=>tutEnd(), g ? "Enter" : null]] };
+  }
+  return { sel:null, text:"" };
+}
+/* 始める前に「はじめますか?」と聞く(auto: 初めて開いたときに自動で聞いた) */
+let tutAsking=null;
+const tutMin = () => window.IS_MOBILE ? 2 : 4;
+function tutAsk(auto){
+  if(tutStep()) tutEnd();
+  tutAsking={ auto:!!auto };
+  const bub=$("tutBubble"), M=!!window.IS_MOBILE;
+  bub.dataset.key="ask"; bub.classList.remove("mini"); bub.classList.add("ask");
+  $("tutRing").style.display="none";
+  $("tutStep").textContent="はじめてガイド";
+  $("tutText").textContent = `はじめてガイド(約${tutMin()}分)を始めますか?\n` +
+    (M ? "庭での畑づくりから収穫・ガチャまで、実際に遊びながら覚えられます。"
+       : "タイピングから庭での畑づくり・収穫・ガチャまで、実際に遊びながら覚えられます。");
+  const acts=$("tutActs"); acts.innerHTML="";
+  const yes=document.createElement("button"); yes.className="btn primary"; yes.innerHTML="はじめる"+(M?"":' <span class="kbdh">Enter</span>'); yes.onclick=tutStart;
+  const no=document.createElement("button"); no.className="btn tut-skip"; no.innerHTML="あとで"+(M?"":' <span class="kbdh">Esc</span>'); no.onclick=tutDecline;
+  acts.append(yes,no);
+  bub.style.display="block";
+  tutAskPlace();
+}
+function tutAskPlace(){
+  const bub=$("tutBubble");
+  bub.style.left=Math.max(8,(window.innerWidth-bub.offsetWidth)/2)+"px";
+  bub.style.top=Math.max(8,(window.innerHeight-bub.offsetHeight)/2)+"px";
+}
+function tutAskHide(){
+  if(!tutAsking) return;
+  tutAsking=null;
+  const bub=$("tutBubble"); bub.classList.remove("ask"); bub.dataset.key=""; bub.style.display="none";
+}
+/* 「あとで」: 自動で聞いたときは、次からは聞かない(タイトルの H でいつでも始められる) */
+function tutDecline(){
+  const auto=tutAsking && tutAsking.auto;
+  tutAskHide();
+  if(auto){ tut={ step:0, done:true }; tutSave(); }
+}
+function tutSkip(){ if(confirm("ガイドを終わりますか?(タイトルの H でいつでも見直せます)")) tutEnd(); }
+/* 吹き出しのボタンをキーで押す: Backspace でスキップ、ボタンに書いてあるキー(Enter)でそのボタン
+   入力欄に書いているときは何もしない */
+document.addEventListener("keydown",e=>{
+  if(tutAsking){   // 「始めますか?」の間は、Enter と Esc だけ受け付ける(ほかのキーでゲームが始まらないように)
+    const tag=(e.target&&e.target.tagName)||"";
+    if(tag==="INPUT"||tag==="TEXTAREA") return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(e.key==="Enter") tutStart();
+    else if(e.key==="Escape"||e.key==="Backspace") tutDecline();
+    return;
+  }
+  const id=tutStep(); if(!id) return;
+  const t=e.target, tag=(t&&t.tagName)||"";
+  if(tag==="INPUT"||tag==="TEXTAREA"||e.isComposing) return;
+  if(e.key==="Backspace" && id!=="done"){ e.preventDefault(); e.stopImmediatePropagation(); tutSkip(); return; }
+  const act=(tutView().acts||[]).find(a=>a[2]===e.key);
+  if(act){ e.preventDefault(); e.stopImmediatePropagation(); act[1](); tutRender(); }
+},true);
+/* 光らせる枠と吹き出しを描く */
+function tutRender(){
+  const id=tutStep(); if(!id) return;
+  const v=tutView(), ring=$("tutRing"), bub=$("tutBubble");
+  const el = v.sel ? [...document.querySelectorAll(v.sel)].find(x=>x.offsetParent!==null && x.getBoundingClientRect().width>0) : null;
+  const i=TUT_STEPS.indexOf(id)+1, total=TUT_STEPS.length;
+  const key=id+"|"+v.text+"|"+(v.acts||[]).map(a=>a[0]).join();
+  if(bub.dataset.key!==key){
+    bub.dataset.key=key;
+    $("tutStep").textContent=`はじめてガイド ${i} / ${total}`;
+    $("tutText").textContent=v.text;
+    const acts=$("tutActs"); acts.innerHTML="";
+    const M=!!window.IS_MOBILE;
+    for(const [label,fn,key] of (v.acts||[])){ const btn=document.createElement("button"); btn.className="btn primary"; btn.innerHTML=label+(key&&!M?` <span class="kbdh">${key}</span>`:""); btn.onclick=fn; acts.appendChild(btn); }
+    if(id!=="done"){ const sk=document.createElement("button"); sk.className="btn tut-skip"; sk.innerHTML="スキップ"+(M?"":' <span class="kbdh">Backspace</span>'); sk.onclick=tutSkip; acts.appendChild(sk); }
+  }
+  bub.style.display="block";
+  const mini = scene==="game";
+  bub.classList.toggle("mini", mini);
+  const W=window.innerWidth, H=window.innerHeight, bw=bub.offsetWidth, bh=bub.offsetHeight;
+  if(mini){
+    // タイピング中は、語録と抜けるネジを隠さないように画面のいちばん上に小さく出す
+    if(el){ const r=el.getBoundingClientRect(); ring.style.display="block";
+      Object.assign(ring.style,{ left:(r.left-6)+"px", top:(r.top-6)+"px", width:(r.width+12)+"px", height:(r.height+12)+"px" }); }
+    else ring.style.display="none";
+    bub.style.left=Math.max(8,(W-bw)/2)+"px"; bub.style.top="6px";
+    return;
+  }
+  if(el){
+    const r=el.getBoundingClientRect();
+    ring.style.display="block";
+    Object.assign(ring.style,{ left:(r.left-6)+"px", top:(r.top-6)+"px", width:(r.width+12)+"px", height:(r.height+12)+"px" });
+    let top = r.bottom+14+bh < H ? r.bottom+14 : (r.top-14-bh >= 8 ? r.top-14-bh : H-bh-8);
+    let left = Math.min(Math.max(8, r.left+r.width/2-bw/2), W-bw-8);
+    bub.style.left=left+"px"; bub.style.top=top+"px";
+  }else{
+    ring.style.display="none";
+    bub.style.left=Math.max(8,(W-bw)/2)+"px"; bub.style.top=(H-bh-16)+"px";
+  }
+}
+window.addEventListener("resize",()=>{ if(tutAsking) tutAskPlace(); else if(tutStep()) tutRender(); });
+window.addEventListener("scroll",()=>{ if(tutStep()) tutRender(); }, true);
+$("tutBtn").addEventListener("click",()=>tutAsk(false));
+/* はじめて遊ぶ人には自動で始める(もう遊んでいる人には出さない) */
+function tutBoot(){
+  if(mGated()) return;   // 同期していないスマホは、同期の画面だけ
+  tutLoad();
+  if(!tut){
+    if(Garden.tutState().fresh){ tutStart(); return; }   // はじめて開いた人には、そのまま始める
+    tut={ step:0, done:true }; tutSave();
+  }
+  if(tut.done){
+    let asked=false; try{ asked=localStorage.getItem("nejiuchi:nameAsked")==="1"; }catch(e){}
+    if(!playerName && !asked && db && scene==="title"){
+      try{ localStorage.setItem("nejiuchi:nameAsked","1"); }catch(e){}
+      openNameWin();
+    }
+    return;
+  }
+  if(!tut.done){ clearInterval(tutTimer); tutTimer=setInterval(tutTick,300); tutRender(); }
+}
+
 refreshBestLine();
 refreshStatsLine();
 refreshGardenStat();
@@ -5796,6 +6981,7 @@ try{
   if(sessionStorage.getItem("nejiuchi:return")==="garden") openGarden();
   sessionStorage.removeItem("nejiuchi:return");
 }catch(e){}
+tutBoot();   // はじめて遊ぶ人にはガイドを出す
 window.addEventListener("beforeunload",()=>{ try{ syncPush(false,true); }catch(e){} });
 // スマホはアプリの切り替えで閉じられることが多いので、隠れたときにも保存して送る
 // 戻ってきたときは、届いている記録を取り込む
