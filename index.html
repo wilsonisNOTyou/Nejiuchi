@@ -1121,6 +1121,14 @@ html.mobile .bk-pconly{display:none}
   background:#fff3cd; color:#5a4300; border:3px solid #c79100; border-radius:12px; padding:.7rem 1rem;
   font-weight:800; max-width:min(520px,calc(100vw - 24px)); text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #imeWarn.show{display:block}
+.news-new:not(:empty){display:inline-block; margin:0 .3rem 0 .1rem; padding:0 .35em; border-radius:4px; background:#e0503c; color:#fff; font-size:.7rem; font-weight:800; letter-spacing:.05em; vertical-align:.1em}
+.news-list{max-height:60vh; overflow:auto; text-align:left}
+.news-item{padding:.6rem 0 .8rem; border-bottom:1px dashed var(--line)}
+.news-item:last-child{border-bottom:none}
+.news-item .d{color:var(--amber); font-size:.85rem}
+.news-item h3{margin:.15rem 0 .35rem; font-size:1.02rem}
+.news-item ul{margin:0; padding-left:1.2rem; line-height:1.7; font-size:.92rem}
+.result-garden{color:#9fd36a; font-size:.95rem; margin:.1rem 0 .4rem; min-height:1.2em}
 /* ---- はじめてガイド ---- */
 #tutRing{position:fixed; display:none; z-index:70; pointer-events:none; border-radius:12px;
   border:3px solid #ffd75e; box-shadow:0 0 0 4px rgba(255,215,94,.25), 0 0 24px rgba(255,215,94,.7);
@@ -1413,8 +1421,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn" id="backupBtn">別端末と同期 <span class="kbdh">K</span></button>
       <button class="btn" id="fbBtn">要望・バグ報告 <span class="kbdh">F</span></button>
       <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
+      <button class="btn" id="newsBtn">更新情報 <span class="news-new" id="newsNew"></span><span class="kbdh">U</span></button>
     </div>
-    <p class="hint">キー 1〜9・0 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 辞典 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>0 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9・0 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 辞典 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>0 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ U 更新情報 ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard"></div>
   </section>
 
@@ -1446,6 +1455,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="result-count" id="resultCount"><span id="resultScore">0</span><span style="font-size:.35em" id="resultUnit">本</span></div>
     <p class="result-sub" id="resultSubLine"></p>
     <p class="result-new" id="resultNew"></p>
+    <p class="result-garden" id="resultGarden"></p>
     <div class="register" id="registerBox">
       <p class="reg-as" id="regAs" style="display:none"><b id="regAsName"></b> としてランキングに登録します</p>
       <input id="nameInput" class="name-input" maxlength="10" placeholder="プレイヤー名" autocomplete="off">
@@ -1517,6 +1527,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div class="big"><span id="poemResTime">0.00</span><small>秒</small></div>
         <p class="sub" id="poemResSub"></p>
         <p class="newrec" id="poemResNew"></p>
+        <p class="sub" id="poemResGarden"></p>
         <p class="reg-as" id="poemRegAs" style="display:none"><b id="poemRegAsName"></b> として番付に載せます</p>
         <input id="poemName" class="w-input" maxlength="10" placeholder="詠み人の名" autocomplete="off">
         <div class="btn-row" style="margin-top:.8rem">
@@ -1770,6 +1781,15 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <input class="bk-codein fb-name" id="fbName" maxlength="20" placeholder="名前(なくても大丈夫です)" autocomplete="off">
     <div class="bk-foot"><span class="bk-note" id="fbNote"></span><button class="btn primary" id="fbSend">送る</button></div>
     <p class="keynav"><b>1〜6</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
+  </div>
+</div>
+
+<!-- 更新情報 -->
+<div id="news" class="bk-modal">
+  <div class="bk-panel">
+    <div class="bk-head"><h2>更新情報</h2><button class="btn bk-x" id="newsClose">閉じる ✕</button></div>
+    <div id="newsList" class="news-list"></div>
+    <p class="keynav"><b>↑ ↓</b> スクロール ・ <b>U</b> / <b>Esc</b> 閉じる</p>
   </div>
 </div>
 
@@ -2486,13 +2506,14 @@ let gardenKeys=0;       // このプレイで正しく打った打鍵数(ネジ�
 
 /* ネジ抜きの庭へ「正しい打鍵数」と「抜いたネジ」を届ける(庭を開いたときに受け取られる) */
 function sendToGarden(keys,screws){
-  keys=keys|0; screws=screws|0;
+  const toInt = v => Math.max(0, Math.floor(Number(v)||0));   // 大きな数(一本勝負の倍々)でも壊れないように
+  keys=toInt(keys); screws=toInt(screws);
   if(keys<=0 && screws<=0) return;
   try{
     const K="nejiuchi:garden:inbox";
     const cur=JSON.parse(localStorage.getItem(K)||"{}")||{};
-    cur.keys=(cur.keys|0)+Math.max(0,keys);
-    cur.screws=(cur.screws|0)+Math.max(0,screws);
+    cur.keys=toInt(cur.keys)+keys;
+    cur.screws=toInt(cur.screws)+screws;
     localStorage.setItem(K,JSON.stringify(cur));
   }catch(e){}
 }
@@ -2732,7 +2753,9 @@ async function endGame(){
   clearInterval(timerId); clearInterval(cdId); cdId=null; running=false;
   $("imeWarn").classList.remove("show");
   resetStage();   // 背景の熱演出を戻す
-  recordStats(score); // ランキング登録の有無に関係なく記録
+  const toGarden=gardenScrews(diff,score);
+  recordStats(score, toGarden); // ランキング登録の有無に関係なく記録(庭には難易度などに応じたネジを届ける)
+  showGardenScrews("resultGarden", toGarden);
   if(diff==="book"){ endBookGame(); return; }
   $("registerBox").style.display="";
   $("titleBtn").textContent="タイトルへ (Esc)";
@@ -2767,6 +2790,19 @@ async function endGame(){
   refreshBestLine();
 }
 
+/* ---------- 庭に届くネジ ----------
+   スコアアタック・タイムアタック: イージー×1 / ノーマル×2 / ハード×3
+   一本勝負: 1〜10語目は1語1本、11〜20語目は2本、21〜30語目は4本…と10語ごとに倍
+   単語帳: 1語1本 / ネジの詩: 1行1本(finishPoem で渡す) */
+const SCREW_MULT={ easy:1, normal:2, hard:3, "ta-easy":1, "ta-normal":2, "ta-hard":3 };
+function gardenScrews(d,n){
+  n=Math.max(0,n|0);
+  if(d==="oneshot"){ let t=0; for(let i=0;i<n;i++) t+=2**Math.floor(i/10); return t; }
+  if(d==="book") return n;
+  return n*(SCREW_MULT[d]||1);
+}
+const showGardenScrews = (el,n) => { $(el).textContent = n>0 ? `庭に 🔩${Math.floor(n).toLocaleString("ja-JP")}ネジ 届きます` : ""; };
+
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
 document.addEventListener("keydown",e=>{
@@ -2779,6 +2815,12 @@ document.addEventListener("keydown",e=>{
   if(nmOpen){
     if(e.key==="Enter"){ e.preventDefault(); nmSave(); }
     else if(e.key==="Escape"){ e.preventDefault(); closeNameWin(); }
+    return;
+  }
+  // 更新情報のウィンドウ
+  if(newsOpen){
+    if(e.key==="Escape"||e.key==="u"||e.key==="U"){ e.preventDefault(); closeNews(); }
+    else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("newsList").scrollBy(0,e.key==="ArrowDown"?60:-60); }
     return;
   }
   // 要望・バグ報告のウィンドウが開いているときは、そちらだけを操作
@@ -2821,6 +2863,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="k"||e.key==="K") openBackup();
     if(e.key==="0") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
+    if(e.key==="u"||e.key==="U") openNews();
     if(e.key==="h"||e.key==="H") tutAsk(false);
     if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
@@ -3352,7 +3395,8 @@ async function finishPoem(){
   poemRows.forEach(r=>{ r.row.classList.remove("cur","past"); r.row.classList.add("fin"); r.pr.innerHTML="&nbsp;"; });
   sndBell();
   $("poemSeal").classList.add("stamp");
-  recordStats(0); // 総プレイ回数には数える(ネジは抜かない)
+  recordStats(0, poem.lines.length); // 総プレイ回数には数える。庭には1行1本のネジを届ける
+  showGardenScrews("poemResGarden", poem.lines.length);
   const key=POEM_KEY(poem);
   const value=Number(poemElapsed.toFixed(2));
   const best=await loadBest(key);
@@ -3642,6 +3686,37 @@ function endBookGame(){
   show("result");
 }
 
+/* ---------- 更新情報 ----------
+   新しいものを上に足していく。d は YYYY-MM-DD */
+const NEWS=[
+  { d:"2026-10-01", t:"庭に届くネジの数が変わりました", items:[
+    "スコアアタック・タイムアタック: イージーはそのまま、ノーマルは2倍、ハードは3倍のネジが庭に届きます",
+    "一本勝負: 1〜10語目は1語1本、11〜20語目は2本、21〜30語目は4本…と、10語ごとに倍になります(上限なし)",
+    "タイピング単語帳は1語1本、ネジの詩は1行1本のネジが庭に届くようになりました",
+    "結果画面に、庭に届くネジの数を出すようにしました",
+    "タイトルに「更新情報」(U)を追加しました",
+  ]},
+];
+const NEWS_SEEN_KEY="nejiuchi:newsSeen";
+let newsOpen=false;
+function refreshNewsBadge(){
+  let seen=""; try{ seen=localStorage.getItem(NEWS_SEEN_KEY)||""; }catch(e){}
+  $("newsNew").textContent = NEWS.length && NEWS[0].d>seen ? "NEW" : "";
+}
+function openNews(){
+  newsOpen=true;
+  $("newsList").innerHTML=NEWS.map(n=>`<div class="news-item"><div class="d">${n.d.replace(/-/g,"/")}</div><h3>${escH(n.t)}</h3><ul>${n.items.map(x=>`<li>${escH(x)}</li>`).join("")}</ul></div>`).join("");
+  $("news").classList.add("open");
+  $("newsList").scrollTop=0;
+  try{ if(NEWS.length) localStorage.setItem(NEWS_SEEN_KEY, NEWS[0].d); }catch(e){}
+  refreshNewsBadge();
+}
+function closeNews(){ newsOpen=false; $("news").classList.remove("open"); }
+$("newsBtn").addEventListener("click",openNews);
+$("newsClose").addEventListener("click",closeNews);
+$("news").addEventListener("click",e=>{ if(e.target===$("news")) closeNews(); });
+refreshNewsBadge();
+
 /* ---------- 要望・バグ報告 ----------
    Firebase の nejiuchi/feedback に書き込むだけ(読むのは作者だけ) */
 let fbOpen=false, fbCat="feature";
@@ -3750,8 +3825,9 @@ for(const t of DICT_TABS){
 $("dictBackBtn").addEventListener("click",()=>show("title"));
 
 /* ---------- 全体統計(総プレイ回数・抜いたネジ累計) ---------- */
-async function recordStats(screws){
-  sendToGarden(gardenKeys, screws); gardenKeys=0;
+/* screws: 実際に抜いた本数(統計に数える) / toGarden: 庭に届けるネジ */
+async function recordStats(screws, toGarden=screws){
+  sendToGarden(gardenKeys, toGarden); gardenKeys=0;
   // 端末ローカルにも記録(オフライン時のフォールバック用)
   try{
     let s={plays:0,screws:0};
@@ -4515,7 +4591,7 @@ function consumeInbox(){
   let box;
   try{ box=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); }catch(e){ box=null; }
   if(!box) return;
-  const keys=Math.max(0, box.keys|0), screws=Math.max(0, box.screws|0);
+  const keys=Math.max(0, Math.floor(Number(box.keys)||0)), screws=Math.max(0, Math.floor(Number(box.screws)||0));
   if(!keys && !screws) return;
   try{ localStorage.setItem(INBOX_KEY, JSON.stringify({keys:0,screws:0})); }catch(e){}
   const minutes=keys*minPerKey();
@@ -6728,7 +6804,7 @@ document.addEventListener("keyup",syncMarkDirty,true);
    記録の引き継ぎ画面の中は、同期を止めたりできるようにそのまま通す */
 function syncGuardInput(e){
   if(!syncCode||!syncReadOnly||window.nejiReplacing) return;
-  if(e.target && e.target.closest && e.target.closest("#backup, #fb")) return;
+  if(e.target && e.target.closest && e.target.closest("#backup, #fb, #news")) return;
   if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
   e.preventDefault(); e.stopPropagation();
   syncActivate();
