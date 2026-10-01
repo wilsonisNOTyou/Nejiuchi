@@ -870,6 +870,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .bookdetail .bic{position:relative; display:inline-block; width:100%}
 #screen-garden .bookdetail .bic.q1{filter:drop-shadow(0 0 6px rgba(244,197,66,.55))}
 #screen-garden .bookdetail .bic.q2{filter:drop-shadow(0 0 12px rgba(244,197,66,.95))}
+#screen-garden .bookdetail .bic.q4{filter:drop-shadow(0 0 10px rgba(255,214,90,1)) drop-shadow(0 0 22px rgba(255,170,40,.85))}
 #screen-garden .bookdetail .bq{
   position:absolute; left:50%; top:0; margin-left:1.3rem; font-size:1.2rem; font-weight:800;
   color:#e0a800; text-shadow:0 1px 0 #fff;
@@ -1048,6 +1049,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .qmarks{display:flex; gap:.15rem}
 #screen-garden .qm{font-size:.7rem; color:#d5c8ae}
 #screen-garden .qm.on{color:#e0a800}
+#screen-garden .qm.st{font-size:.85rem; margin-left:-.05em}
+#screen-garden .qm.st.on{color:#f0b400; text-shadow:0 0 5px rgba(255,190,0,.9)}
 #screen-garden .btabs{display:flex; justify-content:center; gap:.3rem; margin-bottom:.4rem}
 #screen-garden .btab{
   font-size:.75rem; font-weight:700; color:var(--ink-l);
@@ -1660,7 +1663,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div id="g-bookList" class="plist booklist"></div>
         <div id="g-bookDetail" class="bookdetail"></div>
       </div>
-      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / 変異)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -3689,6 +3692,12 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-01", t:"作物に ☆☆☆ が登場しました", items:[
+    "同じ作物を300個収穫すると、☆☆☆ が穫れるようになります。売値はふつうの1.5倍です",
+    "変異の売値は ☆☆☆ の3倍(ふつうの4.5倍)になりました",
+    "図鑑の ☆ は3つ並び、☆・☆☆・☆☆☆ を収穫するたびに1つずつ光ります。☆☆☆ の説明文も作物ごとに追加しました",
+    "実績に「☆☆☆の作物を収穫する」「☆☆☆を5種類収穫する」を追加しました",
+  ]},
   { d:"2026-10-01", t:"庭に届くネジの数が変わりました", items:[
     "スコアアタック・タイムアタック: イージーはそのまま、ノーマルは2倍、ハードは3倍のネジが庭に届きます",
     "一本勝負: 1〜10語目は1語1本、11〜20語目は2本、21〜30語目は4本…と、10語ごとに倍になります(上限なし)",
@@ -4194,8 +4203,13 @@ const QUALITY = [
   { mark:"",   mult:1.00, need:0   },
   { mark:"☆",  mult:1.10, need:10  },
   { mark:"☆☆", mult:1.25, need:100 },
-  { mark:"✦",  mult:3.75, need:Infinity },   // 変異(☆☆の3倍)。累計では穫れず、収穫のたびに1%
+  { mark:"✦",  mult:4.50, need:Infinity },   // 3: 変異(☆☆☆の3倍)。累計では穫れず、収穫のたびに1%
+  { mark:"☆☆☆", mult:1.50, need:300 },      // 4: ☆☆☆(変異が3番なので4番に置く)
 ];
+/* 品質の並び。変異(3)を除いた順と、図鑑などで見せる順 */
+const TIERS = [0,1,2,4];
+const QORDER = [0,1,2,4,3];
+const nextTier = t => t===0?1 : t===1?2 : t===2?4 : null;
 /* 貴重品(GHR)の持っている数と、そこから決まる庭全体の効果 */
 const tre = id => (S.treas && S.treas[id]) || 0;
 const effVal = id => {
@@ -4214,7 +4228,7 @@ const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の�
 const effGacha   = () => 1 - effVal("silverstar")/100;      // ガチャの値段の倍率
 const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き(1つで最大45%、2つで最大90%)
 
-const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0); };
+const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[4].need?4:(n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0)); };
 const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult*effSell());
 const qName   = (id,t) => t===3 ? (MUTANT[id] ? MUTANT[id].name : CROP[id].name+QUALITY[3].mark) : CROP[id].name+QUALITY[t].mark;
 /* 品質ごとの図鑑の説明文(ふつうの品質は CROPS の lore) */
@@ -4864,7 +4878,8 @@ function renderInfo(){
       const t=p.crop.mut?3:tierOf(c.id);
       big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===3?"(変異)":""}`;
       sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}ネジ${t===3?" ・ 変異は自動売却されません":""}`);
-      if(t<2){ const left=QUALITY[t+1].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,t+1)}」が穫れるようになります`); }
+      const nt=t===3?null:nextTier(t);
+      if(nt!=null){ const left=QUALITY[nt].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,nt)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
       big=`${selKey} ・ ${ico(c)} ${esc(c.name)} 育成 ${pct}%`;
@@ -4884,7 +4899,7 @@ function renderInfo(){
 /* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
 const invN = (id,t) => (S.inv[id]&&S.inv[id][t])||0;
 const invAdd = (id,t,n) => { S.inv[id]=S.inv[id]||[0,0,0]; S.inv[id][t]=(S.inv[id][t]||0)+n; };
-const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(let t=0;t<3;t++){ const m=invN(c.id,t); n+=m; v+=m*priceOf(c.id,t); } return {n,v}; };
+const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(const t of TIERS){ const m=invN(c.id,t); n+=m; v+=m*priceOf(c.id,t); } return {n,v}; };
 function renderBasket(){
   const b=$("g-basket"); b.innerHTML="";
   let any=false;
@@ -5169,7 +5184,7 @@ function shopRows(){
         locked:!ok,
         ic: ok?ico(c):"❔",
         nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${seedCost(c)}ネジ${seedCost(c)<c.cost?`<s style="opacity:.5;margin-left:.3em">${c.cost}</s>`:""}</span>`:"？？？",
-        ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}ネジ(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
+        ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}ネジ(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}・☆☆☆${priceOf(c.id,4)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
         keys: ok?`<b>Enter</b> 1つ ${money>=seedCost(c)?"":"(不足)"}<br><b>Shift+Enter</b> 10個`:"",
         enter: ()=>ok && buySeed(c.id,1),
         shift: ()=>ok && buySeed(c.id,10),
@@ -5257,7 +5272,7 @@ function shopRows(){
         keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
     }
   }else{
-    for(const c of CROPS) for(let t=0;t<4;t++){
+    for(const c of CROPS) for(const t of QORDER){
       const n=invN(c.id,t); if(n<=0) continue;
       const pr=priceOf(c.id,t);
       rows.push({ ic:icoQ(c,t), nm:`${t===3?'<span class="mutnm">✦ ':""}${qName(c.id,t)}${t===3?"</span>":""} ×${n}`, ds:`1つ ${fmtNum(pr)}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ${t===3?" ・ 変異(「すべて売る」では売りません)":""}`,
@@ -5440,7 +5455,7 @@ function sell(id,t,n){
 /* A キー: 収穫かごの作物だけをまとめて売る(種と変異は売らない) */
 function sellAll(){
   let gain=0;
-  for(const c of CROPS) for(let t=0;t<3;t++){ const n=invN(c.id,t); if(n>0){ gain+=n*priceOf(c.id,t); S.inv[c.id][t]=0; } }
+  for(const c of CROPS) for(const t of TIERS){ const n=invN(c.id,t); if(n>0){ gain+=n*priceOf(c.id,t); S.inv[c.id][t]=0; } }
   if(!gain){ sfx.nope(); toast("売れる作物がありません(種と変異は A では売れません)","warn"); return; }
   S.money+=gain; S.totalSales+=gain; sfx.sell();
   toast(`すべて売りました(+${fmtNum(gain)}ネジ)`,"good");
@@ -5778,13 +5793,55 @@ const BOOK_CROPS = CROPS.slice().sort((a,b)=>(a.treasure?1:0)-(b.treasure?1:0) |
 const bookSeen = c => c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
 let bookCur=0, bookTier=0;
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
-const loreOf = (c,t) => t===0 ? c.lore : (t===3 ? MUTANT[c.id].lore : LORE_Q[c.id][t-1]);
+/* ☆☆☆(300個目)の説明文 */
+const LORE_Q3 = {
+  carrot: "三百本目。抜く前から、土の中で先がどちらを向いているか分かる。ここまで来ると、にんじんのほうが抜かれる準備をして待っている。",
+  potato: "三百回目の芋掘り。土をひとすくいしただけで、株の下に何個眠っているか言い当てられる。",
+  tomato: "三百個目。切り口がゼリーのように光る。夜のネジ打ちの噂は、本当だったのかもしれない。",
+  corn: "三百本目。皮をむくと粒が光を跳ね返し、畑の一角が少しだけ明るくなる。",
+  eggplant: "三百本目。紫の奥に夜空のような深みがある。並べると、どれが一番かを決められない。",
+  strawberry: "三百粒目。ひと粒で部屋じゅうが甘い香りになる。三日待つことが、もう苦にならない。",
+  pumpkin: "三百個目。ひとつ持ち上げるたびに、四日間の打鍵の音が聞こえる気がする。",
+  melon: "三百個目。網目が地図のように細かい。切り分ける日は、誰も遅刻しない。",
+  nejitree: "三百本目。どの溝にもドライバーが吸い付く。抜いた瞬間の音を聞きに、見物人が集まるようになった。",
+  mushroom: "三百本目。月曜の朝、畑に並ぶかさが整列した兵隊のように見える。",
+  paprika: "三百個目。切ると中から色がこぼれる。火曜の献立は、もうこれ一つで決まっている。",
+  watermelon: "三百個目。叩かなくても分かる。歩く音の響き方で、どの玉が食べ頃か当てられる。",
+  apple: "三百個目。木曜の朝、枝の下に立つと、穫られたい実のほうから手のひらに落ちてくる。",
+  kumquat: "三百個目。ひと粒の皮に、金曜の夕日と週末の予感が両方入っている。",
+  sweetpotato: "三百本目。焼きあがる前から、蜜の匂いで庭の全員が集まってくる。",
+  sunflower: "三百本目。花がみな同じ角度で揃い、日曜の畑が一枚の絵になる。",
+  onion: "三百個目。皮をむくと、透き通るほど白い。包丁を入れても、もう誰も涙を流さない。",
+  lettuce: "三百個目。葉を一枚はがすたびに、澄んだ音がする。朝いちばんの音として親しまれている。",
+  garlic: "三百個目。一片で料理がまるごと決まる。香りの届く範囲で、庭の広さを測る者もいる。",
+  peas: "三百さや目。開けなくても中の粒が透けて見える気がする。数を外したことはもうない。",
+  peach: "三百個目。触れた指の跡さえ残らない。持ち上げる手つきが、ほとんど祈りに近い。",
+  kiwi: "三百個目。切るたびに、宝石箱を開けたような歓声が上がる。外見は相変わらず地味なまま。",
+  mango: "三百個目。実の重みで枝がゆっくりお辞儀をする。収穫は、お辞儀を返すところから始まる。",
+  cherry: "三百組目。ふたつの粒が鏡に映したようにそっくりで、どちらが先に実ったのか誰にも分からない。",
+  coconut: "三百個目。二つの流派はついに和解し、割り方は「どちらでもいい」に落ち着いた。",
+  olive: "三百個目。搾った油に顔が映るほど澄んでいる。使うたびに、少しだけ手が震える。",
+  bluemoon: "三百粒目。摘んだあとも、手のひらで一晩じゅう青く光り続ける。",
+  sunlemon: "三百個目。切らなくても、置いてあるだけで部屋が明るい。夜でもそこだけ昼のようだ。",
+  chili: "三百本目。見ているだけで汗が出る。収穫かごは専用のものを使うのが、この庭の決まり。",
+  cucumber: "三百本目。並べると定規の代わりに使える。誰が測っても、一本も曲がっていない。",
+  broccoli: "三百株目。房のひとつひとつが小さな木に見える。畑に小さな森ができたようだ。",
+  avocado: "三百個目。食べ頃の日を、収穫した日に言い当てられる。もう外れたことはない。",
+  pineapple: "三百個目。葉の先まで香りが行き渡り、畑を歩くだけで南の島の気分になる。",
+  grape: "三百房目。光にかざすと粒の中に種の影が見える。房ごと飾っておきたくなる。",
+  dragonfruit: "三百個目。花の開く夜は、この庭の者が全員起きている。誰も約束していないのに。",
+  lychee: "三百個目。殻を外すと、白い実の向こうに本当に月が見える。言い張る者はもういない。全員が見ている。",
+  butternut: "三百個目。反りの曲線がどれも同じで、型で抜いたのかと疑われる。",
+  romanesco: "三百株目。渦の奥の渦の、さらに奥まで見えた気がした。見つめていると一日が終わる。",
+  shadowqueen: "三百個目。光を吸い込むような黒紫。掘り出すたびに、畑が一瞬だけ夜になる。"
+};
+const loreOf = (c,t) => t===0 ? c.lore : (t===3 ? MUTANT[c.id].lore : (t===4 ? LORE_Q3[c.id] : LORE_Q[c.id][t-1]));
 /* 図鑑の埋まり具合: got 埋まった項目 / all 全項目(作物×品質・変異・貴重品) */
 function bookProgress(){
   let got=0, all=0;
   for(const c of BOOK_CROPS){
     if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
-    for(let t=0;t<(hasMut(c.id)?4:3);t++){ all++; if(qCount(c.id,t)>0) got++; }
+    for(const t of QORDER){ if(t===3 && !hasMut(c.id)) continue; all++; if(qCount(c.id,t)>0) got++; }
   }
   return { got, all };
 }
@@ -5795,13 +5852,15 @@ function renderBook(){
     const known=bookSeen(c);
     const marks=c.treasure
       ? `<span class="qm${known?" on":""}">✨</span>`
-      : [0,1,2,3].filter(t=>t<3||hasMut(c.id)).map(t=>`<span class="qm${t===3?" mut":""}${qCount(c.id,t)>0?" on":""}">${t?QUALITY[t].mark:"・"}</span>`).join("");
+      : `<span class="qm${qCount(c.id,0)>0?" on":""}">・</span>`
+        + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">☆</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
+        + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"");
     return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}" data-i="${i}">
       <div class="ic">${known?ico(c):"❔"}</div>
       <div class="nm">${known?c.name:"？？？"}</div>
       <div class="qmarks">${marks}</div></div>`;
   }).join("");
-  const c=BOOK_CROPS[bookCur], t=c.treasure?0:(bookTier===3&&!hasMut(c.id)?2:bookTier);
+  const c=BOOK_CROPS[bookCur], t=c.treasure?0:(bookTier===3&&!hasMut(c.id)?4:bookTier);
   const known=bookSeen(c), n=c.treasure?tre(c.id):qCount(c.id,t), total=S.harvestBy[c.id]||0;
   if(c.treasure){
     // 貴重品: 品質は無く、永続効果と説明文を載せる
@@ -5831,12 +5890,12 @@ function renderBook(){
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
     const mutKnown = t===3 && n>0;   // 変異は一度穫れるまで名前と絵を伏せる
     $("g-bookDetail").innerHTML=`
-      <div class="btabs">${[0,1,2,3].filter(q=>q<3||hasMut(c.id)).map(q=>`<span class="btab${q===3?" mut":""}${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}" data-t="${q}">${q===3?"変異":(q?QUALITY[q].mark:"ふつう")}</span>`).join("")}</div>
-      <div class="bic q${t}">${t===3?(mutKnown?icoQ(c,3):'<span class="mutq">？</span>'):ico(c)}${t&&t<3?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
+      <div class="btabs">${QORDER.filter(q=>q!==3||hasMut(c.id)).map(q=>`<span class="btab${q===3?" mut":""}${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}" data-t="${q}">${q===3?"変異":(q?QUALITY[q].mark:"ふつう")}</span>`).join("")}</div>
+      <div class="bic q${t}">${t===3?(mutKnown?icoQ(c,3):'<span class="mutq">？</span>'):ico(c)}${t&&t!==3?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
       <div class="bnm">${t===3&&!mutKnown?"？？？":qName(c.id,t)}</div>
       <dl>
         <dt>${t===3?"変異の収穫":"この品質の収穫"}</dt><dd>${fmtNum(n)}個</dd>
-        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}ネジ${t===3?"(☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
+        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}ネジ${t===3?"(☆☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
         <dt>育つまで</dt><dd>${fmtDur(c.hours*HOUR)}</dd>
         <dt>穫れる条件</dt><dd>${cond}</dd>
       </dl>
@@ -5854,8 +5913,9 @@ function bookKey(e){
     sfx.cursor(); renderBook();
   }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
-    const nq=hasMut(BOOK_CROPS[bookCur].id)?4:3;
-    bookTier=(Math.min(bookTier,nq-1)+(k==="ArrowRight"?1:-1)+nq)%nq;
+    const qs=QORDER.filter(q=>q!==3||hasMut(BOOK_CROPS[bookCur].id));   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異
+    const i=Math.max(0,qs.indexOf(bookTier));
+    bookTier=qs[(i+(k==="ArrowRight"?1:-1)+qs.length)%qs.length];
     sfx.tab(); renderBook();
   }
 }
@@ -5895,6 +5955,8 @@ const GOALS = [
   { cat:"売上", id:"s10m",  ic:"💰", nm:"ネジ財閥",   ds:"累計売上 10,000,000ネジ",      need:10000000, now:()=>S.totalSales, rw:150000 },
   { cat:"実りの質", id:"q1",   ic:"⭐", nm:"腕が上がった",   ds:"☆の作物を収穫する",            need:1,  now:()=>anyQ(1)?1:0, rw:300 },
   { cat:"実りの質", id:"q2",   ic:"🌟", nm:"極上の実り",     ds:"☆☆の作物を収穫する",          need:1,  now:()=>anyQ(2)?1:0, rw:2000 },
+  { cat:"実りの質", id:"q3",   ic:"💫", nm:"至高の実り",     ds:"☆☆☆の作物を収穫する",        need:1,  now:()=>anyQ(4)?1:0, rw:10000 },
+  { cat:"実りの質", id:"q3k5", ic:"💫", nm:"至高のコレクション", ds:"☆☆☆の作物を5種類収穫する", need:5,  now:()=>kindsQ(4),   rw:50000 },
   { cat:"実りの質", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
   { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
   { cat:"実りの質", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
@@ -6238,10 +6300,10 @@ function debugUnlock(){
   S.objs={spr:9, crow:9}; S.villagers=3; S.vilLv=VIL_LADDER.length-1;
   for(const c of CROPS){
     S.got[c.id]=1; S.seeds[c.id]=10;
-    S.harvestBy[c.id]=QUALITY[2].need+50;
-    S.harvestQ[c.id]=[50,50,10];
+    S.harvestBy[c.id]=QUALITY[4].need+50;
+    S.harvestQ[c.id]=[50,50,10,0,10];
     if(c.treasure){ S.treas[c.id]=1; }
-    else{ S.inv[c.id]=[3,3,3]; S.auto[c.id]={c:false,s:false}; }
+    else{ S.inv[c.id]=[3,3,3,0,3]; S.auto[c.id]={c:false,s:false}; }
   }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
