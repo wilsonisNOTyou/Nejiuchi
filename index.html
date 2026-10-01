@@ -695,6 +695,12 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 }
 @keyframes g-floatup{0%{opacity:0; transform:translate(-50%,6px)}20%{opacity:1}100%{opacity:0; transform:translate(-50%,-34px)}}
 #screen-garden .under{display:grid; grid-template-columns:1.3fr 1fr; gap:.8rem; margin-top:1.3rem}
+#screen-garden .under.has-counter{grid-template-columns:1.3fr 1fr .75fr}
+#screen-garden .counter h3 small{font-weight:500; color:var(--ink-l); font-size:.75rem}
+#screen-garden .counter .crow{display:flex; justify-content:space-between; align-items:baseline; padding:.25rem 0; border-bottom:1px dashed #e2d6bc; font-size:.9rem}
+#screen-garden .counter .crow:last-child{border-bottom:none}
+#screen-garden .counter .crow b{font-size:1.2rem}
+#screen-garden .counter .crow.hot b{color:#c0392b}
 #screen-garden .card{background:rgba(251,247,238,.9); border-radius:12px; padding:.8rem 1rem; min-height:5.2rem}
 #screen-garden .card h3{font-size:.85rem; color:var(--ink-l); font-weight:700; margin-bottom:.35rem}
 #screen-garden #g-info .big{font-weight:800; font-size:1.1rem}
@@ -1590,6 +1596,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="card">
         <h3>収穫かご</h3>
         <div id="g-basket"></div>
+      </div>
+      <div class="card counter" id="g-counter" style="display:none">
+        <h3>畑のカウンタ <small>全畑</small></h3>
+        <div class="crow"><span>🌾 実っている</span><b id="g-cRipe">0</b></div>
+        <div class="crow"><span>🟫 何も植えていない</span><b id="g-cEmpty">0</b></div>
+        <div class="crow"><span>💧 水が切れている</span><b id="g-cDry">0</b></div>
       </div>
     </div>
 
@@ -3697,6 +3709,12 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-01", t:"お店の効率化に「村人の指示書」と「畑のカウンタ」が登場しました", items:[
+    "村人の指示書(10,000ネジ): 「村人の自動収穫」と「変異の自動収穫」をそれぞれオンオフできます。お店の効率化の行で、Enter が自動収穫、Shift+Enter が変異の自動収穫です",
+    "自動収穫をオフにすると、村人の畑の作物は実ったまま残ります。素手で収穫すると、村人が次を植えます",
+    "変異の自動収穫をオンにすると、村人が変異も収穫して持ち物に入れます(売りません)",
+    "畑のカウンタ(50,000ネジ): 庭の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します",
+  ]},
   { d:"2026-10-01", t:"作物に ☆☆☆ が登場しました", items:[
     "同じ作物を300個収穫すると、☆☆☆ が穫れるようになります。売値はふつうの1.5倍です",
     "変異の売値は ☆☆☆ の3倍(ふつうの4.5倍)になりました",
@@ -4368,6 +4386,8 @@ function newState(){
     lastTick:Date.now(), created:Date.now(),
     fromTypingMin:0, fromTypingScrews:0,
     villagers:0, vLog:{}, vilLv:0,
+    vilOrder:false, vilAutoH:true, vilAutoM:false,   // 村人の指示書(自動収穫・変異の自動収穫)
+    counter:false,                                   // 畑のカウンタ
     owner:Math.random().toString(36).slice(2)+Date.now().toString(36),  // 番付で自分の記録を見分ける印
     rankName:"",
   };
@@ -4513,6 +4533,7 @@ function villagerAdvance(p,dt){
   let t=dt, guard=0;
   while(guard++<100000){
     if(p.crop && p.crop.mut) break;                  // 変異が実っている: 手で収穫されるまで待つ
+    if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
       const c=CROP[vilCropId()];
       if(S.money<c.cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
@@ -4524,9 +4545,21 @@ function villagerAdvance(p,dt){
     if(t<rem){ p.crop.grown+=t; break; }
     t-=rem;
     const c=CROP[p.crop.id];
-    if(hasMut(c.id) && Math.random()<effMut()){     // 変異: 収穫せずに畑に残し、一度だけ知らせる
-      p.crop.grown=n; p.crop.mut=true;
+    if(!p.crop.rolled && hasMut(c.id) && Math.random()<effMut()){     // 変異(待っていた作物はもう抽選済み)
+      if(S.vilAutoM){                                 // 指示書: 変異も収穫して持ち物に入れる(売らない)
+        p.crop=null;
+        const num = 1 + (Math.random()<effDouble() ? 1 : 0);
+        invAdd(c.id,3,num);
+        for(let i=0;i<num;i++) recordHarvest(c.id,3,true);
+        S.vLog.mutGot=S.vLog.mutGot||[]; S.vLog.mutGot.push(c.id);
+        continue;
+      }
+      p.crop.grown=n; p.crop.mut=true;              // 収穫せずに畑に残し、一度だけ知らせる
       S.vLog.mutWait=S.vLog.mutWait||[]; S.vLog.mutWait.push(c.id);
+      break;
+    }
+    if(!S.vilAutoH){                                  // 指示書: 自動収穫オフ。実ったまま、手で収穫されるのを待つ
+      p.crop.grown=n; p.crop.ripeAt=Date.now()-t; p.crop.rolled=true;
       break;
     }
     p.crop=null;
@@ -4547,6 +4580,53 @@ const autoOf = id => S.auto[id] || null;
 const autoCrop = id => { const a=autoOf(id); return !!(a && a.c); };
 const autoSeed = id => { const a=autoOf(id); return !!(a && a.s); };
 
+/* 村人の指示書・畑のカウンタ */
+const VIL_ORDER_COST=10000, COUNTER_COST=50000;
+function buyVilOrder(){
+  if(S.vilOrder) return;
+  if(!spend(VIL_ORDER_COST)) return;
+  S.vilOrder=true; sfx.buy();
+  toast("村人の指示書を手に入れました。お店の効率化で、自動収穫と変異の自動収穫をオンオフできます","good",5200);
+  save(); renderAll();
+}
+function toggleVilOrder(w){
+  if(!S.vilOrder) return;
+  tick();   // ここまでの分は、今の設定で進めてから切り替える
+  if(w==="H") S.vilAutoH=!S.vilAutoH; else S.vilAutoM=!S.vilAutoM;
+  sfx.tool();
+  toast(w==="H" ? `村人の自動収穫を ${S.vilAutoH?"オン":"オフ"} にしました${S.vilAutoH?"":"(実った作物は畑に残ります)"}`
+                : `変異の自動収穫を ${S.vilAutoM?"オン":"オフ"} にしました${S.vilAutoM?"(変異は持ち物に入ります)":""}`,"",3000);
+  save(); renderAll();
+}
+function buyCounter(){
+  if(S.counter) return;
+  if(!spend(COUNTER_COST)) return;
+  S.counter=true; sfx.buy();
+  toast("畑のカウンタを置きました。庭の右下に、すべての畑の様子が出ます","good",4200);
+  save(); renderAll();
+}
+/* 畑のカウンタ: すべての本当の畑で数える(村人の区画・設置物は数えない。実った作物は村人の区画も数える) */
+function renderCounter(){
+  const card=$("g-counter"); if(!card) return;
+  card.style.display = S.counter ? "" : "none";
+  root.querySelector(".under").classList.toggle("has-counter", !!S.counter);
+  if(!S.counter) return;
+  const now=Date.now(); let ripe=0, empty=0, dry=0;
+  withReal(()=>S.fields.forEach((f,fi)=>{
+    const cov=covered(fi);
+    for(const k of KEYS){
+      const p=f[k]; if(p.s==="post" || p.obj) continue;
+      if(p.crop && isRipe(p)){ ripe++; continue; }
+      if(p.vil) continue;
+      if(p.s==="soil" && !p.crop) empty++;
+      else if(p.crop && !isWet(fi,k,now,cov)) dry++;
+    }
+  }));
+  $("g-cRipe").textContent=ripe; $("g-cEmpty").textContent=empty; $("g-cDry").textContent=dry;
+  $("g-cRipe").parentNode.classList.toggle("hot",ripe>0);
+  $("g-cDry").parentNode.classList.toggle("hot",dry>0);
+}
+
 /* 収穫を記録する(品質別の数・品質が上がったらお知らせ) */
 function recordHarvest(id,t,quiet){
   const before=tierOf(id);
@@ -4562,7 +4642,11 @@ function recordHarvest(id,t,quiet){
 }
 /* 村人の仕事ぶりをまとめて知らせる */
 function reportVillagers(){
-  const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait)) return;
+  const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait && !L.mutGot)) return;
+  for(const id of (L.mutGot||[])){
+    toast(`✦ 変異! 村人が ${icoQ(CROP[id],3)} ${esc(qName(id,3))} を収穫しました(持ち物に入れました)`,"good mut",9000,true);
+    sfx.vil();
+  }
   for(const id of (L.mutWait||[])){
     toast(`✦ 変異! 村人の畑で ${icoQ(CROP[id],3)} ${esc(qName(id,3))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,"good mut",9000,true);
     sfx.vil();
@@ -4955,7 +5039,7 @@ function renderBar(){
   $("g-rate").textContent=`ネジ打ち1打で ${minPerKey()}分 進む`;
 }
 function renderAll(){
-  renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge();
+  renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge(); renderCounter();
   if(modal==="shop") renderShop();
   if(modal==="book") renderBook();
   if(modal==="goal") renderGoals();
@@ -5016,8 +5100,8 @@ function act(k){
     nope(k, p.obj ? "案山子を回収するには 6 で案山子を持って押します" : "P は案山子置き場です。6 で案山子を持って置けます");
     save(); renderAll(); return;
   }
-  // 村人の区画は、肥料と「村人を外す」以外は触れない(村人が残した変異の収穫だけはできる)
-  const vilMut = p.vil && S.tool===1 && p.crop && p.crop.mut && isRipe(p);
+  // 村人の区画は、肥料と「村人を外す」以外は触れない(実って残っている作物の収穫だけはできる)
+  const vilMut = p.vil && S.tool===1 && p.crop && isRipe(p);   // 村人が残した変異・自動収穫オフで待っている作物
   if(p.vil && !vilMut && S.tool!==5 && !(S.tool===6 && S.objSel==="vil")){
     nope(k,"村人が世話をしている区画です(6 で村人を持って押すと外せます)");
     save(); renderAll(); return;
@@ -5035,7 +5119,7 @@ function act(k){
         nope(k, p.crop ? "まだ実っていません" : null);
         break;
       }
-      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]) && (!f[x].vil || f[x].crop.mut));
+      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]));
       for(const x of targets) harvestOne(x);
       sfx.harvest();
       checkUnlocks();
@@ -5240,6 +5324,20 @@ function shopRows(){
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
   }else if(shopTab===2){
+    // 村人の指示書(自動収穫・変異の自動収穫のオンオフ)
+    {
+      const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
+      rows.push({ ic:"📜",
+        nm: `村人の指示書 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(VIL_ORDER_COST)+"ネジ"}</span>`,
+        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して持ち物に入れます(売りません)`
+               :`村人の仕事を指示できるようになります。「村人の自動収穫」と「変異の自動収穫」を、それぞれオンオフできます`,
+        keys: has?"<b>Enter</b> 自動収穫のオンオフ<br><b>Shift+Enter</b> 変異の自動収穫のオンオフ":"<b>Enter</b> 買う",
+        enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
+      rows.push({ ic:"🧮",
+        nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"ネジ"}</span>`,
+        ds: `庭の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します(村人の区画と設置物は数えません)`,
+        keys: S.counter?"":"<b>Enter</b> 買う", enter:()=>buyCounter(), shift:()=>buyCounter() });
+    }
     // 効率化: 作物ごとの自動売却
     for(const c of CROPS){
       if(c.treasure) continue;
@@ -6267,7 +6365,7 @@ function enter(){
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); },1000);
+  loopId=setInterval(()=>{ tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
