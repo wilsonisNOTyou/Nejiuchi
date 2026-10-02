@@ -5050,22 +5050,17 @@ function recordHarvest(id,t,quiet){
 function reportVillagers(){
   const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait && !L.mutGot)) return;
   const mutOf = x => { const [id,q]=String(x).split(":"); return [id, q==="5"?5:3]; };   // "carrot" は変異、"carrot:5" は超変異
-  const mutWord = t => t===5 ? "✧ 超変異!" : "✦ 変異!";
-  for(const x of (L.mutGot||[])){
-    const [id,t]=mutOf(x);
-    toast(`${mutWord(t)} 村人が ${icoQ(CROP[id],t)} ${esc(qName(id,t))} を収穫しました(持ち物に入れました)`,t===5?"good mut sup":"good mut",9000,true);
-    sfx.vil();
-  }
-  for(const x of (L.mutWait||[])){
-    const [id,t]=mutOf(x);
-    toast(`${mutWord(t)} 村人の畑で ${icoQ(CROP[id],t)} ${esc(qName(id,t))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,t===5?"good mut sup":"good mut",9000,true);
-    sfx.vil();
-  }
-  const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${n}`);
-  if(parts.length){
-    toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} ネジ)`,"good",6000,true);
-    sfx.vil();
-  }
+  // 変異・超変異は作物ごとにまとめて1つの知らせにする(長い時間がまとめて進むと何百個も穫れ、音が一度に鳴りすぎるため)
+  const byCrop = arr => { const m={}; for(const x of (arr||[])){ const [id,t]=mutOf(x); if(CROP[id]){ const k=id+":"+t; m[k]=(m[k]||0)+1; } } return Object.entries(m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; }); };
+  const mutList = arr => arr.map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ");
+  const head = arr => arr.some(([,t])=>t===5) ? "✧ 超変異!" : "✦ 変異!";
+  const cls  = arr => arr.some(([,t])=>t===5) ? "good mut sup" : "good mut";
+  const got=byCrop(L.mutGot), wait=byCrop(L.mutWait);
+  if(got.length) toast(`${head(got)} 村人が ${mutList(got)} を収穫しました(持ち物に入れました)`,cls(got),9000,true);
+  if(wait.length) toast(`${head(wait)} 村人の畑で ${mutList(wait)} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,cls(wait),9000,true);
+  const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`);
+  if(parts.length) toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} ネジ)`,"good",6000,true);
+  if(got.length || wait.length || parts.length) sfx.vil();   // 音は1回だけ
   for(const m of (L.up||[])) toast(m,"good",5200,true);
   S.vLog={}; checkUnlocks(); save();
 }
