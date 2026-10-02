@@ -7110,10 +7110,11 @@ const charmLives = () => ev("V",1,3,0);
    ↑↓ で1項目ずつ、← → で作物ごとに移動 */
 /* 図鑑: 売値の安い順。貴重品(GHR)は品質が無いので、最後にまとめて並べる */
 /* 食材は作物のあと・貴重品の前に、ふつうの食材のすぐ後ろにその上位種を並べる */
-const FOOD_BOOK = FOODS.filter(f=>!f.up).sort((a,b)=>a.price-b.price).flatMap(f=>[f, ...FOODS.filter(u=>u.up===f.id)]);
+/* 食材はふつうの食材だけを並べ、上位種は ← → で切り替える */
+const FOOD_BOOK = FOODS.filter(f=>!f.up).sort((a,b)=>a.price-b.price);
 const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price).concat(FOOD_BOOK, CROPS.filter(c=>c.treasure));
 const bookSeen = c => c.food ? (S.got[c.id]||0)>0 : c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
-let bookCur=0, bookTier=0;
+let bookCur=0, bookTier=0, foodUp=false;   // foodUp: 食材の図鑑で上位種を見ているか
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 /* ☆☆☆(300個目)の説明文 */
 const LORE_Q3 = {
@@ -7172,7 +7173,7 @@ const loreOf = (c,t) => t===0 ? c.lore : t===5 ? SUPER[c.id].lore : (t===3 ? MUT
 function bookProgress(){
   let got=0, all=0;
   for(const c of BOOK_CROPS){
-    if(c.food){ all++; if(bookSeen(c)) got++; continue; }
+    if(c.food){ for(const f of [c, upOf(c.id)]){ if(!f) continue; all++; if(bookSeen(f)) got++; } continue; }
     if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
     for(const t of QORDER){ if(!qOk(c.id,t)) continue; all++; if(qCount(c.id,t)>0) got++; }
   }
@@ -7182,9 +7183,10 @@ function renderBook(){
   const { got:gotAll, all:allEntries }=bookProgress();
   $("g-bookRate").textContent=`図鑑 ${gotAll} / ${allEntries} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
   $("g-bookList").innerHTML=BOOK_CROPS.map((c,i)=>{
-    const known=bookSeen(c);
+    const up=c.food?upOf(c.id):null;
+    const known=bookSeen(c) || (up && bookSeen(up));
     const marks=c.food
-      ? `<span class="qm${known?" on":""}${c.up?" upm":""}">${c.up?"上位種":"食材"}</span>`
+      ? `<span class="qm${bookSeen(c)?" on":""}">・</span>`+(up?`<span class="qm upm${bookSeen(up)?" on":""}">✦</span>`:"")
       : c.treasure
       ? `<span class="qm${known?" on":""}">✨</span>`
       : `<span class="qm${qCount(c.id,0)>0?" on":""}">・</span>`
@@ -7199,21 +7201,20 @@ function renderBook(){
   const c=BOOK_CROPS[bookCur], t=c.treasure?0:(qOk(c.id,bookTier)?bookTier:4);
   const known=bookSeen(c), n=c.treasure?tre(c.id):qCount(c.id,t), total=S.harvestBy[c.id]||0;
   if(c.food){
-    // 食材: 品質は無く、ふつうの食材と上位種の組で載せる
-    const base=c.up?FOOD[c.up]:null, up=upOf(c.id);
-    $("g-bookDetail").innerHTML = known ? `
-      <div class="btabs"><span class="btab on">食材 ${c.r}</span>${c.up?'<span class="btab mut on">上位種</span>':""}</div>
-      <div class="bic${c.up?" q2":""}">${ico(c)}</div>
-      <div class="bnm">${esc(c.name)}</div>
+    // 食材: ふつう / 上位種 を ← → で切り替える
+    const up=upOf(c.id), f = foodUp && up ? up : c, fk=bookSeen(f);
+    const tabs=`<div class="btabs"><span class="btab${f===c?" on":""}${bookSeen(c)?"":" dim"}" data-t="0">ふつう</span>${up?`<span class="btab mut${f===up?" on":""}${bookSeen(up)?"":" dim"}" data-t="1">上位種</span>`:""}</div>`;
+    $("g-bookDetail").innerHTML = tabs + (fk ? `
+      <div class="bic${f.up?" q2":""}">${ico(f)}</div>
+      <div class="bnm">${esc(f.name)}</div>
       <dl>
-        <dt>持っている数</dt><dd>${fmtNum(foodN(c.id))}個</dd>
-        <dt>売値</dt><dd>${fmtNum(c.price)}ネジ</dd>
-        <dt>${c.up?"ふつうの食材":"上位種"}</dt><dd>${c.up?esc(base.name):(up?(bookSeen(up)?esc(up.name):"？？？"):"なし")}</dd>
-        <dt>手に入れ方</dt><dd>わくわくガチャ(レア度 ${c.r})</dd>
+        <dt>持っている数</dt><dd>${fmtNum(foodN(f.id))}個</dd>
+        <dt>売値</dt><dd>${fmtNum(f.price)}ネジ</dd>
+        <dt>手に入れ方</dt><dd>わくわくガチャ(レア度 ${f.r})${f.up?"":(PREPS.some(p=>p.out===f.id)?" ・ 料理の仕込み":"")}${f.up&&PREPS.some(p=>p.upOut===f.id)?" ・ 料理の仕込み":""}</dd>
       </dl>
-      <div class="lore">${esc(c.lore)}</div>`
+      <div class="lore">${esc(f.lore)}</div>`
     : `<div class="bic">❔</div><div class="bnm">？？？</div>
-       <div class="lore unknown">わくわくガチャ(レア度 ${c.r})から出る食材です。引き当てると、名前がわかります。</div>`;
+       <div class="lore unknown">わくわくガチャ(レア度 ${f.r})から出る${f.up?"上位種の":""}食材です。引き当てると、名前がわかります。</div>`);
     keepVisible($("g-bookList"));
     return;
   }
@@ -7270,7 +7271,8 @@ function bookKey(e){
     sfx.cursor(); renderBook();
   }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
-    if(BOOK_CROPS[bookCur].food || BOOK_CROPS[bookCur].treasure) return;
+    if(BOOK_CROPS[bookCur].treasure) return;
+    if(BOOK_CROPS[bookCur].food){ if(upOf(BOOK_CROPS[bookCur].id)){ foodUp=!foodUp; sfx.tab(); renderBook(); } return; }
     const qs=QORDER.filter(q=>qOk(BOOK_CROPS[bookCur].id,q));   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
     const i=Math.max(0,qs.indexOf(bookTier));
     bookTier=qs[(i+(k==="ArrowRight"?1:-1)+qs.length)%qs.length];
@@ -7279,7 +7281,8 @@ function bookKey(e){
 }
 $("g-bookDetail").addEventListener("click",e=>{
   const b=e.target.closest && e.target.closest("[data-t]"); if(!b) return;
-  bookTier=+b.dataset.t; sfx.tab(); renderBook();
+  if(BOOK_CROPS[bookCur].food) foodUp=b.dataset.t==="1"; else bookTier=+b.dataset.t;
+  sfx.tab(); renderBook();
 });
 $("g-bookList").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
