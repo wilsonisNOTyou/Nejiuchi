@@ -1506,6 +1506,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn gtab" id="tab-g-money">所持ネジ</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
       <button class="btn gtab" id="tab-g-book">図鑑</button>
+      <button class="btn gtab" id="tab-g-earn">累計獲得ネジ</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
@@ -1698,17 +1699,18 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持ネジ・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
+      <p>所持ネジ・累計収穫数・図鑑・累計獲得ネジの番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
         <button class="tab" data-rk="g-money">所持ネジ</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
         <button class="tab" data-rk="g-book">図鑑</button>
+        <button class="tab" data-rk="g-earn">累計獲得</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計収穫 / 図鑑 / 累計獲得 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -2236,10 +2238,10 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 → ネジの詩 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY), "g-money","g-harvest","g-book"];
-const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book";
-const gRankUnit = d => d==="g-money" ? "ネジ" : (d==="g-book" ? "項目" : "個");
-DIFF_LABEL["g-money"]="ネジ抜きの庭 所持ネジ"; DIFF_LABEL["g-harvest"]="ネジ抜きの庭 累計収穫"; DIFF_LABEL["g-book"]="ネジ抜きの庭 図鑑";
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY), "g-money","g-harvest","g-book","g-earn"];
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn";
+const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "ネジ" : (d==="g-book" ? "項目" : "個");
+DIFF_LABEL["g-money"]="ネジ抜きの庭 所持ネジ"; DIFF_LABEL["g-harvest"]="ネジ抜きの庭 累計収穫"; DIFF_LABEL["g-book"]="ネジ抜きの庭 図鑑"; DIFF_LABEL["g-earn"]="ネジ抜きの庭 累計獲得ネジ";
 for(const p of POEMS) DIFF_LABEL[POEM_KEY(p)] = "ネジの詩「"+p.title+"」";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
@@ -3704,6 +3706,10 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-02", t:"番付に「累計獲得ネジ」が登場しました", items:[
+    "これまでに手に入れたネジの合計で競う番付です。作物や種の売上(村人・自動売却を含む)、タイピングから庭に届いたネジ、実績のごほうびを合わせて数えます",
+    "庭の番付(9)と、タイトルのランキングの両方で見られます。これまでの分もさかのぼって数えます",
+  ]},
   { d:"2026-10-01", t:"お店の効率化に「村人の指示書」と「畑のカウンタ」が登場しました", items:[
     "村人の指示書(10,000ネジ): 「村人の自動収穫」と「変異の自動収穫」をそれぞれオンオフできます。お店の効率化の行で、Enter が自動収穫、Shift+Enter が変異の自動収穫です",
     "自動収穫をオフにすると、村人の畑の作物は実ったまま残ります。素手で収穫すると、村人が次を植えます",
@@ -6173,19 +6179,22 @@ function tutGrow(){
   save(); if(document.body.classList.contains("garden")) renderAll();
 }
 
+/* 累計獲得ネジ: 売上(作物・種・村人・自動売却)+ タイピングから届いたネジ + 受け取った実績のごほうび */
+const earnedTotal = () => (S.totalSales||0) + (S.fromTypingScrews||0) + GOALS.filter(goalClaimed).reduce((a,g)=>a+g.rw,0);
 /* ---------- 番付(所持ネジ・累計収穫) ----------
    名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
 const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
   if(isDebugSave()) return {ok:false, msg:"デバッグ用の記録は番付に載せられません"};
   const key=rankKey(name);
-  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`);
+  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`);
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now();
   await refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t });
   await refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t });
   // 図鑑は書けなくても続ける(番付の画面で知らせる)
+  try{ await refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t }); }catch(e){ console.warn("[nejiuchi rank] 累計獲得ネジの番付に書き込めませんでした",e); }
   try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); rankBookErr=""; }
   catch(e){ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[nejiuchi rank] 図鑑の番付に書き込めませんでした",e); }
   return {ok:true};
@@ -6198,7 +6207,7 @@ function refreshRank(){
   return pushRank(S.rankName).catch(e=>console.warn("[nejiuchi rank]",e));
 }
 function prepareRankNow(){
-  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
+  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目 ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>ネジ`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。ページを開いたときと、庭に出入りするたびに自動で更新されます`:"")+
     (rankBookErr?`<br><span style="color:#c0392b">※図鑑の番付に書き込めませんでした。Firebase のルールを最新の database.rules.json で公開してください(${esc(rankBookErr.slice(0,40))})</span>`:"");
 }
@@ -6231,7 +6240,7 @@ async function renderGardenRank(){
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
-const G_RANK_TABS=["g-money","g-harvest","g-book"];
+const G_RANK_TABS=["g-money","g-harvest","g-book","g-earn"];
 function switchGardenRank(dir){
   const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
   gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
@@ -6258,11 +6267,11 @@ async function useName(name, old){
   if(!hasDb() || isDebugSave()) return;
   if(old && old!==name){
     const k=rankKey(old);
-    for(const m of ["money","harvest","book"]){
+    for(const m of ["money","harvest","book","earn"]){
       try{
         const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
         if(v && v.o===S.owner) await ref.remove();
-      }catch(e){ if(m!=="book") throw e; }   // 図鑑はルールが古いと消せないので、失敗しても続ける
+      }catch(e){ if(m==="money"||m==="harvest") throw e; }   // 図鑑はルールが古いと消せないので、失敗しても続ける
     }
   }
   const r=await pushRank(name);
