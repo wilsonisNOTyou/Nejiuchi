@@ -887,6 +887,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .plot.mutp .qb{color:#e9d2ff}
 #screen-garden .cart.mut svg{filter:drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 0 5px rgba(190,120,255,.85))}
 #screen-garden .chip.q3{background:linear-gradient(135deg,#fff4fb,#f1e8ff 50%,#e8f6ff); box-shadow:inset 0 0 0 2px #b27ce8, 0 0 10px rgba(178,124,232,.55)}
+#screen-garden .chip.q4{box-shadow:inset 0 0 0 2px #f0b400, 0 0 10px rgba(240,180,0,.7); background:#fff6dc}
+#screen-garden .chip.q5{background:linear-gradient(135deg,#fffbea,#ffeaf6,#eaf6ff); box-shadow:inset 0 0 0 2px #e0a020, 0 0 12px rgba(255,200,80,.8)}
 #screen-garden .bookdetail .bic.q3{filter:drop-shadow(0 0 10px rgba(178,124,232,.9))}
 #screen-garden .bookdetail .mutq{display:inline-grid; place-items:center; width:1em; height:1em; color:#b27ce8; font-weight:800}
 #screen-garden .btab.mut{background:#efe4fb; color:#7a4ab0}
@@ -3738,6 +3740,7 @@ const NEWS=[
   ]},
   { d:"2026-10-03", t:"不具合を直しました", items:[
     "長くネジ打ちをしたあとに庭へ戻ると、効果音が一度にたくさん鳴って音が乱れる不具合を直しました。村人が穫った変異・超変異の知らせは、作物ごとにまとめて出します",
+    "庭の「収穫かご」に、☆☆☆ の作物が表示されていなかった不具合を直しました(超変異も表示されます)",
   ]},
   { d:"2026-10-02", t:"番付に「累計獲得ネジ」が登場しました", items:[
     "これまでに手に入れたネジの合計で競う番付です。作物や種の売上(村人・自動売却を含む)、タイピングから庭に届いたネジ、実績のごほうびを合わせて数えます",
@@ -5119,7 +5122,7 @@ const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(const t of TIERS
 function renderBasket(){
   const b=$("g-basket"); b.innerHTML="";
   let any=false;
-  for(const c of CROPS) for(let t=0;t<4;t++){
+  for(const c of CROPS) for(const t of QORDER){   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
     const n=invN(c.id,t); if(n<=0) continue;
     any=true;
     const s=document.createElement("span"); s.className="chip"+(t?" q"+t:"");
