@@ -1504,9 +1504,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p class="tab-group-label">ネジ抜きの庭</p>
     <div class="rank-tabs">
       <button class="btn gtab" id="tab-g-money">所持ネジ</button>
+      <button class="btn gtab" id="tab-g-earn">累計獲得ネジ</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
       <button class="btn gtab" id="tab-g-book">図鑑</button>
-      <button class="btn gtab" id="tab-g-earn">累計獲得ネジ</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
@@ -1699,18 +1699,18 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持ネジ・累計収穫数・図鑑・累計獲得ネジの番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
+      <p>所持ネジ・累計獲得ネジ・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
         <button class="tab" data-rk="g-money">所持ネジ</button>
+        <button class="tab" data-rk="g-earn">累計獲得</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
         <button class="tab" data-rk="g-book">図鑑</button>
-        <button class="tab" data-rk="g-earn">累計獲得</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計収穫 / 図鑑 / 累計獲得 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計獲得 / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -2244,7 +2244,7 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 → ネジの詩 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY), "g-money","g-harvest","g-book","g-earn"];
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", ...POEMS.map(POEM_KEY), "g-money","g-earn","g-harvest","g-book"];
 const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn";
 const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "ネジ" : (d==="g-book" ? "項目" : "個");
 DIFF_LABEL["g-money"]="ネジ抜きの庭 所持ネジ"; DIFF_LABEL["g-harvest"]="ネジ抜きの庭 累計収穫"; DIFF_LABEL["g-book"]="ネジ抜きの庭 図鑑"; DIFF_LABEL["g-earn"]="ネジ抜きの庭 累計獲得ネジ";
@@ -6213,7 +6213,7 @@ function refreshRank(){
   return pushRank(S.rankName).catch(e=>console.warn("[nejiuchi rank]",e));
 }
 function prepareRankNow(){
-  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目 ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>ネジ`+
+  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>ネジ ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。ページを開いたときと、庭に出入りするたびに自動で更新されます`:"")+
     (rankBookErr?`<br><span style="color:#c0392b">※図鑑の番付に書き込めませんでした。Firebase のルールを最新の database.rules.json で公開してください(${esc(rankBookErr.slice(0,40))})</span>`:"");
 }
@@ -6246,7 +6246,7 @@ async function renderGardenRank(){
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
-const G_RANK_TABS=["g-money","g-harvest","g-book","g-earn"];
+const G_RANK_TABS=["g-money","g-earn","g-harvest","g-book"];
 function switchGardenRank(dir){
   const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
   gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
