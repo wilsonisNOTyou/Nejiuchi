@@ -1992,6 +1992,7 @@ const WORDS_NORMAL = [
   { t: "5.5ふぇむとByte", k: "5.5ふぇむとByte" },
   { t: "女装合唱", k: "じょそうがっしょう" },
   { t: "男装合唱", k: "だんそうがっしょう" },
+  { t: "合唱ツンデレ", k: "がっしょうつんでれ" },
   { t: "今日泊まらない？", k: "きょうとまらない？" },
   { t: "虚無虚無プリングルス", k: "きょむきょむぷりんぐるす" },
   { t: "過ぎ去りし思い出", k: "すぎさりしおもいで" },
@@ -5325,20 +5326,6 @@ function shopRows(){
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
   }else if(shopTab===2){
-    // 村人の指示書(自動収穫・変異の自動収穫のオンオフ)
-    {
-      const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
-      rows.push({ ic:"📜",
-        nm: `村人の指示書 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(VIL_ORDER_COST)+"ネジ"}</span>`,
-        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して持ち物に入れます(売りません)`
-               :`村人の仕事を指示できるようになります。「村人の自動収穫」と「変異の自動収穫」を、それぞれオンオフできます`,
-        keys: has?"<b>Enter</b> 自動収穫のオンオフ<br><b>Shift+Enter</b> 変異の自動収穫のオンオフ":"<b>Enter</b> 買う",
-        enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
-      rows.push({ ic:"🧮",
-        nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"ネジ"}</span>`,
-        ds: `庭の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します(村人の区画と設置物は数えません)`,
-        keys: S.counter?"":"<b>Enter</b> 買う", enter:()=>buyCounter(), shift:()=>buyCounter() });
-    }
     // 効率化: 作物ごとの自動売却
     for(const c of CROPS){
       if(c.treasure) continue;
@@ -5366,6 +5353,20 @@ function shopRows(){
         enter: ()=>a?toggleAuto(c.id,"c"):(ready&&buyAuto(c.id)),
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
       });
+    }
+    // 村人の指示書(自動収穫・変異の自動収穫のオンオフ)
+    {
+      const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
+      rows.push({ ic:"📜",
+        nm: `村人の指示書 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(VIL_ORDER_COST)+"ネジ"}</span>`,
+        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して持ち物に入れます(売りません)`
+               :`村人の仕事を指示できるようになります。「村人の自動収穫」と「変異の自動収穫」を、それぞれオンオフできます`,
+        keys: has?"<b>Enter</b> 自動収穫のオンオフ<br><b>Shift+Enter</b> 変異の自動収穫のオンオフ":"<b>Enter</b> 買う",
+        enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
+      rows.push({ ic:"🧮",
+        nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"ネジ"}</span>`,
+        ds: `庭の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します(村人の区画と設置物は数えません)`,
+        keys: S.counter?"":"<b>Enter</b> 買う", enter:()=>buyCounter(), shift:()=>buyCounter() });
     }
     // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)
     for(const n of GACHA_BIG){
