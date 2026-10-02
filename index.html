@@ -3826,12 +3826,22 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
-  { d:"2026-10-02", t:"作物に「超変異」が登場しました", items:[
+  { d:"2026-10-03", t:"作物に「超変異」が登場しました", items:[
     "作物が実るとき、0.1% の確率で超変異します。変異よりさらにレアで、すべての作物に専用の名前・絵・図鑑の説明文があります",
     "超変異の売値は ☆☆☆ の10倍(ふつうの15倍)です。変異と同じく、自動売却や「すべて売る」では売りません",
-    "ソプラノピンクプリンセスは、1個につき超変異の確率も +0.1% します(最大 +3%)",
     "図鑑の印に虹色の ✦ が加わり、超変異のタブで説明文が読めます",
     "実績に「超変異の作物を収穫する」「超変異を3種類収穫する」「超変異を10種類収穫する」「図鑑を200項目うめる」を追加しました",
+    "図鑑の実績のごほうびを増やしました(図鑑コンプリートは 5,000,000ネジ)。すでに受け取った分は変わりません",
+  ]},
+  { d:"2026-10-03", t:"貴重品の効果に上限ができました", items:[
+    "バスブラックベルベット(売却価格)は最大 +100%、バスネイビーブルー(2個穫れる確率)は最大 +30% になりました",
+    "バスブラウンアイズ(1打の時短)は最大 +30分、ソプラノレッドフラッシュ(成長の速さ)は最大 +100% になりました",
+    "アルトイエローゴースト(村人の畑の成長)は最大 +200%、テナーシルバースター(ガチャの値段)は最大 −40% になりました",
+    "ソプラノピンクプリンセスは、1個につき変異の確率 +0.2%・超変異の確率 +0.02% になりました(最大 +10%・+1%)",
+    "上限をこえて持っている貴重品は、そのまま残ります。効果だけが上限で止まります",
+  ]},
+  { d:"2026-10-03", t:"不具合を直しました", items:[
+    "長くネジ打ちをしたあとに庭へ戻ると、効果音が一度にたくさん鳴って音が乱れる不具合を直しました。村人が穫った変異・超変異の知らせは、作物ごとにまとめて出します",
   ]},
   { d:"2026-10-02", t:"番付に「累計獲得ネジ」が登場しました", items:[
     "これまでに手に入れたネジの合計で競う番付です。作物や種の売上(村人・自動売却を含む)、タイピングから庭に届いたネジ、実績のごほうびを合わせて数えます",
@@ -4232,31 +4242,31 @@ const CROPS = [
     lore:"地上には何も出てこない。香りだけを頼りに掘り当てる。キーボードの下に眠っていると知る者は少ない。" },
   /* ここから下は GHR(貴重品)。収穫すると売れないかわりに、庭にずっと効く力を授ける */
   { id:"blackvelvet", r:"GHR", gacha:true, treasure:true, name:"バスブラックベルベット", icon:"🎀", cost:0, hours:48, price:0,
-    eff:{ key:"sell", per:1, unit:"%", text:"売却価格 +1%" },
+    eff:{ key:"sell", per:1, unit:"%", cap:100, text:"売却価格 +1%(最大 +100%)" },
     desc:"貴重品。黒天鵞絨のリボン。", lore:"低く響く声のように、静かに値を押し上げる。" },
   { id:"navyblue", r:"GHR", gacha:true, treasure:true, name:"バスネイビーブルー", icon:"💧", cost:0, hours:48, price:0,
-    eff:{ key:"double", per:1, unit:"%", cap:100, text:"2個穫れる確率 +1%" },
+    eff:{ key:"double", per:1, unit:"%", cap:30, text:"2個穫れる確率 +1%(最大 +30%)" },
     desc:"貴重品。深い藍の雫。", lore:"ひとつのはずのものが、ときどきふたつになる。" },
   { id:"browneyes", r:"GHR", gacha:true, treasure:true, name:"バスブラウンアイズ", icon:"👁️", cost:0, hours:48, price:0,
-    eff:{ key:"minute", per:1, unit:"分", text:"1打の時短 +1分" },
+    eff:{ key:"minute", per:1, unit:"分", cap:30, text:"1打の時短 +1分(最大 +30分)" },
     desc:"貴重品。茶色の瞳。", lore:"打鍵のひとつひとつを、この瞳がしっかり数えている。" },
   { id:"redflash", r:"GHR", gacha:true, treasure:true, name:"ソプラノレッドフラッシュ", icon:"⚡", cost:0, hours:48, price:0,
-    eff:{ key:"growth", per:1, unit:"%", text:"成長の速さ +1%" },
+    eff:{ key:"growth", per:1, unit:"%", cap:100, text:"成長の速さ +1%(最大 +100%)" },
     desc:"貴重品。赤い閃光。", lore:"畑の時間が、ほんの少しだけ前のめりになる。" },
   { id:"whitewizard", r:"GHR", gacha:true, treasure:true, name:"ソプラノホワイトウィザード", icon:"🎩", cost:0, hours:48, price:0,
     eff:{ key:"water", per:2, unit:"時間", text:"水やりの持続 +2時間" },
     desc:"貴重品。白い魔法使いの帽子。", lore:"一度まいた水が、なかなか乾かなくなる。" },
   { id:"pinkprincess", r:"GHR", gacha:true, treasure:true, name:"ソプラノピンクプリンセス", icon:"👑", cost:0, hours:48, price:0,
-    eff:{ key:"mutant", per:1, unit:"%", cap:30, text:"変異の確率 +1%・超変異の確率 +0.1%(最大 +30%・+3%)" },
+    eff:{ key:"mutant", per:0.2, unit:"%", cap:10, text:"変異の確率 +0.2%・超変異の確率 +0.02%(最大 +10%・+1%)" },
     desc:"貴重品。桃色の王冠。", lore:"この王冠のある庭では、作物がときどき思いもよらない姿で実る。" },
   { id:"yellowghost", r:"GHR", gacha:true, treasure:true, name:"アルトイエローゴースト", icon:"👻", cost:0, hours:48, price:0,
-    eff:{ key:"vilgrowth", per:2, unit:"%", text:"村人の畑の成長 +2%" },
+    eff:{ key:"vilgrowth", per:2, unit:"%", cap:200, text:"村人の畑の成長 +2%(最大 +200%)" },
     desc:"貴重品。黄色い幽霊。", lore:"畑の隅に立って、村人の手をそっと速める。怖がられているのか慕われているのか、誰も知らない。" },
   { id:"greennecklace", r:"GHR", gacha:true, treasure:true, name:"アルトグリーンネックレス", icon:"📿", cost:0, hours:48, price:0,
     eff:{ key:"seed", per:1, unit:"%", cap:75, text:"種の値段 −1%(最大 −75%)" },
     desc:"貴重品。緑の首飾り。", lore:"これを提げて店に行くと、なぜか値引きしてもらえる。" },
   { id:"silverstar", r:"GHR", gacha:true, treasure:true, name:"テナーシルバースター", icon:"⭐", cost:0, hours:48, price:0,
-    eff:{ key:"gacha", per:1, unit:"%", cap:75, text:"ガチャの値段 −1%(最大 −75%)" },
+    eff:{ key:"gacha", per:1, unit:"%", cap:40, text:"ガチャの値段 −1%(最大 −40%)" },
     desc:"貴重品。銀の星。", lore:"星を持つ者には、ガチャの主人も少しだけ甘くなる。" },
   { id:"blueamaryllis", r:"GHR", gacha:true, treasure:true, name:"テナーブルーアマリリス", icon:"🌸", cost:0, hours:48, price:0,
     eff:{ key:"fert", per:1, unit:"%", cap:20, text:"肥料の効果 +1%(最大 +20%)" },
@@ -4598,7 +4608,7 @@ const qualUp = t => { const x=eff("R"); return x===2 ? 4 : x===1 ? (nextTier(t) 
 const tre = id => (S.treas && S.treas[id]) || 0;
 const effVal = id => {
   const c=CROP[id]; if(!c||!c.eff) return 0;
-  const v=c.eff.per*tre(id);
+  const v=Math.round(c.eff.per*tre(id)*100)/100;   // 0.2% ずつ増えるものも、表示が 0.6000001 のようにならないように
   return c.eff.cap!=null ? Math.min(c.eff.cap, v) : v;
 };
 const effSell    = () => (1 + effVal("blackvelvet")/100) * ev("A",1.2,2,1);     // 売却価格
@@ -4608,7 +4618,7 @@ const effGrowth  = () => (1 + effVal("redflash")/100) * ev("D",2,5,1);        //
 const effVilGrow = () => effGrowth() * (1 + effVal("yellowghost")/100) * ev("G",3,10,1);  // 村人の区画はさらに速い
 const effWater   = () => effVal("whitewizard")*HOUR;        // 水やりの持続(ミリ秒)
 const effMut     = () => MUT_RATE + effVal("pinkprincess")/100 + ev("F",.05,.2,0);  // 変異の確率(1% + 貴重品)
-const effSup     = () => SUP_RATE + effVal("pinkprincess")/1000 + ev("F",.005,.02,0); // 超変異の確率(0.1% + 貴重品1個につき0.1%)
+const effSup     = () => SUP_RATE + effVal("pinkprincess")/1000 + ev("F",.005,.02,0); // 超変異の確率(0.1% + 貴重品1個につき0.02%)
 const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の倍率
 const effGacha   = () => (1 - effVal("silverstar")/100) * ev("I",.9,.5,1);      // ガチャの値段の倍率
 const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100 + ev("J",.1,.2,0);  // 肥料の効き(1つで最大45%、2つで最大90%)
