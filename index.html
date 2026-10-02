@@ -899,7 +899,10 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .cart.sup svg{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 4px rgba(255,210,90,.95)) drop-shadow(0 0 7px rgba(255,140,220,.7))}
 #screen-garden .btab.sup{background:#fff4d6; color:#a8701c}
 #screen-garden .btab.sup.on{background:linear-gradient(90deg,#f4c542,#ff8fd0,#7fd4ff); color:#fff}
-#screen-garden .qm.sup.on{color:#e0a020; text-shadow:0 0 4px rgba(255,190,60,.9), 0 0 8px rgba(255,140,220,.6)}
+#screen-garden .qm.sup{font-size:1rem; line-height:1; vertical-align:-.08em}
+#screen-garden .qm.sup.on{color:transparent; background:repeating-linear-gradient(120deg,#ff5f6d 0,#f4c542 .2em,#5fd08a .4em,#4fb3ff .6em,#b07cff .8em,#ff5f6d 1em); -webkit-background-clip:text; background-clip:text; filter:drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 0 3px rgba(255,180,90,.9)) drop-shadow(0 0 5px rgba(180,120,255,.7)); animation:g-suprb 3s linear infinite}
+@keyframes g-suprb{to{background-position:1.155em 0}}
+@media (prefers-reduced-motion:reduce){ #screen-garden .qm.sup.on{animation:none} }
 #screen-garden .supnm{color:#b8801c}
 #screen-garden .bookdetail .mutq.supq{color:#e0a020}
 #screen-garden .bookdetail .bic.q5{filter:drop-shadow(0 0 12px rgba(255,210,90,1)) drop-shadow(0 0 22px rgba(255,140,220,.8))}
@@ -6077,7 +6080,7 @@ function renderBook(){
       : `<span class="qm${qCount(c.id,0)>0?" on":""}">・</span>`
         + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">☆</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
         + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"")
-        + (hasSup(c.id)?`<span class="qm sup${qCount(c.id,5)>0?" on":""}">✧</span>`:"");
+        + (hasSup(c.id)?`<span class="qm sup${qCount(c.id,5)>0?" on":""}">✦</span>`:"");
     return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}" data-i="${i}">
       <div class="ic">${known?ico(c):"❔"}</div>
       <div class="nm">${known?c.name:"？？？"}</div>
