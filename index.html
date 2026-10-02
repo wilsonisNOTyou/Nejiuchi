@@ -5828,9 +5828,8 @@ function shopRows(){
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`お店で買える畑はここまでです(今は ${nf}枚)。11枚目からは、わくわくガチャの GUR「畑チケット」で増やせます(最大${FIELD_MAX}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
   }else if(shopTab===2){
-    // 効率化: 作物ごとの自動売却
-    for(const c of CROPS){
-      if(c.treasure) continue;
+    // 効率化: 作物ごとの自動売却(自動売却の値段の安い順。同じ値段なら作物の売値の安い順)
+    for(const c of CROPS.filter(c=>!c.treasure).sort((a,b)=>autoCost(a.id)-autoCost(b.id) || a.price-b.price)){
       const a=autoOf(c.id);
       const seen=(S.harvestBy[c.id]||0)>0;   // 一度も収穫していない作物は名前を伏せる
       if(!seen){
