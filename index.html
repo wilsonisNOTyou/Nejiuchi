@@ -1112,6 +1112,31 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .chip.food.up{background:#fffaf0; box-shadow:inset 0 0 0 2px #e0a020, 0 0 8px rgba(255,200,80,.6)}
 #screen-garden .upnm{color:#b8801c; font-weight:800}
 #screen-garden .qm.upm.on{color:#e0a020}
+/* 料理 */
+#screen-garden .buff{font-size:.82rem; font-weight:800; padding:.2rem .7rem; border-radius:999px; background:#fff7e0; box-shadow:inset 0 0 0 2px #e8b84a; color:#6a4a10; white-space:nowrap}
+#screen-garden .buff.mut{background:linear-gradient(135deg,#fff4fb,#f1e8ff); box-shadow:inset 0 0 0 2px #b27ce8, 0 0 8px rgba(178,124,232,.5)}
+#screen-garden .buff.sup{background:linear-gradient(135deg,#fffbea,#ffeaf6,#eaf6ff); box-shadow:inset 0 0 0 2px #e0a020, 0 0 10px rgba(255,200,80,.7)}
+#screen-garden .buff b{font-variant-numeric:tabular-nums}
+#screen-garden .cooknow{font-size:.8rem; max-width:60%}
+#screen-garden .dic{display:inline-block}
+#screen-garden .dic.mut{filter:drop-shadow(0 0 4px rgba(178,124,232,.9))}
+#screen-garden .dic.sup{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px rgba(255,200,80,.95)) drop-shadow(0 0 9px rgba(255,140,220,.7))}
+#screen-garden .dgrade{font-size:.8rem; padding:.05rem .45rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap}
+#screen-garden .dgrade.mut{background:#efe3ff; color:#7a3fc0}
+#screen-garden .dgrade.sup{background:linear-gradient(90deg,#fff1b8,#ffe0f2,#dff2ff); color:#a8701c}
+#screen-garden .dlack{color:#c0392b}
+#screen-garden .dhave{color:#2e7d32; font-weight:700}
+#screen-garden .sptabs{margin:-.2rem 0 .5rem}
+#screen-garden .sptabs .sphint{font-size:.72rem; color:var(--ink-l); align-self:center; margin-left:.4rem}
+#screen-garden .sptabs .gbadge.on{background:#d9573f; color:#fff; border-radius:999px; padding:0 .35rem; font-size:.7rem}
+#screen-garden .dbig{font-size:3.4rem; line-height:1; display:inline-block}
+#screen-garden .dbig.unknown{color:var(--ink-l)}
+#screen-garden .dbig.mut{filter:drop-shadow(0 0 8px rgba(178,124,232,.9))}
+#screen-garden .dbig.sup{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px rgba(255,200,80,1)) drop-shadow(0 0 20px rgba(255,140,220,.8))}
+#screen-garden .gcard .gextra{position:absolute; left:50%; bottom:-7px; transform:translateX(-50%); background:#2e9d6a; color:#fff; font-size:.56rem; font-weight:800; padding:.05rem .35rem; border-radius:999px; white-space:nowrap}
+.fw{position:fixed; width:6px; height:6px; border-radius:50%; pointer-events:none; z-index:9999; animation:g-fw .9s ease-out forwards; box-shadow:0 0 6px currentColor}
+@keyframes g-fw{0%{transform:translate(-50%,-50%); opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))); opacity:0}}
+@media (prefers-reduced-motion:reduce){ .fw{display:none} }
 /* GHR の見た目(虹色) */
 #screen-garden .gcard.GHR{
   border-color:#ff8a3d;
@@ -1603,13 +1628,15 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="sign">ネジ抜きの庭</div>
       <div class="money">🔩 <span id="g-money">0</span><small>ネジ</small></div>
       <div class="rate" id="g-rate"></div>
+      <div class="buff" id="g-buff" hidden></div>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
       <button class="tbtn gacha" id="g-gachaBtn">ガチャ<span class="kb">7</span></button>
       <button class="tbtn treas" id="g-treasBtn">貴重品<span class="kb">8</span></button>
+      <button class="tbtn cook" id="g-cookBtn">料理<span class="kb">0</span></button>
       <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
       <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
-      <button class="tbtn goal" id="g-goalBtn">実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">0</span></button>
+      <button class="tbtn goal" id="g-goalBtn">実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">Space</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
     </div>
 
@@ -1655,7 +1682,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </p>
     <p class="help pc-only">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
-      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
+      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>0</b> 料理 ・ <b>Space</b> 図鑑・料理図鑑・実績 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
@@ -1673,6 +1700,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <button class="tab" data-tab="1">道具・土地</button>
         <button class="tab" data-tab="2">効率化</button>
         <button class="tab" data-tab="3">売る</button>
+        <button class="tab" data-tab="4">レシピ</button>
       </div>
       <div id="g-shopBody" class="plist"></div>
       <div class="keyhint" id="g-shopHint"></div>
@@ -1715,11 +1743,47 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div class="money" id="g-bookRate"></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
+      <div class="tabs sptabs"></div>
       <div class="book">
         <div id="g-bookList" class="plist booklist"></div>
         <div id="g-bookDetail" class="bookdetail"></div>
       </div>
-      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異 / 超変異)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異 / 超変異)を切り替え ・ <b>Tab</b> 料理図鑑・実績へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <!-- 料理図鑑 -->
+  <div class="modal" id="g-dbook">
+    <div class="panel">
+      <div class="phead">
+        <h2>料理図鑑</h2>
+        <div class="money" id="g-dbookRate"></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <div class="tabs sptabs"></div>
+      <div class="book">
+        <div id="g-dbookList" class="plist booklist"></div>
+        <div id="g-dbookDetail" class="bookdetail"></div>
+      </div>
+      <div class="keyhint"><b>↑ ↓</b> 料理を選ぶ ・ <b>← →</b> ふつう / 変異 / 超変異を切り替え ・ <b>Tab</b> 実績・図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <!-- 料理 -->
+  <div class="modal" id="g-cook">
+    <div class="panel">
+      <div class="phead">
+        <h2>料理</h2>
+        <div class="money cooknow" id="g-cookNow"></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <div class="tabs" id="g-cookTabs">
+        <button class="tab" data-tab="0">作る</button>
+        <button class="tab" data-tab="1">食べる</button>
+        <button class="tab" data-tab="2">仕込み</button>
+      </div>
+      <div id="g-cookBody" class="plist"></div>
+      <div class="keyhint" id="g-cookHint"></div>
     </div>
   </div>
 
@@ -1731,9 +1795,10 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div class="money" id="g-goalRate"></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
+      <div class="tabs sptabs"></div>
       <p class="tnote">実績を解除すると、ごほうびのネジを受け取れます。次に何をするか迷ったら、ここを見てください。</p>
       <div id="g-goalBody" class="plist"></div>
-      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>0</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>Tab</b> 図鑑・料理図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -2562,13 +2627,15 @@ let timerId=null, cdId=null, lastWordKey=null, plateScrews=0, running=false, cur
 const usedWords=new Set();   // スコアアタックで、このプレイ中に出した語録
 let elapsed=0;          // 一本勝負/タイムアタックの経過秒
 let taQueue=[], taGoal=0, nextWord=null; // タイムアタック用の出題キュー
-let oneshotStage=0;     // 一本勝負の緊張段階(0〜4)
+let oneshotStage=0;
+let osLives=0, osCharm=false;   // 一本勝負: 料理のお守りで続けられる回数 / お守りの効果中に始めたか(ランキングに載せない)     // 一本勝負の緊張段階(0〜4)
 let gardenKeys=0;       // このプレイで正しく打った打鍵数(ネジ抜きの庭の時短に使う)
 
 /* ネジ抜きの庭へ「正しい打鍵数」と「抜いたネジ」を届ける(庭を開いたときに受け取られる) */
+const gardenScrewMul = () => { try{ return Garden.screwMul(); }catch(e){ return 1; } };   // 料理「1語のネジ」の倍率
 function sendToGarden(keys,screws){
   const toInt = v => Math.max(0, Math.floor(Number(v)||0));   // 大きな数(一本勝負の倍々)でも壊れないように
-  keys=toInt(keys); screws=toInt(screws);
+  keys=toInt(keys); screws=toInt(screws)*gardenScrewMul();
   if(keys<=0 && screws<=0) return;
   try{
     const K="nejiuchi:garden:inbox";
@@ -2744,6 +2811,8 @@ function startGame(d){
   if(window.IS_MOBILE) return;   // スマホではタイピングできない
   diff=d;
   const ta=isQ(d), oneshot=(d==="oneshot");
+  osLives = oneshot ? (()=>{ try{ return Garden.charmLives(); }catch(e){ return 0; } })() : 0;
+  osCharm = osLives>0;
   if(d==="book" && !(bookPlay && bookPlay.words && bookPlay.words.length)) return;
   words = (ta||oneshot) ? [] : WORD_SETS[d];
   score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false; usedWords.clear();
@@ -2758,7 +2827,7 @@ function startGame(d){
   // HUD/タイムバーをモードごとに切り替え
   $("scoreLabel").textContent = ta ? "残り " : "抜いたネジ ";
   $("score").textContent = ta ? taGoal : 0;
-  $("missWrap").style.display = oneshot ? "none" : "";
+  $("missWrap").style.display = oneshot && !osCharm ? "none" : "";
   $("miss").textContent="0";
   $("timebar").style.visibility = oneshot ? "hidden" : "visible";
   $("timeLabel").textContent = (ta||oneshot) ? "経過 " : "残り ";
@@ -2847,7 +2916,8 @@ async function endGame(){
   $("regStatus").textContent=db?"":"※Firebase未設定のためランキング登録はできません";
   showRegName();
   show("result"); resultAt=Date.now();
-  if(playerName && db) registerResult();   // 名前が決まっていれば自動で登録
+  if(diff==="oneshot" && osCharm) $("regStatus").textContent="料理のお守りの効果中に遊んだので、ランキングには載りません";
+  else if(playerName && db) registerResult();   // 名前が決まっていれば自動で登録
   refreshBestLine();
 }
 
@@ -2862,7 +2932,7 @@ function gardenScrews(d,n){
   if(d==="book") return n;
   return n*(SCREW_MULT[d]||1);
 }
-const showGardenScrews = (el,n) => { $(el).textContent = n>0 ? `庭に 🔩${Math.floor(n).toLocaleString("ja-JP")}ネジ 届きます` : ""; };
+const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `庭に 🔩${Math.floor(n*m).toLocaleString("ja-JP")}ネジ 届きます${m>1?`(料理で×${m})`:""}` : ""; };
 
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
@@ -2982,6 +3052,7 @@ document.addEventListener("keydown",e=>{
     const p=$("wordPanel");
     p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
     // 一本勝負: 1ミスで即終了
+    if(diff==="oneshot" && osLives>0){ osLives--; sndMiss(); return; }   // 料理のお守り: このミスは見逃してもらえる
     if(diff==="oneshot"){
       running=false;
       sndFatal();
@@ -3153,6 +3224,7 @@ async function openRanking(d,highlight){
 
 /* 結果画面の登録。名前が決まっていなければ、ここで決める(以後はその名前で自動登録) */
 async function registerResult(){
+  if(diff==="oneshot" && osCharm){ $("regStatus").textContent="料理のお守りの効果中に遊んだので、ランキングには載りません"; return; }
   if(isDebugSave()){ $("regStatus").textContent="デバッグ用の記録はランキングに登録できません"; return; }
   if(!db){ $("regStatus").textContent="※Firebase未設定のため登録できません"; return; }
   if(!playerName){
@@ -4517,6 +4589,7 @@ const QORDER = [0,1,2,4,3,5];
 const isMutT = t => t===3 || t===5;          // 変異・超変異(自動売却しない・「すべて売る」で売らない)
 const qOk = (id,t) => t===3 ? hasMut(id) : (t===5 ? hasSup(id) : true);
 const nextTier = t => t===0?1 : t===1?2 : t===2?4 : null;
+const qualUp = t => { const x=eff("R"); return x===2 ? 4 : x===1 ? (nextTier(t) ?? t) : t; };   // 料理: 品質アップ
 /* 貴重品(GHR)の持っている数と、そこから決まる庭全体の効果 */
 const tre = id => (S.treas && S.treas[id]) || 0;
 const effVal = id => {
@@ -4524,17 +4597,17 @@ const effVal = id => {
   const v=c.eff.per*tre(id);
   return c.eff.cap!=null ? Math.min(c.eff.cap, v) : v;
 };
-const effSell    = () => 1 + effVal("blackvelvet")/100;     // 売却価格
-const effDouble  = () => effVal("navyblue")/100;            // 2個穫れる確率
+const effSell    = () => (1 + effVal("blackvelvet")/100) * ev("A",1.2,2,1);     // 売却価格
+const effDouble  = () => Math.min(1, effVal("navyblue")/100 + ev("B",.2,1,0));            // 2個穫れる確率
 const effMinute  = () => effVal("browneyes");               // 1打の時短(分)
-const effGrowth  = () => 1 + effVal("redflash")/100;        // 成長の速さ(畑ぜんぶ)
-const effVilGrow = () => effGrowth() * (1 + effVal("yellowghost")/100);  // 村人の区画はさらに速い
+const effGrowth  = () => (1 + effVal("redflash")/100) * ev("D",2,5,1);        // 成長の速さ(畑ぜんぶ)
+const effVilGrow = () => effGrowth() * (1 + effVal("yellowghost")/100) * ev("G",3,10,1);  // 村人の区画はさらに速い
 const effWater   = () => effVal("whitewizard")*HOUR;        // 水やりの持続(ミリ秒)
-const effMut     = () => MUT_RATE + effVal("pinkprincess")/100;  // 変異の確率(1% + 貴重品)
-const effSup     = () => SUP_RATE + effVal("pinkprincess")/1000; // 超変異の確率(0.1% + 貴重品1個につき0.1%)
+const effMut     = () => MUT_RATE + effVal("pinkprincess")/100 + ev("F",.05,.2,0);  // 変異の確率(1% + 貴重品)
+const effSup     = () => SUP_RATE + effVal("pinkprincess")/1000 + ev("F",.005,.02,0); // 超変異の確率(0.1% + 貴重品1個につき0.1%)
 const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の倍率
-const effGacha   = () => 1 - effVal("silverstar")/100;      // ガチャの値段の倍率
-const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き(1つで最大45%、2つで最大90%)
+const effGacha   = () => (1 - effVal("silverstar")/100) * ev("I",.9,.5,1);      // ガチャの値段の倍率
+const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100 + ev("J",.1,.2,0);  // 肥料の効き(1つで最大45%、2つで最大90%)
 
 const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[4].need?4:(n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0)); };
 const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult*effSell());
@@ -4693,6 +4766,7 @@ function newState(){
     tool:1, seedId:"carrot", objSel:"spr",
     seeds:{ carrot:4 }, inv:{}, canLv:1, hoeLv:1, sickLv:1, fert:0, objs:{}, auto:{},
     food:{}, mfert:0, sfert:0, fertSel:"fert", bnVil:0,
+    recipes:{}, dishes:{}, dishMade:{}, dishEaten:{}, buff:null,
     harvestBy:{}, harvestQ:{}, got:{}, gachaCount:0, treas:{}, known:["carrot","potato"], lastCrow:[],
     lastTick:Date.now(), created:Date.now(),
     fromTypingMin:0, fromTypingScrews:0,
@@ -4732,6 +4806,8 @@ function normalize(o){
   if(s.objs.spr2){ s.objs.spr=(s.objs.spr||0)+s.objs.spr2; delete s.objs.spr2; }
   for(const f of s.fields) for(const k of KEYS){ if(f[k].obj==="spr2") f[k].obj="spr"; }
   if(!["vil","bnvil",...OBJ_ALL].includes(s.objSel)) s.objSel="spr";
+  for(const key of ["recipes","dishes","dishMade","dishEaten"]) s[key]=s[key]||{};
+  if(s.buff && !(s.buff.d && s.buff.until)) s.buff=null;
   s.food=s.food||{}; s.mfert=s.mfert||0; s.sfert=s.sfert||0; s.bnVil=s.bnVil||0;
   if(!["fert","sfert","mfert"].includes(s.fertSel)) s.fertSel="fert";
   s.villagers=s.villagers||0; s.vLog=s.vLog||{}; s.vilLv=s.vilLv||0;
@@ -4843,6 +4919,12 @@ const bnFree  = () => (S.bnVil||0)*VIL_SLOTS - vilUsed("bn");
 /* 村人が育てる作物。元気の種を買うたびに、お店にいつも並ぶ作物の中で1段上がる */
 const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","nejitree"];
 const VIL_UP_PRICES = [30000,60000,120000,250000,500000,1000000,2000000,4000000];
+/* 料理: 村人がガチャの作物を育てる(ふつう SRまで / 強い HR〜GSR) */
+function vilGachaCrop(){
+  const rs = eff("O")===2 ? ["HR","UR","GSR"] : ["N","R","SR"];
+  const pool=CROPS.filter(c=>c.gacha && !c.treasure && rs.includes(c.r));
+  return pool[Math.floor(Math.random()*pool.length)].id;
+}
 const vilCropId = () => VIL_LADDER[Math.min(S.vilLv||0, VIL_LADDER.length-1)];
 const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length-1)];
 function villagerAdvance(p,dt){
@@ -4851,7 +4933,7 @@ function villagerAdvance(p,dt){
     if(p.crop && p.crop.mut && p.crop.grown>=need(p.crop)) break;   // 変異が実っている: 手で収穫されるまで待つ
     if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
-      const c=CROP[p.vil==="bn" ? "butternut" : vilCropId()];   // バターナッツかぼちゃ農家はバターナッツかぼちゃだけ
+      const c=CROP[p.vil==="bn" ? "butternut" : (eff("O") ? vilGachaCrop() : vilCropId())];   // バターナッツかぼちゃ農家はバターナッツかぼちゃだけ
       if(S.money<c.cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
       S.money-=c.cost;
       S.vLog.spent=(S.vLog.spent||0)+c.cost;
@@ -4881,7 +4963,7 @@ function villagerAdvance(p,dt){
       break;
     }
     p.crop=null;
-    const q=tierOf(c.id);                           // q: 品質(t は残り時間なので別名に)
+    const q=qualUp(tierOf(c.id));                   // q: 品質(t は残り時間なので別名に)
     const num = 1 + (Math.random()<effDouble() ? 1 : 0);
     const price=priceOf(c.id,q)*num;
     S.money+=price; S.totalSales+=price;
@@ -4984,7 +5066,7 @@ function reportVillagers(){
 /* 案山子のいる畑の数(1打あたりの時短が増える) */
 const crowFields = () => FS().filter(f=>isScare(f[POST].obj)).length;
 const sgkFields  = () => FS().filter(f=>f[POST].obj==="sgk").length;   // シゴデキ案山子は +3分(案山子の +1分に +2分)
-const minPerKey  = () => MIN_PER_KEY + crowFields() + sgkFields()*2 + effMinute();
+const minPerKey  = () => MIN_PER_KEY + crowFields() + sgkFields()*2 + effMinute() + ev("C",3,30,0);
 /* タイピングで得た時間を、水の効いている作物にまとめて足す */
 function applySkip(minutes){
   const now=Date.now();
@@ -5144,7 +5226,9 @@ function toast(text,kind="",ms=2600,html=false){
   o.timer=setTimeout(()=>dropToast(o),ms);
   while(liveToasts.length>MAX_TOASTS) dropToast(liveToasts[0]);
 }
+let quietFx=false;   // ほかの畑をまとめて触るときは、今の畑に演出を出さない
 function floatAt(k,text){
+  if(quietFx) return;
   const el=plotEls[k]; if(!el) return;
   const r=el.getBoundingClientRect();
   const f=document.createElement("div");
@@ -5381,6 +5465,10 @@ function renderAll(){
   if(modal==="shop") renderShop();
   if(modal==="book") renderBook();
   if(modal==="goal") renderGoals();
+  if(modal==="dbook") renderDbook();
+  if(modal==="cook") renderCook();
+  if(modal==="book"||modal==="dbook"||modal==="goal") renderSpaceTabs();
+  renderBuff();
 }
 
 /* ---------- 作業 ---------- */
@@ -5391,6 +5479,7 @@ function nope(k,msg){
   if(msg) toast(msg,"warn",1800);
 }
 function hit(k){
+  if(quietFx) return;
   const el=plotEls[k]; if(!el) return;
   el.classList.add("hit"); setTimeout(()=>el.classList.remove("hit"),90);
 }
@@ -5407,7 +5496,7 @@ function harvestOne(k){
     toast(`${ico(c)} ${esc(c.name)} を手に入れました。${esc(c.eff.text)}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000,true);
     return;
   }
-  let t=tierOf(c.id);
+  let t=qualUp(tierOf(c.id));
   const mq = cropMut ? (cropSup?5:3) : (rolled ? 0 : rollMut(c.id));   // 5=超変異 3=変異
   const mut = mq>0;
   if(mut) t=mq;
@@ -5427,6 +5516,8 @@ function harvestOne(k){
     sfx.vil();
   }
   else if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000,true);
+  if(Math.random()<ev("α",.2,1,0)){ S.seeds[c.id]=(S.seeds[c.id]||0)+1; floatAt(k,`🌱 ${esc(c.name)}の種が戻った`); }   // 料理: 種が戻る
+  if(!quietFx) dishFirework(k);
   hit(k);
 }
 function act(k){
@@ -5458,8 +5549,14 @@ function act(k){
         nope(k, p.crop ? "まだ実っていません" : null);
         break;
       }
-      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]));
+      const targets = eff("Q") ? KEYS.filter(x=>f[x].crop && isRipe(f[x]) && (!f[x].vil || f[x].crop.mut || !S.vilAutoH))
+                               : [k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]));
       for(const x of targets) harvestOne(x);
+      if(eff("Q")===2 && !realFields){   // 料理: すべての畑の実りを収穫する(ほかの畑は演出なし)
+        const here=S.cur;
+        S.fields.forEach((fx,fi)=>{ if(fi===here) return; S.cur=fi; quietFx=true; for(const x of KEYS){ const q=fx[x]; if(q.crop && isRipe(q) && (!q.vil || q.crop.mut || !S.vilAutoH)) harvestOne(x); } quietFx=false; });
+        S.cur=here;
+      }
       sfx.harvest();
       checkUnlocks();
       break;
@@ -5478,6 +5575,10 @@ function act(k){
       if(!targets.length){ nope(k, p.obj?"設置物があります":(p.s==="grass"?"先にクワ(2)で耕しましょう":null)); break; }
       const until=Date.now()+canInfo().hours*HOUR+effWater();
       for(const x of targets){ f[x].wet=until; hit(x); }
+      if(eff("P") && !realFields){   // 料理: 一括水やり
+        for(const fx of (eff("P")===2 ? S.fields : [f])) for(const x of KEYS){ const q=fx[x]; if(q.s==="soil" && !q.obj && !q.vil) q.wet=until; }
+        floatAt(k, eff("P")===2 ? "💧 すべての畑" : "💧 この畑ぜんぶ");
+      }else
       floatAt(k, targets.length>1?`💧×${targets.length}`:"💧");
       sfx.water();
       break;
@@ -5492,6 +5593,14 @@ function act(k){
       p.crop={ id:S.seedId, grown:0 }; p.emptySince=0;
       if(window.tutFastCrop && S.seedId==="carrot") p.crop.tut=true;   // ガイドの「植える」で植えたにんじん
       hit(k); floatAt(k,"🌱"); sfx.plant();
+      if(eff("L") && !realFields){   // 料理: 一括植え
+        let m=0;
+        for(const fx of (eff("L")===2 ? S.fields : [f])) for(const x of KEYS){
+          const q=fx[x]; if(!(S.seeds[S.seedId]>0)) break;
+          if(q.s==="soil" && !q.crop && !q.obj && !q.vil){ q.crop={ id:S.seedId, grown:0 }; q.emptySince=0; S.seeds[S.seedId]--; m++; }
+        }
+        if(m) floatAt(k,`🌱×${m+1}`);
+      }
       break;
     }
     case 5: { // 肥料: 育成中の作物を一気に進める
@@ -5499,12 +5608,13 @@ function act(k){
       if(S.fert<=0){ nope(k,"肥料がありません。Tab でお店へ"); break; }
       if(!p.crop){ nope(k,"作物が植わっていません"); break; }
       if(isRipe(p)){ nope(k,"もう実っています"); break; }
-      if((p.crop.fert||0)>=2){ nope(k,"この作物に肥料はもう2回使っています"); break; }
+      const fmax=ev("K",3,Infinity,2);
+      if((p.crop.fert||0)>=fmax){ nope(k,`この作物に肥料はもう${fmax}回使っています`); break; }
       p.crop.fert=(p.crop.fert||0)+1;
-      S.fert--;
+      if(Math.random()<ev("η",.3,.6,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
       grow(p, need(p.crop)*effFert(), Date.now());
       if(isRipe(p)) p.crop.ripeAt=Date.now();
-      hit(k); floatAt(k,`🍂 ${p.crop.fert}/2`); sfx.fert();
+      hit(k); floatAt(k,`🍂 ${p.crop.fert}/${fmax===Infinity?"∞":fmax}`); sfx.fert();
       break;
     }
     case 6: { // 設置: スプリンクラーや案山子を置く / 村人に区画をまかせる
@@ -5561,7 +5671,7 @@ function magicFert(k,p,id){
     p.crop.mut=true; p.crop.mutN=3;
   }
   p.crop.rolled=true;
-  S[id]--;
+  if(Math.random()<ev("η",.3,.6,0)) toast("料理の効果で、肥料が減りませんでした","good",2600); else S[id]--;
   if(!(S[id]>0)) S.fertSel="fert";
   hit(k); floatAt(k, id==="mfert"?"✧ 超変異":"✦×3"); sfx.vil();
   toast(`${ico(g)} ${esc(c.name)}にまきました。${id==="mfert"?"超変異で実ります":"変異で3個穫れます"}`,"good mut"+(id==="mfert"?" sup":""),4200,true);
@@ -5606,6 +5716,9 @@ function openModal(name){
   if(name==="book") renderBook();
   if(name==="rank") prepareRank();
   if(name==="goal") renderGoals();
+  if(name==="dbook") renderDbook();
+  if(name==="cook") renderCook();
+  if(SPACE_TABS.some(([m])=>m===name)) renderSpaceTabs();
 }
 function closeModal(silent){
   if(!modal) return;
@@ -5623,7 +5736,7 @@ function keepVisible(listEl){
 
 /* ---------- お店(キーボード操作) ----------
    ← → タブ / ↑ ↓ 品物 / Enter 1つ買う・1つ売る / Shift+Enter 10買う・全部売る / A すべて売る */
-const SHOP_TABS=["種","道具・土地","効率化","売る"];
+const SHOP_TABS=["種","道具・土地","効率化","売る","レシピ"];
 let shopTab=0, shopCur=[0,0,0,0];
 function shopRows(){
   const rows=[];
@@ -5741,6 +5854,8 @@ function shopRows(){
         ds: `種ガチャ・わくわくガチャで ${fmtNum(n)}連 が引けるようになります(種ガチャなら1回 ${fmtNum(gachaCost(n,"n"))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます${has?"":" ・ 結果は作物ごとにまとめて表示します"}`,
         keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
     }
+  }else if(shopTab===4){
+    rows.push(...recipeRows());
   }else{
     for(const c of CROPS) for(const t of QORDER){
       const n=invN(c.id,t); if(n<=0) continue;
@@ -5810,7 +5925,7 @@ function shopActBtns(keys){
 function shopKey(e){
   const k=e.key;
   if(k==="Escape"||k==="Tab"){ e.preventDefault(); closeModal(); return; }
-  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=(shopTab+(k==="ArrowRight"?1:-1)+4)%4; sfx.tab(); renderShop(); return; }
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=(shopTab+(k==="ArrowRight"?1:-1)+SHOP_TABS.length)%SHOP_TABS.length; sfx.tab(); renderShop(); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
     const n=shopRowCache.length; if(!n) return;
@@ -5837,7 +5952,7 @@ function buyVil(){
   toast(`村人を雇いました。6 で村人を持って、まかせたい区画を${VIL_SLOTS}つ押してください`,"good",5000);
   save(); renderAll();
 }
-const seedCost = c => Math.max(1, Math.round(c.cost*effSeed()));
+const seedCost = c => Math.max(1, Math.round(c.cost*effSeed()*ev("H",.7,.25,1)));
 function buySeed(id,n){
   const c=CROP[id]; if(!c||!isUnlocked(c)) return;
   if(!spend(seedCost(c)*n)) return;
@@ -5984,7 +6099,21 @@ const MACHINES={
   w:{ name:"わくわくガチャ", mult:2, order:RARITY_ORDER },
 };
 let gachaM="n";
-const rateOf = (r,m=gachaM) => m==="w" && r==="N" ? +(RARITY.N.rate-RARITY.GUR.rate).toFixed(3) : RARITY[r].rate;
+const rateBase = (r,m=gachaM) => m==="w" && r==="N" ? +(RARITY.N.rate-RARITY.GUR.rate).toFixed(3) : RARITY[r].rate;
+/* 料理で確率が変わる(SR以上・GUR・GHR・GSR)。表示は合計100%になるよう割り直す */
+function rateRaw(r,m=gachaM){
+  let x=rateBase(r,m);
+  if(RARITY_ORDER.indexOf(r)>=2) x*=ev("S",1.2,1.5,1);
+  if(r==="GUR") x*=ev("ε",1.5,3,1);
+  if(r==="GHR") x*=ev("μ",1.5,3,1);
+  if(r==="GSR") x*=ev("ν",1.5,3,1);
+  return x;
+}
+function rateOf(r,m=gachaM){
+  const tot=MACHINES[m].order.reduce((a,x)=>a+rateRaw(x,m),0);
+  const v=rateRaw(r,m)/tot*100;
+  return +v.toFixed(v<0.01?4:v<1?3:2);
+}
 const GACHA_COST1=100, GACHA_COST11=1000, GACHA_COST111=10000;
 function poolOf(r,m=gachaM){
   if(m==="w"){
@@ -5996,9 +6125,9 @@ function poolOf(r,m=gachaM){
 }
 function rollRarity(minIdx){
   const list=MACHINES[gachaM].order.slice(minIdx||0);
-  const total=list.reduce((a,r)=>a+rateOf(r),0);
+  const total=list.reduce((a,r)=>a+rateRaw(r),0);
   let x=Math.random()*total;
-  for(const r of list){ x-=rateOf(r); if(x<=0) return r; }
+  for(const r of list){ x-=rateRaw(r); if(x<=0) return r; }
   return list[list.length-1];
 }
 function drawOne(minIdx){
@@ -6033,6 +6162,7 @@ function gainGur(id){
   if(id==="sgk"){ S.objs.sgk=(S.objs.sgk||0)+1; S.objSel="sgk"; return `${ico(g)} シゴデキ案山子を手に入れました。6 で持って、畑の P(案山子置き場)に置けます`; }
   return "";
 }
+const guardEvery = () => ev("λ",8,5,11);   // SR以上が1つ確定する間隔
 let gachaNote=[];   // 演出が終わってから出す GUR の知らせ
 function flushGachaNote(){ for(const m of gachaNote) toast(m,"good mut sup",8000,true); gachaNote=[]; }
 function buyGachaPass(n){
@@ -6055,17 +6185,25 @@ function drawGacha(n){
   const res=[];
   for(let i=0;i<n;i++) res.push(drawOne(0));
   if(window.tutGachaEggplant && n===1 && gachaM==="n"){ window.tutGachaEggplant=false; res[0]={ r:"R", id:"eggplant" }; }   // はじめてガイドの1回はなす
-  // 11回ごとにSR以上を1つ確定(111回なら10回分)
-  if(n>=11){
-    for(let b=0; b+11<=n; b+=11){
-      let ok=false; for(let j=b;j<b+11;j++) if(RARITY_ORDER.indexOf(res[j].r)>=2){ ok=true; break; }
-      if(!ok) res[b+10]=drawOne(2);
+  // 11回ごとにSR以上を1つ確定(111回なら10回分)。料理で8回・5回ごとに縮まる
+  const G=guardEvery();
+  if(n>=G){
+    for(let b=0; b+G<=n; b+=G){
+      let ok=false; for(let j=b;j<b+G;j++) if(RARITY_ORDER.indexOf(res[j].r)>=2){ ok=true; break; }
+      if(!ok) res[b+G-1]=drawOne(2);
     }
   }
+  // 料理: ガチャおかわり
+  const og=ev("γ",.1,.5,0);
+  if(og){ const add=[]; for(let i=0;i<n;i++) if(Math.random()<og){ const y=drawOne(0); y.extra=true; add.push(y); } res.push(...add); }
   for(const x of res){
     if(!(S.got[x.id]>0)) x.isNew=true;
     S.got[x.id]=(S.got[x.id]||0)+1;
-    if(FOOD[x.id]){ S.food[x.id]=(S.food[x.id]||0)+1; continue; }   // 食材はそのまま持ち物へ
+    if(FOOD[x.id]){   // 食材はそのまま持ち物へ(料理で2つになることがある)
+      S.food[x.id]=(S.food[x.id]||0)+1;
+      if(Math.random()<ev("ζ",.2,1,0)){ S.food[x.id]++; x.dbl=true; }
+      continue;
+    }
     if(GUR[x.id]){ gachaNote.push(gainGur(x.id)); continue; }
     if(autoSeed(x.id)){                      // 種の自動売却
       const gain=seedPrice(CROP[x.id]);
@@ -6277,6 +6415,7 @@ function gachaHTML(){
       <span class="gnm">${c.name}</span>
       ${x.isNew?'<span class="gnew">NEW</span>':""}
       ${x.sold?`<span class="gsold">+${fmtNum(x.sold)}</span>`:""}
+      ${x.extra?'<span class="gextra">おかわり</span>':""}${x.dbl?'<span class="gextra">×2</span>':""}
     </div>`;
   }).join("");
   return tabs+`<div class="gacha ${gachaM}">
@@ -6286,7 +6425,7 @@ function gachaHTML(){
         <div class="gneck"></div>
         <div class="gbody"><span class="gknob"></span><span class="gout"></span></div>
       </div>
-      <div class="gcost">1回 <b>${fmtNum(gachaCost(1))}</b>ネジ<br>11回 <b>${fmtNum(gachaCost(11))}</b>ネジ<br>111回 <b>${fmtNum(gachaCost(111))}</b>ネジ${GACHA_BIG.filter(gachaPass).map(n=>`<br>${fmtNum(n)}回 <b>${fmtNum(gachaCost(n))}</b>ネジ`).join("")}<small>11回ごとにSR以上1つ確定${gachaM==="w"?" ・ 作物の種・食材・GUR が出ます":""}${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
+      <div class="gcost">1回 <b>${fmtNum(gachaCost(1))}</b>ネジ<br>11回 <b>${fmtNum(gachaCost(11))}</b>ネジ<br>111回 <b>${fmtNum(gachaCost(111))}</b>ネジ${GACHA_BIG.filter(gachaPass).map(n=>`<br>${fmtNum(n)}回 <b>${fmtNum(gachaCost(n))}</b>ネジ`).join("")}<small>${guardEvery()}回ごとにSR以上1つ確定${ev("γ",1,1,0)?" ・ おかわりあり":""}${gachaM==="w"?" ・ 作物の種・食材・GUR が出ます":""}${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
       <div class="gtotal">これまで ${fmtNum(S.gachaCount||0)}回</div>
     </div>
     <div class="gright">
@@ -6319,6 +6458,535 @@ function treasKey(e){
   if(k==="Escape"||k==="8"){ e.preventDefault(); closeModal(); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-treasBody").scrollBy(0, k==="ArrowDown"?90:-90); }
 }
+
+/* ---------- 料理 ----------
+   レシピはお店で買う。作った料理は作り置きでき、食べると効果がかかる(効果は1つだけ。次に食べると上書き)。
+   ふつうの料理: 作物の品質のいちばん低いもので時間が決まる(ふつう10分・☆20分・☆☆30分・☆☆☆1時間)
+   変異の料理: 作物がすべて変異・食材がすべて上位種。強い効果が1時間
+   超変異の料理: 作物がすべて超変異・食材がすべて上位種。強い効果が24時間
+   効果の時間は、ゲームを閉じている間も減る */
+const DISHES = [
+  { id:"glace", name:"にんじんグラッセ", icon:"🥕", ing:[["carrot", 2], ["butter", 1], ["sugarcane", 1]], eff:"K",
+    l0:"バターで照りをつけた、つやつやのにんじん。肥料をまく手が、なぜか軽くなる。",
+    l3:"金のにんじんを煮詰めると、皿の上で小さな太陽のように光る。肥料袋がいくらでも開く気がする。",
+    l5:"ダイヤのにんじんのグラッセ。ナイフを入れると虹がこぼれ、肥料の袋の底が見えなくなる。" },
+  { id:"nikujaga", name:"肉じゃが", icon:"🍲", ing:[["potato", 1], ["carrot", 1], ["onion", 1], ["beef", 1], ["shoyu", 1]], eff:"L",
+    l0:"ほっとする家の味。食べ終わるころには、空いた区画に何を植えるか決まっている。",
+    l3:"隕石じゃがいもがほくほくと湯気を立てる。畑の空きが、端から順に埋まっていく。",
+    l5:"どの具も超変異の肉じゃが。ひと口で、庭じゅうの空き地に種が飛んでいく。" },
+  { id:"mamegohan", name:"豆ごはん", icon:"🍚", ing:[["rice", 1], ["peas", 1], ["salt", 1]], eff:"P",
+    l0:"えんどう豆の緑が目にうれしい炊き込みごはん。じょうろが一度で畑じゅうに届く。",
+    l3:"黄金の稲穂と天空えんどうで炊いた豆ごはん。湯気が雲になって、畑に雨を降らせる。",
+    l5:"天照の稲穂で炊いた豆ごはん。茶碗から虹が立ちのぼり、庭のすべての畑が潤う。" },
+  { id:"chahan", name:"チャーハン", icon:"🍳", ing:[["rice", 1], ["egg", 1], ["lettuce", 1], ["shoyu", 1]], eff:"Q",
+    l0:"強火で一気に仕上げるパラパラのチャーハン。収穫も一気にいきたくなる。",
+    l3:"黄金の稲穂と金の卵の黄金チャーハン。カマを振るたびに、畑ごと実りが集まってくる。",
+    l5:"米粒の一つ一つが光るチャーハン。ひと振りで、庭じゅうの実りがかごに飛び込む。" },
+  { id:"kinoko", name:"きのこのバターソテー", icon:"🍄", ing:[["mushroom", 1], ["garlic", 1], ["butter", 1]], eff:"J",
+    l0:"にんにくとバターの香りがたまらない。肥料の効きまで良くなる気がする。",
+    l3:"発光マッシュルームのソテー。皿の上がぼんやり光り、まいた肥料がよく染みこむ。",
+    l5:"妖精の輪のように並んだきのこ。食べると、肥料が土の奥まで届く音がする。" },
+  { id:"yakinasu", name:"焼きなす", icon:"🍆", ing:[["eggplant", 2], ["shoyu", 1]], eff:"C",
+    l0:"皮を焦がして、とろりと仕上げる。打鍵の一つ一つに、時間が少しずつ乗る。",
+    l3:"宵闇なすの焼きなす。食べると、一打ごとに夜が少しずつ明けていく。",
+    l5:"星空なすの焼きなす。打つたびに流れ星が走り、畑の時間が大きく進む。" },
+  { id:"pickles", name:"ピクルス", icon:"🥒", ing:[["cucumber", 1], ["chili", 1], ["salt", 1]], eff:"H",
+    l0:"酢と塩でさっぱり。お店の主人がひと口つまむと、種の値段がゆるむ。",
+    l3:"螺旋きゅうりのピクルス。渦を見つめた店主が、うっかり大幅に値引きしてしまう。",
+    l5:"二重螺旋のピクルス。店主はこれと引きかえなら、種はほとんどただでいいと言う。" },
+  { id:"pumpkinpie", name:"パンプキンパイ", icon:"🥧", ing:[["pumpkin", 1], ["sweetpotato", 1], ["wheat", 1], ["butter", 1]], eff:"B",
+    l0:"かぼちゃとさつまいもの甘いパイ。ひとつ穫ったはずが、ふたつになる日がある。",
+    l3:"おばけかぼちゃのパイ。切り分けると、なぜか一切れ増えている。",
+    l5:"かぼちゃの馬車のパイ。収穫のたびに、実りがかならず二つになる。" },
+  { id:"applepie", name:"アップルパイ", icon:"🍎", ing:[["apple", 1], ["wheat", 1], ["butter", 1], ["sugarcane", 1]], eff:"S",
+    l0:"シナモンの香る焼きたてのパイ。ガチャのカプセルが、いつもより光って見える。",
+    l3:"魔女のりんごのアップルパイ。ガチャを回す指先に、ちょっとした魔法がかかる。",
+    l5:"知恵の実のアップルパイ。どのカプセルに当たりが入っているか、わかる気がする。" },
+  { id:"kanroni", name:"金柑の甘露煮", icon:"🍊", ing:[["kumquat", 2], ["sugarcane", 1]], eff:"V",
+    l0:"つやつやの金柑を甘く煮た、お守りのような一品。一度のミスなら見逃してもらえる。",
+    l3:"風鈴金柑の甘露煮。ミスをしても、ちりんと鳴ってなかったことにしてくれる。",
+    l5:"祭囃子金柑の甘露煮。三度までのミスを、祭りの音がかき消してくれる。" },
+  { id:"cookie", name:"ひまわりの種クッキー", icon:"🍪", ing:[["sunflower", 1], ["corn", 1], ["wheat", 1], ["butter", 1]], eff:"O",
+    l0:"香ばしい種のクッキー。差し入れすると、村人がいつもと違う種を植えたがる。",
+    l3:"日時計ひまわりのクッキー。村人がめずらしい種を持ってきて、勝手に植えはじめる。",
+    l5:"太陽系ひまわりのクッキー。村人がどこからかとびきりの種を見つけてくる。" },
+  { id:"ratatouille", name:"ラタトゥイユ", icon:"🥘", ing:[["paprika", 1], ["tomato", 1], ["eggplant", 1], ["onion", 1], ["basil", 1]], eff:"I",
+    l0:"夏野菜をじっくり煮込んだ南仏の味。ガチャの主人が、少しまけてくれる。",
+    l3:"氷結パプリカのラタトゥイユ。ひんやりした香りに、ガチャの主人の財布もゆるむ。",
+    l5:"蒸気パプリカのラタトゥイユ。湯気の向こうで、ガチャの値札が半分になっている。" },
+  { id:"gomasalad", name:"アボカドとブロッコリーのごまサラダ", icon:"🥗", ing:[["avocado", 1], ["broccoli", 1], ["sesame", 1], ["shoyu", 1]], eff:"R",
+    l0:"ごまの香りがきいた、栄養たっぷりのサラダ。穫れる作物が、ひと回り上等になる。",
+    l3:"恐竜のたまごアボカドのサラダ。畑の作物が、穫るたびに格を上げてくる。",
+    l5:"ドラゴンのたまごのサラダ。どの作物も、穫れた瞬間に最上等の ☆☆☆ になる。" },
+  { id:"parfait", name:"フルーツパフェ", icon:"🍨", ing:[["cherry", 1], ["peach", 1], ["vanilla", 1], ["cream", 1]], eff:"α",
+    l0:"果物をたっぷり盛ったパフェ。食べ終わると、器の底に種が残っていることがある。",
+    l3:"恋結びさくらんぼのパフェ。収穫した作物が、種を連れて帰ってくる。",
+    l5:"永遠の誓いのパフェ。穫った作物は、かならず次の種を残していく。" },
+  { id:"tropical", name:"トロピカルジュース", icon:"🍹", ing:[["mango", 1], ["pineapple", 1], ["coconut", 1]], eff:"γ",
+    l0:"南の島の果物を全部しぼった一杯。ガチャを引くと、ときどきもう一回引ける。",
+    l3:"朱雀マンゴーのジュース。ガチャのハンドルが、勝手にもう半回転する。",
+    l5:"鳳凰マンゴーのジュース。二回に一回は、ガチャがおかわりをくれる。" },
+  { id:"annin", name:"月光ライチの杏仁豆腐", icon:"🍮", ing:[["lychee", 1], ["sugarcane", 1], ["milk", 1]], eff:"β",
+    l0:"月の光のようにぷるんと白い。ひと口食べると、畑の時間が一気に六時間進む。",
+    l3:"日輪ライチの杏仁豆腐。食べた瞬間、畑に何度も朝が来る。",
+    l5:"日食ライチの杏仁豆腐。食べた瞬間、畑の時間が三日ぶん駆け抜ける。" },
+  { id:"olivepasta", name:"黄金オリーブのパスタ", icon:"🍝", ing:[["olive", 1], ["wheat", 1], ["tomato", 1], ["basil", 1], ["cheese", 1]], eff:"A",
+    l0:"黄金のオイルで仕上げた、ぜいたくなパスタ。作物の売値が、二割上がる。",
+    l3:"真珠オリーブのパスタ。お店の主人が、作物を真珠と同じ値で買ってくれる。",
+    l5:"人魚の涙オリーブのパスタ。どの作物も、売値が倍になる。" },
+  { id:"smoothie", name:"ドラゴンフルーツのスムージー", icon:"🥤", ing:[["dragonfruit", 1], ["kiwi", 1], ["milk", 1], ["honey", 1]], eff:"D",
+    l0:"鮮やかなピンクの一杯。飲むと、畑の作物の育ちが二倍速になる。",
+    l3:"不死鳥フルーツのスムージー。作物が燃えるような勢いで伸びていく。",
+    l5:"龍王フルーツのスムージー。作物が龍のように、五倍の速さで天へ伸びる。" },
+  { id:"pancake", name:"ネジの木シロップのパンケーキ", icon:"🥞", ing:[["nejitree", 1], ["wheat", 1], ["egg", 1], ["milk", 1], ["butter", 1]], eff:"N",
+    l0:"ネジの木の樹液から作ったシロップをたっぷり。一語打つごとのネジが二倍になる。",
+    l3:"千年ネジの木のシロップ。打った言葉が、倍の重さのネジになって庭に届く。",
+    l5:"世界樹ネジのシロップ。一語打つごとに、ネジが四倍になって降ってくる。" },
+  { id:"gratin", name:"ロマネスコのグラタン", icon:"🧀", ing:[["romanesco", 1], ["potato", 1], ["wheat", 1], ["milk", 1], ["cheese", 1]], eff:"F",
+    l0:"渦巻くロマネスコをチーズで焼いた。畑の作物が、少し変わった姿で実りやすくなる。",
+    l3:"無限ロマネスコのグラタン。渦の奥から、変異の作物が次々と顔を出す。",
+    l5:"マンデルブロコのグラタン。畑じゅうの作物が、思いもよらない姿で実りはじめる。" },
+  { id:"potage", name:"バターナッツのポタージュ", icon:"🥣", ing:[["butternut", 1], ["onion", 1], ["milk", 1], ["cream", 1]], eff:"G",
+    l0:"なめらかで甘いスープ。差し入れると、村人の畑が三倍の速さで育つ。",
+    l3:"ハニーナッツのポタージュ。村人たちが鼻歌まじりに、十倍の速さで働く。",
+    l5:"女王蜂かぼちゃのポタージュ。村人の畑に、蜂が花粉を運んで十倍の速さで実らせる。" },
+  { id:"carbonara", name:"カルボナーラ", icon:"🍝", ing:[["wheat", 1], ["egg", 1], ["bacon", 1], ["cheese", 1]], eff:"ζ",
+    l0:"卵とチーズとベーコンだけで作る、こってりパスタ。わくわくガチャの食材が、ときどき二つ出る。",
+    l3:"琥珀小麦のカルボナーラ。わくわくガチャのカプセルに、食材がぎゅうぎゅうに詰まってくる。",
+    l5:"太陽の小麦のカルボナーラ。わくわくガチャの食材は、かならず二つずつ出る。" },
+  { id:"paella", name:"サフランのパエリア", icon:"🥘", ing:[["rice", 1], ["saffron", 1], ["tomato", 1], ["garlic", 1], ["salt", 1]], eff:"ε",
+    l0:"黄金色に炊きあげた大皿料理。わくわくガチャの GUR が、少しだけ出やすくなる。",
+    l3:"夕焼けサフランのパエリア。夕日に照らされたカプセルの中に、GUR がひそむ。",
+    l5:"錬金術サフランのパエリア。ガチャのカプセルが金に変わり、GUR が三倍出やすくなる。" },
+  { id:"risotto", name:"白トリュフのリゾット", icon:"🍚", ing:[["rice", 1], ["truffle", 1], ["cheese", 1], ["butter", 1]], eff:"η",
+    l0:"白トリュフを削りかけた、香り高いリゾット。まいた肥料が、ときどき減っていない。",
+    l3:"黒トリュフのリゾット。肥料袋の中身が、なぜかなかなか減らない。",
+    l5:"幻香トリュフのリゾット。香りにつられて、肥料がひとりでに袋へ戻ってくる。" },
+  { id:"misoshiru", name:"みそ汁", icon:"🥣", ing:[["miso", 1], ["onion", 1], ["potato", 1]], eff:"ν",
+    l0:"毎朝の一杯。ガチャの GSR が、少しだけ出やすくなる。",
+    l3:"三年熟成みそのみそ汁。ガチャの中で、GSR のカプセルがひときわ目立つ。",
+    l5:"黄金色に澄んだみそ汁。ガチャの GSR が三倍出やすくなる。" },
+  { id:"steak", name:"ステーキ", icon:"🥩", ing:[["beef", 1], ["garlic", 1], ["salt", 1]], eff:"μ",
+    l0:"じゅうじゅう焼けた分厚い一枚。ガチャの GHR が、少しだけ出やすくなる。",
+    l3:"和牛と魔除けにんにくのステーキ。ガチャから、貴重品の気配がただよう。",
+    l5:"聖騎士にんにくを添えた和牛のステーキ。ガチャの GHR が三倍出やすくなる。" },
+  { id:"chococake", name:"チョコレートケーキ", icon:"🍰", ing:[["cacao", 1], ["wheat", 1], ["egg", 1], ["butter", 1], ["sugarcane", 1]], eff:"λ",
+    l0:"濃厚なチョコのケーキ。ガチャで SR 以上が、8回ごとに1つ確定する。",
+    l3:"ショコラティエカカオのケーキ。ガチャの確定の合図が、いつもより早く鳴る。",
+    l5:"神々の食べ物のケーキ。ガチャで SR 以上が、5回ごとに1つ確定する。" },
+  { id:"strawmilk", name:"いちごミルク", icon:"🍓", ing:[["strawberry", 1], ["milk", 1]], eff:"M", color:"#ff8fb4",
+    l0:"甘酸っぱいピンクの一杯。庭がほんのり桜色に染まる。",
+    l3:"白雪いちごのミルク。庭に、ピンクの雪がちらちら舞う。",
+    l5:"雪の女王いちごのミルク。収穫のたびに、ピンクの花火があがる。" },
+  { id:"sherbet", name:"すいかシャーベット", icon:"🍧", ing:[["watermelon", 1], ["sugarcane", 1]], eff:"M", color:"#ff5a5a",
+    l0:"しゃりしゃり冷たい夏の味。庭が夕焼けのような赤に染まる。",
+    l3:"金魚鉢すいかのシャーベット。庭の赤の中を、金魚が泳いでいく。",
+    l5:"水族館すいかのシャーベット。収穫のたびに、赤い花火があがる。" },
+  { id:"lemonade", name:"レモネード", icon:"🍋", ing:[["sunlemon", 1], ["sugarcane", 1]], eff:"M", color:"#ffd84a",
+    l0:"太陽をしぼったような一杯。庭が明るい黄色に染まる。",
+    l3:"レモン・ド・リュンヌのレモネード。夜の庭が、月明かりの黄色に光る。",
+    l5:"レモン・ド・レトワールのレモネード。収穫のたびに、黄色い花火があがる。" },
+  { id:"melonsoda", name:"メロンソーダ", icon:"🥤", ing:[["melon", 1]], eff:"M", color:"#5fd08a",
+    l0:"しゅわっとはじける緑の一杯。庭が若葉色に染まる。",
+    l3:"宝の地図メロンのソーダ。緑の泡の中に、宝の場所が浮かびあがる。",
+    l5:"黄金郷メロンのソーダ。収穫のたびに、緑の花火があがる。" },
+  { id:"bluetart", name:"ブルームーンタルト", icon:"🫐", ing:[["bluemoon", 1], ["wheat", 1]], eff:"M", color:"#6f8ef0",
+    l0:"青い実をたっぷりのせたタルト。庭が月夜の青に染まる。",
+    l3:"レッドムーンベリーのタルト。青い庭に、赤い月がのぼる。",
+    l5:"スーパームーンベリーのタルト。収穫のたびに、青い花火があがる。" },
+  { id:"grapejuice", name:"ぶどうジュース", icon:"🍇", ing:[["grape", 1]], eff:"M", color:"#a274d8",
+    l0:"濃い紫のしぼりたて。庭が夕暮れの紫に染まる。",
+    l3:"シャンデリアぶどうのジュース。紫の庭に、きらきらと光が下がる。",
+    l5:"天の川ぶどうのジュース。収穫のたびに、紫の花火があがる。" },
+  { id:"chips", name:"紫いもチップス", icon:"🍠", ing:[["shadowqueen", 1], ["salt", 1]], eff:"M", color:"#3a2a4a",
+    l0:"ぱりぱりの黒紫のチップス。庭が夜のように暗くなる。",
+    l3:"シャドーキングのチップス。庭の影が、王様のマントのように広がる。",
+    l5:"シャドーエンペラーのチップス。収穫のたびに、闇の中で花火があがる。" },
+  { id:"vanillaice", name:"バニラアイス", icon:"🍦", ing:[["vanilla", 1], ["milk", 1], ["egg", 1]], eff:"M", color:"#fff6e0",
+    l0:"なめらかな白いアイス。庭が雪のように白く染まる。",
+    l3:"黒真珠バニラのアイス。白い庭に、黒真珠のような粒が光る。",
+    l5:"一夜花バニラのアイス。収穫のたびに、白い花火があがる。" },
+];
+const DISH = Object.fromEntries(DISHES.map(d=>[d.id,d]));
+const PREPS = [
+  { id:"p_miso", out:"miso", ing:[["soy", 3], ["salt", 1]], upOut:"oldmiso", upIng:[["soy", 3], ["salt", 1]] },
+  { id:"p_shoyu", out:"shoyu", ing:[["soy", 2], ["wheat", 1], ["salt", 1]], upOut:"oldshoyu", upIng:[["soy", 2], ["wheat", 1], ["skysalt", 1]] },
+  { id:"p_butter", out:"butter", ing:[["milk", 2]], upOut:"kbutter", upIng:[["jersey", 2]] },
+  { id:"p_cream", out:"cream", ing:[["milk", 3]], upOut:"angelcream", upIng:[["jersey", 3]] },
+  { id:"p_cheese", out:"cheese", ing:[["milk", 3], ["salt", 1]], upOut:"chesking", upIng:[["jersey", 6], ["skysalt", 1]] },
+];
+/* 効果: n ふつうの料理 / s 変異・超変異の料理 */
+const EFFS = {
+  A:{ nm:"売却価格アップ",       n:"作物の売値 +20%",                     s:"作物の売値 2倍" },
+  B:{ nm:"2個穫れる",            n:"2個穫れる確率 +20%",                  s:"かならず2個穫れる" },
+  C:{ nm:"1打の時間アップ",      n:"ネジ打ち1打で進む時間 +3分",           s:"ネジ打ち1打で進む時間 +30分" },
+  D:{ nm:"成長が速い",           n:"作物の育つ速さ 2倍",                  s:"作物の育つ速さ 5倍" },
+  F:{ nm:"変異しやすい",         n:"変異 +5%・超変異 +0.5%",              s:"変異 +20%・超変異 +2%" },
+  G:{ nm:"村人の畑",             n:"村人の畑の育つ速さ 3倍",              s:"村人の畑の育つ速さ 10倍" },
+  H:{ nm:"種が安い",             n:"種の値段 −30%",                       s:"種の値段 −75%" },
+  I:{ nm:"ガチャが安い",         n:"ガチャの値段 −10%",                   s:"ガチャの値段 −50%" },
+  J:{ nm:"肥料の効果",           n:"肥料の効き +10%",                     s:"肥料の効き +20%" },
+  K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも" },
+  L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
+  M:{ nm:"庭の色",               n:"庭が料理の色に染まる",                s:"庭が料理の色に染まり、収穫のたびに花火があがる" },
+  N:{ nm:"1語のネジ",            n:"ネジ打ちから庭に届くネジ 2倍",         s:"ネジ打ちから庭に届くネジ 4倍" },
+  O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(SRまで)を育てる",  s:"村人がガチャの作物(HR〜GSR)を育てる" },
+  P:{ nm:"一括水やり",           n:"じょうろ1回で、その畑ぜんぶに水やり",  s:"じょうろ1回で、すべての畑に水やり" },
+  Q:{ nm:"一括収穫",             n:"収穫すると、その畑の実りをぜんぶ収穫", s:"収穫すると、すべての畑の実りをぜんぶ収穫" },
+  R:{ nm:"品質アップ",           n:"収穫する作物が1段上の品質になる",      s:"収穫する作物がかならず ☆☆☆ になる" },
+  S:{ nm:"ガチャのレア度",       n:"ガチャの SR 以上が出る確率 1.2倍",     s:"ガチャの SR 以上が出る確率 1.5倍" },
+  V:{ nm:"ノーミス勝負のお守り", n:"一本勝負でミスしても1回まで続く(効果中はランキングに載りません)", s:"一本勝負でミスしても3回まで続く(効果中はランキングに載りません)" },
+  "α":{ nm:"種が戻る",           n:"収穫すると20%で同じ種が1つ戻る(貴重品は除く)", s:"収穫すると、かならず同じ種が1つ戻る(貴重品は除く)" },
+  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が6時間進む",    s:"食べた瞬間、すべての畑が3日進む" },
+  "γ":{ nm:"ガチャおかわり",     n:"ガチャ1回ごとに10%でもう1回",         s:"ガチャ1回ごとに50%でもう1回" },
+  "ε":{ nm:"GUR が出やすい",     n:"わくわくガチャの GUR の確率 1.5倍",    s:"わくわくガチャの GUR の確率 3倍" },
+  "μ":{ nm:"GHR が出やすい",     n:"ガチャの GHR の確率 1.5倍",            s:"ガチャの GHR の確率 3倍" },
+  "ν":{ nm:"GSR が出やすい",     n:"ガチャの GSR の確率 1.5倍",            s:"ガチャの GSR の確率 3倍" },
+  "ζ":{ nm:"食材おかわり",       n:"わくわくガチャの食材が20%で2つ",       s:"わくわくガチャの食材がかならず2つ" },
+  "η":{ nm:"肥料が減らない",     n:"肥料を使っても30%で減らない",          s:"肥料を使っても60%で減らない" },
+  "λ":{ nm:"確定枠アップ",       n:"ガチャで SR 以上が8回ごとに1つ確定",   s:"ガチャで SR 以上が5回ごとに1つ確定" },
+};
+/* 料理の段階(作物の品質の番号をそのまま使う): 0 ふつう / 1 ☆ / 2 ☆☆ / 4 ☆☆☆ / 3 変異 / 5 超変異 */
+const DISH_GRADES = [0,1,2,4,3,5];
+const DISH_MIN = { 0:10, 1:20, 2:30, 4:60, 3:60, 5:1440 };   // 効果の時間(分)
+const gradeName = g => g===5?"超変異":g===3?"変異":(g?QUALITY[g].mark:"ふつう");
+const bookKeyOf = g => g===5?5:g===3?3:0;                   // 料理図鑑の3項目(ふつう・変異・超変異)
+const fmtMin = m => m>=1440 ? `${m/1440}日`.replace("1日","24時間") : m>=60 ? `${m/60}時間` : `${m}分`;
+/* レシピの値段: 材料のうちいちばんレアなもので決まる(庭の色の料理は一律) */
+const RECIPE_COST = { N:1000, R:1000, SR:3000, HR:8000, UR:15000, GSR:30000 };
+const rarOf = id => { const x=itemOf(id); if(!x) return "N"; if(x.r) return x.r; return x.price>=500 ? "SR" : "R"; };   // 曜日の作物はレア度が無いので売値で
+const recipeCost = d => d.eff==="M" ? 500 : RECIPE_COST[d.ing.map(([id])=>rarOf(id)).sort((a,b)=>RARITY_ORDER.indexOf(b)-RARITY_ORDER.indexOf(a))[0]] || 1000;
+
+/* ---- 今かかっている料理の効果 ---- */
+function buffNow(){
+  const b=S.buff; if(!b) return null;
+  if(Date.now()>=b.until){ S.buff=null; return null; }
+  return b;
+}
+/* 効果の強さ: 0 なし / 1 ふつうの料理 / 2 変異・超変異の料理 */
+function eff(k){ const b=buffNow(); if(!b) return 0; const d=DISH[b.d]; return d && d.eff===k ? (isMutT(b.t)?2:1) : 0; }
+const ev = (k,a,b,none) => { const x=eff(k); return x===2 ? b : x===1 ? a : none; };
+
+/* ---- 材料 ---- */
+const cropKnown = id => (S.harvestBy[id]||0)>0 || (S.got[id]||0)>0 || (CROP[id] && !CROP[id].gacha && isUnlocked(CROP[id]));
+const itemKnown = id => CROP[id] ? cropKnown(id) : (S.got[id]||0)>0;
+const ingName = id => itemKnown(id) ? itemOf(id).name : "？？？";
+const haveFood = id => foodN(id);
+/* その段階で作るときに使う材料の組み合わせ。足りなければ null。grade: 実際にできる段階 */
+function cookPlan(ing, g){
+  const take=[];   // [kind, id, tier, n]
+  let grade=g;
+  for(const [id,n] of ing){
+    if(CROP[id]){
+      if(g===3||g===5){
+        if(invN(id,g)<n) return null;
+        take.push(["c",id,g,n]);
+      }else{
+        let left=n;
+        for(const t of TIERS){
+          if(TIERS.indexOf(t)<TIERS.indexOf(g)) continue;
+          const k=Math.min(left, invN(id,t)); if(k<=0) continue;
+          take.push(["c",id,t,k]); left-=k;
+          if(!left) break;
+        }
+        if(left>0) return null;
+      }
+    }else{
+      const f=FOOD[id];
+      if(g===3||g===5){
+        const u=f.up ? f : upOf(id);
+        if(!u || haveFood(u.id)<n) return null;
+        take.push(["f",u.id,0,n]);
+      }else{
+        let left=n;
+        for(const fid of [id, ...(upOf(id)?[upOf(id).id]:[])]){
+          const k=Math.min(left, haveFood(fid)); if(k<=0) continue;
+          take.push(["f",fid,0,k]); left-=k; if(!left) break;
+        }
+        if(left>0) return null;
+      }
+    }
+  }
+  // ふつうの料理は、使う作物のいちばん低い品質で段階が決まる
+  if(g!==3 && g!==5){
+    const ts=take.filter(x=>x[0]==="c").map(x=>TIERS.indexOf(x[2]));
+    grade = ts.length ? TIERS[Math.min(...ts)] : 0;
+  }
+  return { take, grade };
+}
+function consume(take){
+  for(const [kind,id,t,n] of take){
+    if(kind==="c") S.inv[id][t]-=n;
+    else S.food[id]-=n;
+  }
+}
+/* 材料の並び。変異・超変異の料理では、作物は「変異の〇〇」、食材は上位種で書く */
+const ingText = (ing,g) => ing.map(([id,n])=>{
+  const mutG = g===3 || g===5;
+  const shown = mutG && FOOD[id] && upOf(id) ? upOf(id) : itemOf(id);
+  const known = itemKnown(shown.id);
+  const nm = known ? (CROP[id] && mutG ? `${gradeName(g)}の${shown.name}` : shown.name) : "？？？";
+  return `${known?ico(shown):"❔"}${esc(nm)}${n>1?"×"+n:""}`;
+}).join(" ・ ");
+
+/* ---- 料理の画面(0): 作る / 食べる / 仕込み ---- */
+const COOK_TABS=["作る","食べる","仕込み"];
+let cookTab=0, cookCur=[0,0,0], cookRows=[];
+const cookGrade={};   // 料理ごとに選んでいる段階
+function cookRowsOf(){
+  const rows=[];
+  if(cookTab===0){
+    for(const d of DISHES){
+      if(!S.recipes[d.id]) continue;
+      const g=cookGrade[d.id] ?? 0;
+      const plan=cookPlan(d.ing,g);
+      const gl = g===5||g===3 ? gradeName(g) : (plan ? gradeName(plan.grade) : gradeName(g));
+      const min = plan ? DISH_MIN[plan.grade] : DISH_MIN[g];
+      rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${d.icon}</span>`,
+        nm:`${esc(d.name)} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}(${fmtMin(min)}) ▶</span>${(S.dishes[d.id]&&S.dishes[d.id][plan?plan.grade:g])?` <small class="dhave">作り置き ×${S.dishes[d.id][plan?plan.grade:g]}</small>`:""}`,
+        ds:`材料: ${ingText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
+        keys: plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"",
+        locked:!plan, enter:()=>cookMake(d.id,1), shift:()=>cookMake(d.id,99), left:()=>cookStep(d.id,-1), right:()=>cookStep(d.id,1) });
+    }
+  }else if(cookTab===1){
+    for(const d of DISHES){
+      const st=S.dishes[d.id]; if(!st) continue;
+      for(const g of DISH_GRADES){
+        const n=st[g]||0; if(n<=0) continue;
+        const known=(S.dishEaten[d.id]||{})[bookKeyOf(g)];
+        rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${d.icon}</span>`,
+          nm:`${esc(d.name)} <span class="dgrade${g===3?" mut":g===5?" sup":""}">${gradeName(g)}</span> ×${n}`,
+          ds: known ? `${esc(effText(d,g))}${d.eff==="β"?"":`(${fmtMin(DISH_MIN[g])})`}` : `効果は、食べるとわかります${d.eff==="β"?"":`(${fmtMin(DISH_MIN[g])})`}`,
+          keys:"<b>Enter</b> 食べる", enter:()=>cookEat(d.id,g), shift:()=>cookEat(d.id,g) });
+      }
+    }
+  }else{
+    for(const p of PREPS){
+      for(const up of [false,true]){
+        const out=FOOD[up?p.upOut:p.out], ing=up?p.upIng:p.ing;
+        const plan=prepPlan(ing,up);
+        rows.push({ ic:itemKnown(out.id)||!up?ico(out):"❔",
+          nm:`${itemKnown(out.id)||!up?esc(out.name):"？？？"}${up?' <span class="upnm">上位種</span>':""} <small class="dhave">持っている ×${foodN(out.id)}</small>`,
+          ds:`材料: ${ing.map(([id,n])=>{ const c=CROP[id]; const nm = c ? (up?`変異の${ingName(id)}`:ingName(id)) : ingName(id); return `${itemKnown(id)?ico(itemOf(id)):"❔"}${esc(nm)}${n>1?"×"+n:""}`; }).join(" ・ ")}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
+          keys: plan?"<b>Enter</b> 1つ仕込む<br><b>Shift+Enter</b> 仕込めるだけ":"", locked:!plan,
+          enter:()=>prepMake(p.id,up,1), shift:()=>prepMake(p.id,up,99) });
+      }
+    }
+  }
+  return rows;
+}
+const effText = (d,g) => isMutT(g) ? EFFS[d.eff].s : EFFS[d.eff].n;
+function cookStep(id,dir){
+  const i=DISH_GRADES.indexOf(cookGrade[id]??0);
+  cookGrade[id]=DISH_GRADES[(i+dir+DISH_GRADES.length)%DISH_GRADES.length];
+  sfx.tab(); renderCook();
+}
+function cookMake(id,times){
+  const d=DISH[id]; if(!d || !S.recipes[id]) return;
+  const g=cookGrade[id]??0;
+  let made=0, grade=null;
+  for(let i=0;i<times;i++){
+    const plan=cookPlan(d.ing,g); if(!plan) break;
+    consume(plan.take); grade=plan.grade;
+    S.dishes[id]=S.dishes[id]||{}; S.dishes[id][grade]=(S.dishes[id][grade]||0)+1;
+    const bk=bookKeyOf(grade); S.dishMade[id]=S.dishMade[id]||{};
+    const first=!S.dishMade[id][bk]; S.dishMade[id][bk]=true;
+    if(first) toast(`📖 ${esc(d.name)}${bk?`(${gradeName(bk)})`:""}が料理図鑑に載りました`,"good",3600,true);
+    made++;
+  }
+  if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
+  sfx.buy();
+  toast(`${d.icon} ${esc(d.name)}(${gradeName(grade)})を ${made}つ 作りました`,isMutT(grade)?"good mut"+(grade===5?" sup":""):"good",3000,true);
+  save(); renderAll(); renderCook();
+}
+function cookEat(id,g){
+  const d=DISH[id], st=S.dishes[id]; if(!d||!st||!(st[g]>0)) return;
+  st[g]--;
+  const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
+  if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
+    const hours = isMutT(g) ? 72 : 6;
+    tick(); advanceAll(hours*HOUR);
+    toast(`${d.icon} ${esc(d.name)}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
+  }else{
+    const old=buffNow();
+    S.buff={ d:id, t:g, until:Date.now()+DISH_MIN[g]*60000 };
+    toast(`${d.icon} ${esc(d.name)}を食べました。${esc(effText(d,g))}(${fmtMin(DISH_MIN[g])})${old?` ・ ${esc(DISH[old.d].name)}の効果は上書きされました`:""}`,"good",5200,true);
+  }
+  sfx.vil(); save(); renderAll(); renderCook();
+}
+/* 時間を進める(β): 水の有無にかかわらず、すべての畑の作物と村人の区画を進める */
+function advanceAll(ms){
+  const run=()=>{ for(const f of S.fields) for(const k of KEYS){ const p=f[k]; if(p.vil){ villagerAdvance(p,ms*effVilGrow()); continue; } if(p.crop && !isRipe(p)) grow(p,ms,Date.now()-ms); } };
+  withReal(run); if(realFields) run();
+  reportVillagers();
+}
+/* 仕込み */
+function prepPlan(ing,up){
+  const take=[];
+  for(const [id,n] of ing){
+    if(CROP[id]){
+      if(up){
+        let left=n;
+        for(const t of [3,5]){ const k=Math.min(left,invN(id,t)); if(k>0){ take.push(["c",id,t,k]); left-=k; } if(!left) break; }
+        if(left>0) return null;
+      }else{
+        let left=n;
+        for(const t of TIERS){ const k=Math.min(left,invN(id,t)); if(k>0){ take.push(["c",id,t,k]); left-=k; } if(!left) break; }
+        if(left>0) return null;
+      }
+    }else{
+      if(foodN(id)<n) return null;
+      take.push(["f",id,0,n]);
+    }
+  }
+  return { take };
+}
+function prepMake(pid,up,times){
+  const p=PREPS.find(x=>x.id===pid); if(!p) return;
+  const out=up?p.upOut:p.out, ing=up?p.upIng:p.ing;
+  let made=0;
+  for(let i=0;i<times;i++){ const plan=prepPlan(ing,up); if(!plan) break; consume(plan.take); S.food[out]=(S.food[out]||0)+1; S.got[out]=(S.got[out]||0)+1; made++; }
+  if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
+  sfx.buy();
+  toast(`${ico(FOOD[out])} ${esc(FOOD[out].name)}を ${made}つ 仕込みました`,"good",3000,true);
+  save(); renderAll(); renderCook();
+}
+function renderCook(){
+  root.querySelectorAll("#g-cookTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tab===cookTab));
+  const rows=cookRowsOf(); cookRows=rows;
+  if(cookCur[cookTab]>=rows.length) cookCur[cookTab]=Math.max(0,rows.length-1);
+  const cur=cookCur[cookTab], body=$("g-cookBody");
+  $("g-cookNow").innerHTML=cookNowText();
+  if(!rows.length){
+    body.innerHTML=`<p class="empty" style="padding:1rem .4rem">${cookTab===0?"レシピがありません。お店(Tab)の「レシピ」で買うと、ここで作れます。":cookTab===1?"作り置きの料理がありません。「作る」で作ると、ここに並びます。":""}</p>`;
+  }else{
+    body.innerHTML=rows.map((r,i)=>`<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
+      <div class="ic">${r.ic}</div>
+      <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
+      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("");
+  }
+  $("g-cookHint").innerHTML = window.IS_MOBILE ? "" :
+    `<b>Tab</b> ${COOK_TABS.map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異 / 超変異)":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
+  keepVisible(body);
+}
+function cookNowText(){ const b=buffNow(); return b ? `今の効果: ${DISH[b.d].icon} ${esc(DISH[b.d].name)}(${gradeName(b.t)}) ・ ${esc(effText(DISH[b.d],b.t))} ・ 残り ${fmtLeft(b.until-Date.now())}` : "今かかっている料理の効果はありません"; }
+const fmtLeft = ms => { const s=Math.max(0,Math.ceil(ms/1000)), h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return h ? `${h}時間${m}分` : `${m}分${String(x).padStart(2,"0")}秒`; };
+function cookKey(e){
+  const k=e.key;
+  if(k==="Escape"||k==="0"){ e.preventDefault(); closeModal(); return; }
+  if(k==="Tab"){ e.preventDefault(); cookTab=(cookTab+(e.shiftKey?-1:1)+COOK_TABS.length)%COOK_TABS.length; sfx.tab(); renderCook(); return; }
+  const r=cookRows[cookCur[cookTab]];
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=cookRows.length; if(!n) return; cookCur[cookTab]=(cookCur[cookTab]+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderCook(); return; }
+  if((k==="ArrowLeft"||k==="ArrowRight") && r && r.left){ e.preventDefault(); (k==="ArrowLeft"?r.left:r.right)(); return; }
+  if(k==="Enter" && r){ e.preventDefault(); if(r.locked){ sfx.nope(); toast("材料が足りません","warn"); return; } (e.shiftKey?r.shift:r.enter)(); }
+}
+$("g-cookBody").addEventListener("click",e=>{
+  const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
+  cookCur[cookTab]=+row.dataset.i;
+  const r=cookRows[cookCur[cookTab]];
+  const g=e.target.closest(".dgrade"); if(g && r && r.left){ r.right(); return; }
+  const b=e.target.closest("[data-act]");
+  if(b && r && !r.locked){ (b.dataset.act==="shift"?r.shift:r.enter)(); return; }
+  renderCook();
+});
+root.querySelectorAll("#g-cookTabs .tab").forEach(t=>t.addEventListener("click",()=>{ cookTab=+t.dataset.tab; renderCook(); }));
+
+/* ---- お店のレシピ ---- */
+function recipeRows(){
+  return DISHES.map(d=>{
+    const has=!!S.recipes[d.id], cost=recipeCost(d);
+    return { ic:d.icon, nm:`${esc(d.name)}のレシピ <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(cost)+"ネジ"}</span>`,
+      ds:`材料: ${ingText(d.ing,0)}${d.eff==="M"?" ・ 庭の色が変わる料理":""}`,
+      keys: has?"":"<b>Enter</b> 買う", enter:()=>buyRecipe(d.id), shift:()=>buyRecipe(d.id) };
+  });
+}
+function buyRecipe(id){
+  if(S.recipes[id]) return;
+  const d=DISH[id]; if(!spend(recipeCost(d))) return;
+  S.recipes[id]=true;
+  toast(`📜 ${esc(d.name)}のレシピを手に入れました。料理(0)で作れます`,"good",3600,true);
+  save(); renderAll();
+}
+
+/* ---- 料理図鑑(Space の2番目) ---- */
+let dbookCur=0, dbookTier=0;
+const dishMadeAny = d => !!S.dishMade[d.id] && Object.keys(S.dishMade[d.id]).length>0;
+function renderDbook(){
+  const got=DISHES.reduce((a,d)=>a+[0,3,5].filter(t=>(S.dishMade[d.id]||{})[t]).length,0);
+  $("g-dbookRate").textContent=`料理図鑑 ${got} / ${DISHES.length*3}`;
+  $("g-dbookList").innerHTML=DISHES.map((d,i)=>{
+    const m=S.dishMade[d.id]||{}, known=dishMadeAny(d);
+    const marks=`<span class="qm${m[0]?" on":""}">・</span><span class="qm mut${m[3]?" on":""}">✦</span><span class="qm sup${m[5]?" on":""}">✦</span>`;
+    return `<div class="rowi ${known?"":"locked"} ${i===dbookCur?"cur":""}" data-i="${i}">
+      <div class="ic">${known?d.icon:"❔"}</div><div class="nm">${known?esc(d.name):"？？？"}</div><div class="qmarks">${marks}</div></div>`;
+  }).join("");
+  const d=DISHES[dbookCur], t=dbookTier, made=(S.dishMade[d.id]||{})[t], eaten=(S.dishEaten[d.id]||{})[t];
+  const lore = t===5 ? d.l5 : t===3 ? d.l3 : d.l0;
+  const durTxt = d.eff==="β" ? "食べた瞬間に効く" : t===5 ? "24時間" : t===3 ? "1時間" : "10分〜1時間(作物の品質で変わる)";
+  $("g-dbookDetail").innerHTML=`
+    <div class="btabs">${[0,3,5].map(q=>`<span class="btab${q===3?" mut":(q===5?" mut sup":"")}${q===t?" on":""}${(S.dishMade[d.id]||{})[q]?"":" dim"}" data-t="${q}">${gradeName(q)}</span>`).join("")}</div>
+    <div class="bic${t===5?" q5":t===3?" q2":""}"><span class="dbig${made?"":" unknown"}${t===5?" sup":t===3?" mut":""}">${made?d.icon:"？"}</span></div>
+    <div class="bnm">${made?esc(d.name)+(t?`(${gradeName(t)})`:""):"？？？"}</div>
+    <dl>
+      <dt>材料</dt><dd>${made||S.recipes[d.id]?ingText(d.ing,t):"？？？"}</dd>
+      <dt>効果</dt><dd>${eaten?esc(effText(d,t)):"？？？(食べるとわかります)"}</dd>
+      <dt>効く時間</dt><dd>${eaten?durTxt:"？？？"}</dd>
+      <dt>レシピ</dt><dd>${S.recipes[d.id]?"持っている":`お店で買えます(${fmtNum(recipeCost(d))}ネジ)`}</dd>
+    </dl>
+    <div class="lore ${made?"":"unknown"}">${made?esc(lore):(t===5?"作物をすべて超変異に、食材をすべて上位種にして作ると、ここに載ります。":t===3?"作物をすべて変異に、食材をすべて上位種にして作ると、ここに載ります。":"一度作ると、ここに説明が書き込まれます。")}</div>`;
+  keepVisible($("g-dbookList"));
+}
+function dbookKey(e){
+  const k=e.key;
+  if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
+  if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); dbookCur=(dbookCur+(k==="ArrowDown"?1:-1)+DISHES.length)%DISHES.length; sfx.cursor(); renderDbook(); }
+  else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const qs=[0,3,5]; dbookTier=qs[(qs.indexOf(dbookTier)+(k==="ArrowRight"?1:-1)+3)%3]; sfx.tab(); renderDbook(); }
+}
+$("g-dbookDetail").addEventListener("click",e=>{ const b=e.target.closest && e.target.closest("[data-t]"); if(!b) return; dbookTier=+b.dataset.t; sfx.tab(); renderDbook(); });
+$("g-dbookList").addEventListener("click",e=>{ const r=e.target.closest && e.target.closest(".rowi"); if(!r) return; dbookCur=+r.dataset.i; renderDbook(); });
+
+/* ---- Space の画面: 図鑑 → 料理図鑑 → 実績(Tab で切り替え) ---- */
+const SPACE_TABS=[["book","図鑑"],["dbook","料理図鑑"],["goal","実績"]];
+function spaceTab(dir){
+  const i=SPACE_TABS.findIndex(([m])=>m===modal);
+  openModal(SPACE_TABS[(i+dir+SPACE_TABS.length)%SPACE_TABS.length][0], true);
+}
+function renderSpaceTabs(){
+  root.querySelectorAll(".sptabs").forEach(el=>{
+    el.innerHTML=SPACE_TABS.map(([m,nm])=>`<button class="tab${m===modal?" on":""}" data-sp="${m}" tabindex="-1">${nm}${m==="goal"&&goalsReady()?' <span class="gbadge on">!</span>':""}</button>`).join("")+`<span class="sphint">Tab で切り替え</span>`;
+  });
+}
+root.querySelectorAll(".sptabs").forEach(el=>el.addEventListener("click",e=>{ const b=e.target.closest("[data-sp]"); if(b) openModal(b.dataset.sp,true); }));
+
+/* ---- 今かかっている効果(庭の上に出す)・庭の色 ---- */
+function renderBuff(){
+  const el=$("g-buff"), b=buffNow();
+  if(!b){ el.hidden=true; root.classList.remove("dishtheme"); root.style.removeProperty("--sky"); return; }
+  const d=DISH[b.d];
+  el.hidden=false;
+  el.className="buff"+(b.t===5?" sup":b.t===3?" mut":"");
+  el.innerHTML=`${d.icon} ${esc(EFFS[d.eff].nm)} <b>${fmtLeft(b.until-Date.now())}</b>`;
+  el.title=`${d.name}(${gradeName(b.t)}): ${effText(d,b.t)}`;
+  if(d.eff==="M"){ root.classList.add("dishtheme"); root.style.setProperty("--sky",`color-mix(in srgb, ${d.color} 45%, #cfe6ee)`); }
+  else{ root.classList.remove("dishtheme"); root.style.removeProperty("--sky"); }
+}
+/* 庭の色(変異・超変異の料理): 収穫のたびに花火 */
+function dishFirework(k){
+  const b=buffNow(); if(!b || DISH[b.d].eff!=="M" || !isMutT(b.t)) return;
+  const el=plotEls[k]; if(!el) return;
+  const r=el.getBoundingClientRect(), c=DISH[b.d].color;
+  for(let i=0;i<14;i++){
+    const s=document.createElement("div"); s.className="fw";
+    const a=Math.PI*2*i/14, dist=34+Math.random()*20;
+    s.style.left=(r.left+r.width/2)+"px"; s.style.top=(r.top+r.height/2)+"px";
+    s.style.background=c; s.style.setProperty("--dx",Math.cos(a)*dist+"px"); s.style.setProperty("--dy",Math.sin(a)*dist+"px");
+    document.body.appendChild(s); setTimeout(()=>s.remove(),900);
+  }
+}
+/* ネジ打ち本編から使う: 届くネジの倍率・一本勝負のお守りの数 */
+const screwMul = () => ev("N",2,4,1);
+const charmLives = () => ev("V",1,3,0);
 
 /* ---------- 図鑑 ----------
    作物ごとに ふつう / ☆ / ☆☆ の3項目(全27項目)。
@@ -6478,6 +7146,7 @@ function renderBook(){
 function bookKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
+  if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
   const N=BOOK_CROPS.length;
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
@@ -6600,7 +7269,8 @@ function claimGoal(i){
 }
 function goalKey(e){
   const k=e.key;
-  if(k==="Escape"||k==="0"){ e.preventDefault(); closeModal(); return; }
+  if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
+  if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); goalCur=(goalCur+(k==="ArrowDown"?1:-1)+GOALS.length)%GOALS.length; sfx.cursor(); renderGoals(); return; }
   if(k==="Enter"){ e.preventDefault(); claimGoal(goalCur); }
 }
@@ -6782,6 +7452,8 @@ function onKey(e){
   if(modal==="treas"){ treasKey(e); return; }
   if(modal==="book"){ bookKey(e); return; }
   if(modal==="goal"){ goalKey(e); return; }
+  if(modal==="dbook"){ dbookKey(e); return; }
+  if(modal==="cook"){ cookKey(e); return; }
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
@@ -6798,7 +7470,7 @@ function onKey(e){
   if(k==="8"){ e.preventDefault(); openModal("treas"); return; }
   if(k===" "){ e.preventDefault(); openModal("book"); return; }
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
-  if(k==="0"){ e.preventDefault(); openModal("goal"); return; }
+  if(k==="0"){ e.preventDefault(); openModal("cook"); return; }
   if(k==="Escape"){ backToTitle(); return; }
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
@@ -6824,6 +7496,7 @@ $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
 $("g-goalBtn").addEventListener("click",()=>openModal("goal"));
+$("g-cookBtn").addEventListener("click",()=>openModal("cook"));
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
 root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) closeModal(); }));
@@ -6857,7 +7530,7 @@ function enter(){
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); },1000);
+  loopId=setInterval(()=>{ tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
@@ -6903,11 +7576,12 @@ function debugUnlock(){
   for(const f of FOODS){ S.got[f.id]=1; S.food[f.id]=3; }
   for(const g of GURS) S.got[g.id]=1;
   S.mfert=3; S.sfert=3; S.bnVil=1; S.objs.sgk=2;
+  for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName };
+return { screwMul, charmLives, enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -7631,7 +8305,7 @@ function tutView(){
       const what = st.modal==="gacha" ? "ガチャ" : "開いている画面";
       if(g && st.modal) return { sel:null, text: M ? `${got}「閉じる」で${what}を閉じよう` : `${got}${what}を閉じよう(Esc)` };
       return { sel: g ? "#g-goalBtn" : null,
-               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、ネジを増やしていこう。次に何をするか迷ったら「実績」${M?"":"(キー 0)"}を見てね`,
+               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、ネジを増やしていこう。次に何をするか迷ったら「実績」${M?"":"(Space の中)"}を見てね`,
                acts:[["ガイドをおわる", ()=>tutEnd(), g ? "Enter" : null]] };
   }
   return { sel:null, text:"" };
