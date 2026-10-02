@@ -1011,9 +1011,9 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 @keyframes g-wpop{0%{transform:scale(.3) rotateY(180deg) rotate(-20deg); opacity:0}60%{transform:scale(1.12) rotateY(0) rotate(4deg); opacity:1}100%{transform:none}}
 #screen-garden .gacha.w .gsumsec.pop{animation:g-wsec .55s cubic-bezier(.2,.9,.3,1.3)}
 @keyframes g-wsec{0%{transform:translateY(-14px) scale(.9) rotate(-2deg); opacity:0}100%{transform:none; opacity:1}}
-#g-gachaFlash.waku.on{animation:g-wflash .8s ease-out}
+#g-gachaFlash.waku.on{animation:g-wflash .6s ease-out}
 #g-gachaFlash.waku.big{animation:g-wflashbig 1.6s ease-out}
-@keyframes g-wflash{0%{opacity:0; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 25%, transparent 70%)}20%{opacity:.7; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 25%, transparent 70%)}100%{opacity:0; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 25%, transparent 70%)}}
+@keyframes g-wflash{0%{opacity:0; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 25%, transparent 70%)}20%{opacity:.4; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 25%, transparent 60%)}100%{opacity:0; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 25%, transparent 70%)}}
 @keyframes g-wflashbig{0%{opacity:0; background:repeating-conic-gradient(from 0deg at 50% 45%,#ff9ec4 0 15deg,#ffd86a 15deg 30deg,#7fd4ff 30deg 45deg,#b0f0c0 45deg 60deg)}15%{opacity:.75; background:repeating-conic-gradient(from 30deg at 50% 45%,#ff9ec4 0 15deg,#ffd86a 15deg 30deg,#7fd4ff 30deg 45deg,#b0f0c0 45deg 60deg)}45%{opacity:.4; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 35%, transparent 75%)}100%{opacity:0; background:radial-gradient(circle at 50% 45%, #fff 0, var(--rc) 35%, transparent 75%)}}
 .wconf{position:fixed; top:-12px; width:8px; height:12px; border-radius:2px; z-index:9998; pointer-events:none; animation:g-wconf 2s ease-in forwards}
 @keyframes g-wconf{0%{transform:translate(0,0) rotate(0); opacity:1}100%{transform:translate(var(--dx),105vh) rotate(var(--rot)); opacity:.9}}
@@ -6116,10 +6116,10 @@ const RARITY={
   GUR:{ label:"GUR", rate:0.005, color:"#2fb8c9" },
 };
 const RARITY_ORDER=["N","R","SR","HR","UR","GSR","GHR","GUR"];
-/* ガチャの台: n 種ガチャ / w わくわくガチャ(値段は2倍。GUR があり、そのぶん N の確率が低い。GHR は種ガチャと共通) */
+/* ガチャの台: n 種ガチャ / w わくわくガチャ(値段は10倍。GUR があり、そのぶん N の確率が低い。GHR は種ガチャと共通) */
 const MACHINES={
   n:{ name:"種ガチャ",       mult:1, order:RARITY_ORDER.slice(0,7) },
-  w:{ name:"わくわくガチャ", mult:2, order:RARITY_ORDER },
+  w:{ name:"わくわくガチャ", mult:10, order:RARITY_ORDER },   // 1回 1,000ネジ
 };
 let gachaM="n";
 const rateBase = (r,m=gachaM) => m==="w" && r==="N" ? +(RARITY.N.rate-RARITY.GUR.rate).toFixed(3) : RARITY[r].rate;
@@ -6270,7 +6270,10 @@ function revealNext(){
   if(gachaShown>=gachaRes.length){ renderGacha(); renderBar(); flushGachaNote(); save(); return; }
   gachaShown++;
   sfxGacha(gachaRes[gachaShown-1].r);
-  if(gachaM==="w"){ const ri=RARITY_ORDER.indexOf(gachaRes[gachaShown-1].r); if(ri>=3) gachaFlash(gachaRes[gachaShown-1].r, ri>=4); }   // わくわくガチャは HR 以上で紙ふぶき
+  if(gachaM==="w"){   // わくわくガチャ: 1回引きは HR 以上、まとめて引くときは GSR 以上で光らせる
+    const ri=RARITY_ORDER.indexOf(gachaRes[gachaShown-1].r);
+    if(ri>=(gachaRes.length>1?5:3)) gachaFlash(gachaRes[gachaShown-1].r, false);
+  }
   renderGacha();
   gachaTimer=setTimeout(revealNext, gachaRes.length>20 ? 70 : 360);
 }
@@ -6343,8 +6346,10 @@ const sfxNew = () => seq([1568,2093,2637,3136],60,"triangle",.05,.12);
 function gachaFlash(r,big){
   const f=$("g-gachaFlash"); if(!f) return;
   f.style.setProperty("--rc", RARITY[r].color);
+  const ri=RARITY_ORDER.indexOf(r);
+  if(gachaM==="w") big = ri>=6;   // わくわくガチャの大きな虹の光は GHR・GUR だけ
   f.className=""; void f.offsetWidth; f.className="on"+(big?" big":"")+(gachaM==="w"?" waku":"");
-  if(gachaM==="w") wakuConfetti(big?60:24);
+  if(gachaM==="w") wakuConfetti(ri>=6 ? 40 : ri>=5 ? 18 : ri>=4 ? 10 : 0);   // UR は少しだけ、HR は紙ふぶきなし
 }
 /* 出てきた札が見えるところまでスクロールする。
    札は縮んだ状態から飛び出すので、見た目の大きさではなく本来の大きさで測る */
