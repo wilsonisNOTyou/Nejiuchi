@@ -6424,9 +6424,9 @@ function debugUnlock(){
   for(const c of CROPS){
     S.got[c.id]=1; S.seeds[c.id]=10;
     S.harvestBy[c.id]=QUALITY[4].need+50;
-    S.harvestQ[c.id]=[50,50,10,0,10];
+    S.harvestQ[c.id]=[50,50,10,10,10];   // ふつう・☆・☆☆・変異・☆☆☆
     if(c.treasure){ S.treas[c.id]=1; }
-    else{ S.inv[c.id]=[3,3,3,0,3]; S.auto[c.id]={c:false,s:false}; }
+    else{ S.inv[c.id]=[3,3,3,3,3]; S.auto[c.id]={c:false,s:false}; }
   }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
