@@ -1635,10 +1635,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
       <button class="tbtn gacha" id="g-gachaBtn">ガチャ<span class="kb">7</span></button>
       <button class="tbtn treas" id="g-treasBtn">貴重品<span class="kb">8</span></button>
-      <button class="tbtn cook" id="g-cookBtn">料理<span class="kb">0</span></button>
-      <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
       <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
-      <button class="tbtn goal" id="g-goalBtn">実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">Space</span></button>
+      <button class="tbtn cook" id="g-cookBtn">料理<span class="kb">0</span></button>
+      <button class="tbtn goal" id="g-bookBtn">図鑑・実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">Space</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
     </div>
 
@@ -1684,7 +1683,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </p>
     <p class="help pc-only">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
-      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>0</b> 料理 ・ <b>Space</b> 図鑑・料理図鑑・実績 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
+      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>9</b> 番付 ・ <b>0</b> 料理 ・ <b>Space</b> 図鑑・実績 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
@@ -7621,7 +7620,6 @@ $("g-treasBtn").addEventListener("click",()=>openModal("treas"));
 $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
-$("g-goalBtn").addEventListener("click",()=>openModal("goal"));
 $("g-cookBtn").addEventListener("click",()=>openModal("cook"));
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
@@ -8430,8 +8428,8 @@ function tutView(){
       const got = "なすの種が出た! ";
       const what = st.modal==="gacha" ? "ガチャ" : "開いている画面";
       if(g && st.modal) return { sel:null, text: M ? `${got}「閉じる」で${what}を閉じよう` : `${got}${what}を閉じよう(Esc)` };
-      return { sel: g ? "#g-goalBtn" : null,
-               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、ネジを増やしていこう。次に何をするか迷ったら「実績」${M?"":"(Space の中)"}を見てね`,
+      return { sel: g ? "#g-bookBtn" : null,
+               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、ネジを増やしていこう。次に何をするか迷ったら「図鑑・実績」${M?"":"(Space)"}の実績を見てね`,
                acts:[["ガイドをおわる", ()=>tutEnd(), g ? "Enter" : null]] };
   }
   return { sel:null, text:"" };
