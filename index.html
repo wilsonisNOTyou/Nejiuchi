@@ -1156,6 +1156,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 
 /* ---- 庭: 貴重品の画面 ---- */
 #screen-garden .tbtn.treas{background:linear-gradient(180deg,#ffe9d2,#ffd0a3); border-color:#c07330; box-shadow:0 3px 0 #c07330}
+#screen-garden .tbtn.cook{background:linear-gradient(180deg,#e2f6d6,#bfe6a8); border-color:#4f8a3a; box-shadow:0 3px 0 #4f8a3a}
 #screen-garden .tnote{color:var(--ink-l); font-size:.85rem; line-height:1.7; margin-bottom:.7rem}
 #screen-garden .tlist{display:grid; grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); gap:.5rem}
 #screen-garden .titem{
@@ -7700,7 +7701,7 @@ function debugUnlock(){
   for(const f of FOODS){ S.got[f.id]=1; S.food[f.id]=3; }
   for(const g of GURS) S.got[g.id]=1;
   S.mfert=3; S.sfert=3; S.bnVil=1; S.objs.sgk=2;
-  for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; }
+  for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
   save();
