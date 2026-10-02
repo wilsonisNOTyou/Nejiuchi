@@ -3842,6 +3842,7 @@ const NEWS=[
   ]},
   { d:"2026-10-03", t:"不具合を直しました", items:[
     "長くネジ打ちをしたあとに庭へ戻ると、効果音が一度にたくさん鳴って音が乱れる不具合を直しました。村人が穫った変異・超変異の知らせは、作物ごとにまとめて出します",
+    "庭の「収穫かご」に、☆☆☆ の作物が表示されていなかった不具合を直しました(超変異も表示されます)",
   ]},
   { d:"2026-10-02", t:"番付に「累計獲得ネジ」が登場しました", items:[
     "これまでに手に入れたネジの合計で競う番付です。作物や種の売上(村人・自動売却を含む)、タイピングから庭に届いたネジ、実績のごほうびを合わせて数えます",
@@ -5412,7 +5413,7 @@ const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(const t of TIERS
 function renderBasket(){
   const b=$("g-basket"); b.innerHTML="";
   let any=false;
-  for(const c of CROPS) for(const t of QORDER){
+  for(const c of CROPS) for(const t of QORDER){   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
     const n=invN(c.id,t); if(n<=0) continue;
     any=true;
     const s=document.createElement("span"); s.className="chip"+(t?" q"+t:"");
