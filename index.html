@@ -1719,8 +1719,8 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <button class="tab" data-tab="0">種</button>
         <button class="tab" data-tab="1">道具・土地</button>
         <button class="tab" data-tab="2">効率化</button>
-        <button class="tab" data-tab="3">売る</button>
         <button class="tab" data-tab="4">レシピ</button>
+        <button class="tab" data-tab="3">売る</button>
       </div>
       <div id="g-shopBody" class="plist"></div>
       <div class="keyhint" id="g-shopHint"></div>
@@ -4371,16 +4371,17 @@ const upOf = id => FOODS.find(f=>f.up===id) || null;   // その食材の上位�
 const GURS = [
   { id:"mfert", r:"GUR", gur:true, name:"摩訶不思議な肥料", icon:"✨", desc:"植わっている作物にまくと、その作物が必ず超変異で実ります(5 で持ち、← → で切り替え)", lore:"袋を開けると、中で星がうずを巻いている。まいた区画の作物は、実るまで誰にも正体を明かさない。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="14" fill="#c8a8ff" opacity=".35"/><path d="M9 10h14l2 16c.2 1.8-1.2 3.4-3 3.4H10c-1.8 0-3.2-1.6-3-3.4z" fill="#6a3ac8"/><path d="M8.6 7h14.8l-.6 3H9.2z" fill="#4a2490"/><path d="M12 15c2-2 6-2 8 0s0 6-4 6-4-3-2-4 4 0 3 1" stroke="#ffd84a" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M5 4l0.56 1.44 1.44 0.56-1.44 0.56-0.56 1.44-0.56-1.44-1.44-0.56 1.44-0.56z" fill="#fff6c0" opacity="1"/><path d="M27 4.8l0.62 1.58 1.58 0.62-1.58 0.62-0.62 1.58-0.62-1.58-1.58-0.62 1.58-0.62z" fill="#fff6c0" opacity="1"/><path d="M26 25.2l0.50 1.30 1.30 0.50-1.30 0.50-0.50 1.30-0.50-1.30-1.30-0.50 1.30-0.50z" fill="#fff6c0" opacity="1"/><path d="M5 23.4l0.45 1.15 1.15 0.45-1.15 0.45-0.45 1.15-0.45-1.15-1.15-0.45 1.15-0.45z" fill="#fff6c0" opacity="1"/></svg>` },
-  { id:"sfert", r:"GUR", gur:true, name:"不思議な肥料", icon:"✨", desc:"植わっている作物にまくと、その作物が変異で3個穫れます(5 で持ち、← → で切り替え)", lore:"ほんのり光る粉。まいた作物はなぜか三つに分かれて、どれも変わった姿で実る。",
+  { id:"sfert", r:"GHR", gur:true, name:"不思議な肥料", icon:"✨", desc:"植わっている作物にまくと、その作物が変異で3個穫れます(5 で持ち、← → で切り替え)", lore:"ほんのり光る粉。まいた作物はなぜか三つに分かれて、どれも変わった姿で実る。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="14" fill="#d8b4f0" opacity=".3"/><path d="M9 10h14l2 16c.2 1.8-1.2 3.4-3 3.4H10c-1.8 0-3.2-1.6-3-3.4z" fill="#a87ad8"/><path d="M8.6 7h14.8l-.6 3H9.2z" fill="#7a4ab0"/><path d="M16 14.4l1.2 2.8 3 .3-2.3 2 .7 3-2.6-1.6-2.6 1.6.7-3-2.3-2 3-.3z" fill="#fff3b0"/><path d="M6 5.4l0.45 1.15 1.15 0.45-1.15 0.45-0.45 1.15-0.45-1.15-1.15-0.45 1.15-0.45z" fill="#ffffff" opacity="1"/><path d="M26 6.4l0.45 1.15 1.15 0.45-1.15 0.45-0.45 1.15-0.45-1.15-1.15-0.45 1.15-0.45z" fill="#ffffff" opacity="1"/></svg>` },
   { id:"ticket", r:"GUR", gur:true, name:"畑チケット(GUR)", icon:"✨", desc:"引いた時点で畑が1枚増えます。11枚目より先の畑を手に入れる、ただひとつの方法です(最大50枚)", lore:"金色に縁取られた特別なチケット。お店ではもう売っていない、その先の畑への入場券。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#ffd84a" opacity=".3"/><path d="M3 9h26v4.4a2.6 2.6 0 0 0 0 5.2V23H3v-4.4a2.6 2.6 0 0 0 0-5.2z" fill="#f4c542"/><path d="M21 9v14" stroke="#b8860b" stroke-width="1" stroke-dasharray="1.6 1.4"/><path d="M8 13.6h9M8 16.4h9M8 19.2h6" stroke="#8a5a0a" stroke-width="1.2"/><path d="M24.6 13.6l.9 2 2.1.2-1.6 1.4.5 2.1-1.9-1.1-1.9 1.1.5-2.1-1.6-1.4 2.1-.2z" fill="#fff"/></svg>` },
-  { id:"bnvil", r:"GUR", gur:true, name:"バターナッツかぼちゃ農家", icon:"✨", desc:"バターナッツかぼちゃだけを育てる村人です。9区画を世話し、植える・水やり・収穫・売却まで自動で行います(6 で持って区画を押す)", lore:"バターナッツかぼちゃのことしか話さない。ほかの作物の名前を出すと、聞こえないふりをする。",
+  { id:"bnvil", r:"GHR", gur:true, name:"バターナッツかぼちゃ農家", icon:"✨", desc:"バターナッツかぼちゃだけを育てる村人です。9区画を世話し、植える・水やり・収穫・売却まで自動で行います(6 で持って区画を押す)", lore:"バターナッツかぼちゃのことしか話さない。ほかの作物の名前を出すと、聞こえないふりをする。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="12" r="6" fill="#f4d2b0"/><path d="M9.6 11c0-4 3-6.6 6.4-6.6s6.4 2.6 6.4 6.6c-2-1.6-4.6-2.4-6.4-2.4S11.6 9.4 9.6 11z" fill="#e0b76a"/><path d="M7 8.6h18" stroke="#c89a4a" stroke-width="2" stroke-linecap="round"/><circle cx="13.8" cy="12.4" r=".9" fill="#3a2a1a"/><circle cx="18.2" cy="12.4" r=".9" fill="#3a2a1a"/><path d="M14 15c1.2 1 2.8 1 4 0" stroke="#a0603a" stroke-width=".9" fill="none"/><path d="M8 30c0-6 3.6-10 8-10s8 4 8 10z" fill="#5a8a3a"/><path d="M19 21.6c1.4 0 2.4 1.4 2.4 3 0 1.2-.6 2-.6 3 2.4.6 3.6 2.4 3.6 4.4H14c0-2 1.4-3.8 3.6-4.4 0-1-.6-1.8-.6-3 0-1.6 1-3 2-3z" fill="#e0b76a"/></svg>` },
   { id:"sgk", r:"GUR", gur:true, name:"シゴデキ案山子", icon:"✨", desc:"P(案山子置き場)に置くと、その畑にカラスが来なくなり、1打の時短が+3分、畑じゅうの水やりが自動になります(6 で持って P に置く)", lore:"仕事ができすぎる案山子。カラスを追い払いながら、ついでに水まで撒いてくれる。休んでいるところを見た者はいない。",
     art:`<svg viewBox="0 0 32 32"><path d="M15 29V8" stroke="#8a5a2a" stroke-width="2"/><path d="M5 14h22" stroke="#8a5a2a" stroke-width="2"/><circle cx="16" cy="7" r="4.6" fill="#f4d2b0"/><path d="M10 6.4c1-3.6 3.4-5 6-5s5 1.4 6 5z" fill="#f4c542"/><path d="M8.6 6.6h14.8" stroke="#d49a12" stroke-width="1.4"/><circle cx="14.4" cy="7.4" r=".8" fill="#3a2a1a"/><circle cx="17.6" cy="7.4" r=".8" fill="#3a2a1a"/><path d="M14.6 9.4c1 .6 1.8.6 2.8 0" stroke="#a0603a" stroke-width=".8" fill="none"/><path d="M10 13h12l1 9H9z" fill="#3a6ad8"/><path d="M14 13l2 4 2-4" fill="#fff"/><path d="M16 17v5" stroke="#c0392b" stroke-width="1.4"/><path d="M24 10l3-3M27 13l3-1" stroke="#ffd84a" stroke-width="1.2" stroke-linecap="round"/><path d="M3 22c1-2 3-2 4 0" stroke="#5fb0e8" stroke-width="1.4" fill="none"/></svg>` },
 ];
 const GUR = Object.fromEntries(GURS.map(g=>[g.id,g]));
+const isPrepFood = id => ["miso","shoyu","butter","cream","cheese","oldmiso","oldshoyu","kbutter","angelcream","chesking"].includes(id);   // 仕込みで作る食材(ガチャからは出ない)
 const itemOf = id => CROP[id] || FOOD[id] || GUR[id];   // ガチャから出るもの(作物の種・食材・GUR)
 const foodN = id => (S.food && S.food[id]) || 0;
 const FIELD_MAX = 50;   // 畑の上限(お店で買えるのは10枚まで。その先はわくわくガチャの畑チケット)
@@ -5761,6 +5762,7 @@ function keepVisible(listEl){
 /* ---------- お店(キーボード操作) ----------
    ← → タブ / ↑ ↓ 品物 / Enter 1つ買う・1つ売る / Shift+Enter 10買う・全部売る / A すべて売る */
 const SHOP_TABS=["種","道具・土地","効率化","売る","レシピ"];
+const SHOP_ORDER=[0,1,2,4,3];   // 画面での並び: 種 / 道具・土地 / 効率化 / レシピ / 売る
 let shopTab=0, shopCur=[0,0,0,0];
 function shopRows(){
   const rows=[];
@@ -5931,7 +5933,7 @@ function renderShop(){
     return;
   }
   $("g-shopHint").innerHTML =
-    `<b>← →</b> ${SHOP_TABS.map((t,i)=>i===shopTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
+    `<b>← →</b> ${SHOP_ORDER.map(i=>i===shopTab?`「${SHOP_TABS[i]}」`:SHOP_TABS[i]).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
     (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}ネジ・種・食材と変異・超変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
@@ -5948,7 +5950,7 @@ function shopActBtns(keys){
 function shopKey(e){
   const k=e.key;
   if(k==="Escape"||k==="Tab"){ e.preventDefault(); closeModal(); return; }
-  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=(shopTab+(k==="ArrowRight"?1:-1)+SHOP_TABS.length)%SHOP_TABS.length; sfx.tab(); renderShop(); return; }
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=SHOP_ORDER[(SHOP_ORDER.indexOf(shopTab)+(k==="ArrowRight"?1:-1)+SHOP_ORDER.length)%SHOP_ORDER.length]; sfx.tab(); renderShop(); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
     const n=shopRowCache.length; if(!n) return;
@@ -6116,13 +6118,14 @@ const RARITY={
   GUR:{ label:"GUR", rate:0.005, color:"#2fb8c9" },
 };
 const RARITY_ORDER=["N","R","SR","HR","UR","GSR","GHR","GUR"];
-/* ガチャの台: n 種ガチャ / w わくわくガチャ(値段は10倍。GUR があり、そのぶん N の確率が低い。GHR は種ガチャと共通) */
+/* ガチャの台: n 種ガチャ / w わくわくガチャ(値段は10倍。確率は WAKU_RATES。GHR・GUR はわくわくガチャだけの中身) */
+const WAKU_RATES = { N:40.189, R:30, SR:25, HR:3, UR:1.7, GSR:0.1, GHR:0.01, GUR:0.001 };
 const MACHINES={
   n:{ name:"種ガチャ",       mult:1, order:RARITY_ORDER.slice(0,7) },
   w:{ name:"わくわくガチャ", mult:10, order:RARITY_ORDER },   // 1回 1,000ネジ
 };
 let gachaM="n";
-const rateBase = (r,m=gachaM) => m==="w" && r==="N" ? +(RARITY.N.rate-RARITY.GUR.rate).toFixed(3) : RARITY[r].rate;
+const rateBase = (r,m=gachaM) => m==="w" ? WAKU_RATES[r] : RARITY[r].rate;
 /* 料理で確率が変わる(SR以上・GUR・GHR・GSR)。表示は合計100%になるよう割り直す */
 function rateRaw(r,m=gachaM){
   let x=rateBase(r,m);
@@ -6140,9 +6143,8 @@ function rateOf(r,m=gachaM){
 const GACHA_COST1=100, GACHA_COST11=1000, GACHA_COST111=10000;
 function poolOf(r,m=gachaM){
   if(m==="w"){
-    if(r==="GUR") return GURS;
-    if(r==="GHR") return CROPS.filter(c=>c.r==="GHR");
-    return CROPS.filter(c=>c.r===r && c.waku).concat(FOODS.filter(f=>f.r===r));
+    if(r==="GUR" || r==="GHR") return GURS.filter(g=>g.r===r);
+    return CROPS.filter(c=>c.r===r && c.waku).concat(FOODS.filter(f=>f.r===r && !isPrepFood(f.id)));
   }
   return CROPS.filter(c=>c.r===r && !c.waku);
 }
@@ -7258,11 +7260,11 @@ function renderBook(){
       <dl>
         <dt>持っている数</dt><dd>${fmtNum(foodN(f.id))}個</dd>
         <dt>売値</dt><dd>${fmtNum(f.price)}ネジ</dd>
-        <dt>手に入れ方</dt><dd>わくわくガチャ(レア度 ${f.r})${f.up?"":(PREPS.some(p=>p.out===f.id)?" ・ 料理の仕込み":"")}${f.up&&PREPS.some(p=>p.upOut===f.id)?" ・ 料理の仕込み":""}</dd>
+        <dt>手に入れ方</dt><dd>${isPrepFood(f.id)?"料理の仕込みで作る":`わくわくガチャ(レア度 ${f.r})`}</dd>
       </dl>
       <div class="lore">${esc(f.lore)}</div>`
     : `<div class="bic">❔</div><div class="bnm">？？？</div>
-       <div class="lore unknown">わくわくガチャ(レア度 ${f.r})から出る${f.up?"上位種の":""}食材です。引き当てると、名前がわかります。</div>`);
+       <div class="lore unknown">${isPrepFood(f.id)?"料理の仕込みで作る食材です。一度作ると、名前がわかります。":`わくわくガチャ(レア度 ${f.r})から出る${f.up?"上位種の":""}食材です。引き当てると、名前がわかります。`}</div>`);
     keepVisible($("g-bookList"));
     return;
   }
