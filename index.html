@@ -53,6 +53,23 @@ body{
 /* 料理の色: 語録の板とネジ板も料理の色に */
 body.dishtheme .word-panel{background:linear-gradient(180deg,color-mix(in srgb, var(--dish) 22%, #333a45),color-mix(in srgb, var(--dish) 18%, #262c36) 55%,color-mix(in srgb, var(--dish) 20%, #2b323d))}
 body.dishtheme .plate{background:repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 2px, transparent 2px 4px),linear-gradient(180deg,color-mix(in srgb, var(--dish) 24%, #4a5261),color-mix(in srgb, var(--dish) 20%, #3a414d))}
+/* 料理の色(変異・超変異): 背景をはっきり料理の色に。作物が舞い、ネジが料理に */
+body.dishfun:not(.garden):not(.washi){
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.06) 34px 36px),
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--dish) 92%, #fff) 0%, color-mix(in srgb, var(--dish) 78%, #000) 55%, var(--bg) 100%);
+}
+body.dishfun:not(.garden):not(.washi) #app{position:relative; z-index:1}
+body.dishfun h1, body.dishfun .subtitle, body.dishfun .mode-head{text-shadow:0 2px 0 rgba(0,0,0,.35), 0 0 12px rgba(0,0,0,.25)}
+#dishFloat{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0}
+body.garden #dishFloat, body.washi #dishFloat{display:none}
+#dishFloat span{position:absolute; bottom:-70px; opacity:.55; animation:dishfloat linear infinite; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+#dishFloat span svg{width:100%; height:100%; display:block}
+@keyframes dishfloat{from{transform:translateY(0) rotate(0)} to{transform:translateY(calc(-100vh - 140px)) rotate(var(--spin))}}
+@media (prefers-reduced-motion:reduce){ #dishFloat span{animation:none; bottom:auto; top:var(--top)} }
+.screw.dishscrew{background:none; box-shadow:none}
+.screw.dishscrew::before, .screw.dishscrew::after{display:none}
+.screw.dishscrew svg{width:118%; height:118%; margin:-9%; display:block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}
 /* 料理の色: 背景の光も料理の色に */
 body.dishtheme:not(.garden):not(.washi){
   background-image:
@@ -2701,6 +2718,8 @@ function buildPlate(){
     const s=document.createElement("div");
     s.className="screw";
     s.style.transform=`rotate(${Math.floor(Math.random()*90)}deg)`;
+    const art=(()=>{ try{ return Garden.themeScrewArt(); }catch(e){ return null; } })();   // 料理の色(変異・超変異)
+    if(art){ s.classList.add("dishscrew"); s.innerHTML=art; s.style.transform=`rotate(${Math.floor(Math.random()*40)-20}deg)`; }
     plate.appendChild(s);
   }
   plateScrews=SCREWS_PER_PLATE;
@@ -6963,7 +6982,7 @@ const DISHES = [
   { id:"miraclejelly", name:"ミラクルゼリー", n3:"さかさまゼリー", n5:"奇跡のゼリー", icon:"🍮", ing:[["miracle", 1], ["sunlemon", 1]], eff:"P8",
     l0:"すっぱいレモンのゼリーが、なぜか甘い。食べると、今かかっている料理の効果が少し延びる。",
     l3:"さかさまフルーツのゼリー。時計の針がさかさまに回り、料理の効果が延びる。",
-    l5:"奇跡の実のゼリー。今かかっている料理の効果が、六時間も延びる。",
+    l5:"奇跡の実のゼリー。今かかっている料理の効果が、一時間も延びる。",
     art:[`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="29" rx="14" ry="4.6" fill="#d9cfbd"/><ellipse cx="16" cy="28.2" rx="12.2" ry="3.4" fill="#f6f2ea"/><path d="M8 12h16l-2 13c-.2 1.4-1.4 2.4-2.8 2.4h-6.4c-1.4 0-2.6-1-2.8-2.4z" fill="#ffe27a" fill-opacity=".85"/><ellipse cx="16" cy="12" rx="8" ry="2" fill="#fff3b0"/><ellipse cx="12" cy="17" rx="1.6" ry="3" fill="#ffffff" opacity=".5"/><circle cx="16" cy="10" r="2.2" fill="#d8203a"/><path d="M16 8V6.4" stroke="#4f9a3a" stroke-width="1"/></svg>`,
          `<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#eef2ff"/><ellipse cx="16" cy="29" rx="14" ry="4.6" fill="#d9cfbd"/><ellipse cx="16" cy="28.2" rx="12.2" ry="3.4" fill="#f6f2ea"/><path d="M8 12h16l-2 13c-.2 1.4-1.4 2.4-2.8 2.4h-6.4c-1.4 0-2.6-1-2.8-2.4z" fill="#ffe27a" fill-opacity=".85"/><ellipse cx="16" cy="12" rx="8" ry="2" fill="#fff3b0"/><ellipse cx="12" cy="17" rx="1.6" ry="3" fill="#ffffff" opacity=".5"/><ellipse cx="16" cy="12" rx="3" ry="1" fill="#ffffff" opacity=".6"/><path d="M16 10.6v-1.4" stroke="#6a5030" stroke-width=".8"/><ellipse cx="16" cy="8" rx="1.8" ry="2.4" fill="#d8203a"/><path d="M6 10C6 5 10 2.6 13 2.4" stroke="#5a8ad8" stroke-width="1.2" fill="none"/><path d="M11.6 1l1.8 1.4-1.6 1.6" stroke="#5a8ad8" stroke-width="1.2" fill="none"/><path d="M26 10c0-5-4-7.4-7-7.6" stroke="#e86a8a" stroke-width="1.2" fill="none"/><path d="M20.4 1l-1.8 1.4 1.6 1.6" stroke="#e86a8a" stroke-width="1.2" fill="none"/><ellipse cx="4" cy="15" rx="2.6" ry="2" fill="#ffe24a"/><path d="M25 17l3-4.4 3 4.4z" fill="#fff0d0"/><path d="M25 17h6v1.8h-6z" fill="#f4c08a"/><circle cx="28" cy="12.4" r=".7" fill="#e8102a"/></svg>`,
          `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#ffe0f0" opacity="0.6"/><path d="M26.0 15.0L31.4 15.0M25.2 18.8L30.2 20.9M23.1 22.1L26.9 25.9M19.8 24.2L21.9 29.2M16.0 25.0L16.0 30.4M12.2 24.2L10.1 29.2M8.9 22.1L5.1 25.9M6.8 18.8L1.8 20.9M6.0 15.0L0.6 15.0M6.8 11.2L1.8 9.1M8.9 7.9L5.1 4.1M12.2 5.8L10.1 0.8M16.0 5.0L16.0 -0.4M19.8 5.8L21.9 0.8M23.1 7.9L26.9 4.1M25.2 11.2L30.2 9.1" stroke="#ffd84a" stroke-width="1" stroke-linecap="round" opacity="0.6"/><ellipse cx="16" cy="29" rx="14" ry="4.6" fill="#e8c45a"/><ellipse cx="16" cy="28.2" rx="12.2" ry="3.4" fill="#fff8e0"/><path d="M8 12h16l-2 13c-.2 1.4-1.4 2.4-2.8 2.4h-6.4c-1.4 0-2.6-1-2.8-2.4z" fill="#ff8ab8" fill-opacity=".85"/><ellipse cx="16" cy="12" rx="8" ry="2" fill="#ffd0e4"/><ellipse cx="12" cy="17" rx="1.6" ry="3" fill="#ffffff" opacity=".5"/><path d="M10 20c2 1 10 1 12 0" stroke="#ffffff" stroke-width=".6" opacity=".6" fill="none"/><ellipse cx="16" cy="3.4" rx="3.6" ry="1" fill="none" stroke="#ffe27a" stroke-width="1"/><ellipse cx="16" cy="8.6" rx="2.6" ry="3.4" fill="#ff2a4a"/><ellipse cx="15.2" cy="7.4" rx=".8" ry="1.3" fill="#ffffff" opacity=".6"/><ellipse cx="17.4" cy="5.4" rx="1.4" ry=".6" fill="#4f9a3a" transform="rotate(-20 17.4 5.4)"/><path d="M5 6.4l0.45 1.15 1.15 0.45-1.15 0.45-0.45 1.15-0.45-1.15-1.15-0.45 1.15-0.45z" fill="#ffffff" opacity="1"/><path d="M27 6.4l0.45 1.15 1.15 0.45-1.15 0.45-0.45 1.15-0.45-1.15-1.15-0.45 1.15-0.45z" fill="#ffffff" opacity="1"/></svg>`] },
@@ -6992,7 +7011,7 @@ const EFFS = {
   J:{ nm:"肥料の効果",           n:"肥料の効き +10%",                     s:"肥料の効き +20%" },
   K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも" },
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
-  M:{ nm:"画面の色",             n:"ホーム画面とネジ打ちが料理の色に染まる", s:"ホーム画面とネジ打ちが料理の色に染まり、庭で収穫するたびに花火があがる" },
+  M:{ nm:"画面の色",             n:"ホーム画面とネジ打ちが料理の色に染まる", s:"ホーム画面とネジ打ちが料理の色に鮮やかに染まり、作物が舞い、ネジが料理に変わる。庭では収穫のたびに花火があがる" },
   N:{ nm:"1語のネジ",            n:"ネジ打ちから庭に届くネジ 2倍",         s:"ネジ打ちから庭に届くネジ 4倍" },
   O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(SRまで)を育てる",  s:"村人がガチャの作物(HR〜GSR)を育てる" },
   P:{ nm:"一括水やり",           n:"じょうろ1回で、その畑ぜんぶに水やり",  s:"じょうろ1回で、すべての畑に水やり" },
@@ -7016,7 +7035,7 @@ const EFFS = {
   Y:{ nm:"実績のごほうび",       n:"実績のごほうび 1.5倍",                 s:"実績のごほうび 2倍" },
   P3:{ nm:"食材が上位種に化ける", n:"わくわくガチャの食材が5%で上位種に化ける", s:"わくわくガチャの食材が20%で上位種に化ける" },
   P5:{ nm:"ネジ打ちで肥料",      n:"ネジ打ち100打ごとに肥料が1つ届く",     s:"ネジ打ち30打ごとに肥料が1つ届く" },
-  P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が30分延びる", s:"食べた瞬間、今かかっている料理の効果が6時間延びる" },
+  P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
   Q1:{ nm:"種おかわり",          n:"ガチャで出た作物の種が20%で2つ",       s:"ガチャで出た作物の種が50%で2つ" },
   Q2:{ nm:"変わり種の売値",      n:"変異・超変異の作物の売値 1.5倍",       s:"変異・超変異の作物の売値 3倍" },
   Q3:{ nm:"庭の時計",            n:"庭を開いている間、1秒ごとに水の効いている作物が10秒育つ", s:"庭を開いている間、1秒ごとに水の効いている作物が30秒育つ" },
@@ -7190,7 +7209,7 @@ function cookEat(id,g){
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
   }else if(d.eff==="P8"){   // 効果を延ばす: 今の効果に時間を足す
     const b=buffNow();
-    const add = isMutT(g) ? 360 : 30;
+    const add = isMutT(g) ? 60 : 10;
     b.until+=add*60000;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました(残り ${fmtLeft(b.until-Date.now())})`,"good",5200,true);
   }else{
@@ -7361,11 +7380,55 @@ function renderBuff(){
 }
 /* 料理の色: ホーム画面とネジ打ちの色を、料理の色に染める(庭はそのまま) */
 const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--amber-dim","--steel"];
+let themeKey="";   // いまの色(同じなら作り直さない)
+/* ネジ打ちで使う: 変異・超変異の画面の色のとき、ネジの代わりに出す料理の絵 */
+function themeScrewArt(){
+  const b=buffNow(), d=b && DISH[b.d];
+  return d && d.eff==="M" && isMutT(b.t) ? d.art[b.t===5?2:1] : null;
+}
+/* 背景に舞う作物: 料理の材料(変異・超変異の絵)と、庭の作物いろいろ */
+function themeFloatArts(d,t){
+  const own=[];
+  for(const [id] of d.ing){
+    const c=CROP[id];
+    if(c){ const m=t===5?SUPER[id]:MUTANT[id]; own.push(m&&m.art || c.art); }
+    else if(FOOD[id] && FOOD[id].art) own.push(FOOD[id].art);
+  }
+  const others=CROPS.filter(c=>c.art && !c.treasure).map(c=>c.art);
+  const out=[d.art[t===5?2:1]];
+  for(let i=0;i<18;i++) out.push(i%2===0 && own.length ? own[i/2%own.length|0] : others[Math.floor(Math.random()*others.length)]);
+  return out.filter(Boolean);
+}
+function themeFloat(on,d,t){
+  let el=document.getElementById("dishFloat");
+  if(!on){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement("div"); el.id="dishFloat"; el.setAttribute("aria-hidden","true"); document.body.prepend(el); }
+  el.innerHTML=themeFloatArts(d,t).map((a,i)=>{
+    const size=28+Math.random()*34, left=Math.random()*96, dur=16+Math.random()*16, delay=-Math.random()*dur, spin=(Math.random()<.5?-1:1)*(90+Math.random()*270);
+    return `<span style="--top:${(Math.random()*90).toFixed(1)}%;left:${left.toFixed(1)}%;width:${size|0}px;height:${size|0}px;animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s;--spin:${spin|0}deg">${a}</span>`;
+  }).join("");
+}
 function applyTheme(){
   const b=buffNow(), d=b && DISH[b.d], de=document.documentElement;
-  if(!d || d.eff!=="M"){ document.body.classList.remove("dishtheme"); for(const v of THEME_VARS) de.style.removeProperty(v); return; }
+  if(!d || d.eff!=="M"){ themeKey=""; document.body.classList.remove("dishtheme","dishfun"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
+  const key=d.id+":"+b.t; if(key===themeKey) return; themeKey=key;
   const c=d.tint||d.color, a=d.accent||d.color, mix=(p,base)=>`color-mix(in srgb, ${c} ${p}%, ${base})`;
   document.body.classList.add("dishtheme");
+  if(isMutT(b.t)){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、ネジが料理に変わる
+    document.body.classList.add("dishfun");
+    const cf=d.accent||c, mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
+    de.style.setProperty("--dish",cf);
+    de.style.setProperty("--bg",mix(62,"#0c0c10"));
+    de.style.setProperty("--panel",mix(42,"#14161c"));
+    de.style.setProperty("--panel-hi",mix(52,"#1c1f27"));
+    de.style.setProperty("--line",mix(70,"#ffffff"));
+    de.style.setProperty("--amber",`color-mix(in srgb, ${a} 35%, #ffffff)`);
+    de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 60%, #000)`);
+    de.style.setProperty("--steel",`color-mix(in srgb, ${a} 20%, #f0f2f6)`);
+    themeFloat(true,d,b.t);
+    return;
+  }
+  document.body.classList.remove("dishfun"); themeFloat(false);
   de.style.setProperty("--dish",c);
   de.style.setProperty("--bg",mix(18,"#101216"));
   de.style.setProperty("--panel",mix(22,"#262a32"));
@@ -8010,7 +8073,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { screwMul, charmLives, applyTheme, enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName };
+return { screwMul, charmLives, applyTheme, themeScrewArt, enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
