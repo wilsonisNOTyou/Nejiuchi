@@ -1038,6 +1038,37 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 }
 
 /* ---- 庭: 大連ガチャ(1111連・11111連・111111連)のまとめ表示と演出 ---- */
+/* ---- 庭: 料理ができたときの演出(中央に大きく絵を出す) ---- */
+#g-cookShow{position:fixed; inset:0; z-index:38; display:none; align-items:center; justify-content:center; pointer-events:none}
+#g-cookShow.on{display:flex}
+#g-cookShow .csbg{position:absolute; inset:0; background:radial-gradient(circle at 50% 48%, rgba(255,244,214,.92), rgba(255,236,190,.6) 30%, rgba(40,25,10,.4) 70%); animation:g-csbg var(--cs-dur) ease-out forwards}
+#g-cookShow.g3 .csbg{background:radial-gradient(circle at 50% 48%, rgba(240,228,255,.92), rgba(220,195,255,.6) 30%, rgba(40,15,70,.45) 70%)}
+#g-cookShow.g5 .csbg{background:radial-gradient(circle at 50% 48%, rgba(255,248,228,.94), rgba(255,215,240,.65) 30%, rgba(60,20,70,.5) 70%)}
+#g-cookShow .csbox{position:relative; display:flex; flex-direction:column; align-items:center; gap:.3rem; animation:g-csbox var(--cs-dur) cubic-bezier(.2,.9,.3,1.3) forwards}
+#g-cookShow .csrays{position:absolute; top:50%; left:50%; width:22rem; height:22rem; margin:-13rem 0 0 -11rem; border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,214,110,.55) 0 10deg, transparent 10deg 20deg); -webkit-mask:radial-gradient(circle, #000 25%, transparent 68%); mask:radial-gradient(circle, #000 25%, transparent 68%);
+  animation:g-csspin 6s linear infinite}
+#g-cookShow.g3 .csrays{background:repeating-conic-gradient(rgba(190,140,255,.6) 0 10deg, transparent 10deg 20deg)}
+#g-cookShow.g5 .csrays{background:repeating-conic-gradient(#ff9ec4 0 8deg, transparent 8deg 15deg, #ffd86a 15deg 23deg, transparent 23deg 30deg, #7fd4ff 30deg 38deg, transparent 38deg 45deg, #b0f0c0 45deg 53deg, transparent 53deg 60deg); opacity:.75}
+#g-cookShow .csart{position:relative; width:9.5rem; height:9.5rem; filter:drop-shadow(0 6px 10px rgba(60,35,10,.35))}
+#g-cookShow .csart svg{width:100%; height:100%; display:block}
+#g-cookShow.g3 .csart{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 16px rgba(190,120,255,.9))}
+#g-cookShow.g5 .csart{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px rgba(255,210,90,.95)) drop-shadow(0 0 26px rgba(255,140,220,.75))}
+#g-cookShow .csnm{position:relative; font-size:1.7rem; font-weight:900; color:#5a3a12; letter-spacing:.04em; text-align:center; max-width:90vw;
+  text-shadow:0 0 4px #fff, 0 0 4px #fff, 0 2px 0 #fff}
+#g-cookShow.g3 .csnm{color:#6a3aa8}
+#g-cookShow.g5 .csnm{color:#b8327a}
+#g-cookShow .cssub{position:relative; font-weight:800; font-size:1rem; color:#5a3a12; background:rgba(255,250,235,.92); border:2px solid #c8a06a; border-radius:999px; padding:.15rem .9rem}
+#g-cookShow .csnew{margin-left:.4rem; color:#fff; background:#e2589b; border-radius:6px; padding:0 .4rem; font-size:.85rem}
+#g-cookShow .csp{position:absolute; top:50%; left:50%; width:.7rem; height:.7rem; border-radius:50%; background:var(--c); opacity:0;
+  animation:g-cspop 1.1s ease-out var(--d) forwards}
+@keyframes g-csbg{0%{opacity:0} 12%{opacity:1} 78%{opacity:1} 100%{opacity:0}}
+@keyframes g-csbox{0%{opacity:0; transform:scale(.25) rotate(-12deg)} 14%{opacity:1; transform:scale(1.12) rotate(3deg)} 22%{transform:scale(1) rotate(0)} 80%{opacity:1; transform:scale(1)} 100%{opacity:0; transform:scale(1.08) translateY(-10px)}}
+@keyframes g-csspin{to{transform:rotate(360deg)}}
+@keyframes g-cspop{0%{opacity:1; transform:translate(-50%,-50%) scale(.4)} 100%{opacity:0; transform:translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1)}}
+@media (prefers-reduced-motion:reduce){ #g-cookShow .csrays, #g-cookShow .csp{animation:none; display:none} #g-cookShow .csbox{animation:g-csbg var(--cs-dur) linear forwards} }
+html.mobile #g-cookShow .csart{width:7rem; height:7rem}
+html.mobile #g-cookShow .csnm{font-size:1.3rem}
 #g-gachaFlash{position:fixed; inset:0; pointer-events:none; z-index:3; opacity:0}
 #g-gachaFlash.on{animation:g-flash .7s ease-out}
 #g-gachaFlash.big{animation:g-flashbig 1.4s ease-out}
@@ -1914,6 +1945,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
   </div>
 
   <div id="g-toasts"></div>
+  <div id="g-cookShow"></div>
   </section>
 
   <!-- ネジ抜き辞典画面 -->
@@ -7451,10 +7483,39 @@ function cookStep(id,dir){
   cookGrade[id]=DISH_GRADES[(i+dir+DISH_GRADES.length)%DISH_GRADES.length];
   sfx.tab(); renderCook();
 }
+/* 料理ができたときの演出: 中央に大きく絵と名前を出す。段階が上がるほど光と音が豪華になる */
+let cookShowTimer=null;
+function cookShow(d,grade,count,first){
+  const el=$("g-cookShow"); if(!el) return;
+  const dur = grade===5 ? 2600 : grade===3 ? 2100 : 1700;
+  const cols = grade===5 ? ["#ff9ec4","#ffd86a","#7fd4ff","#b0f0c0","#c8a8ff"] : grade===3 ? ["#c8a8ff","#e8d8ff","#9a6ae8"] : ["#ffd86a","#ffb35c","#fff2c0"];
+  const np = grade===5 ? 28 : grade===3 ? 18 : 12;
+  let parts="";
+  for(let i=0;i<np;i++){
+    const a=i/np*Math.PI*2+Math.random()*.4, r=110+Math.random()*90;
+    parts+=`<i class="csp" style="--c:${cols[i%cols.length]}; --x:${Math.round(Math.cos(a)*r)}px; --y:${Math.round(Math.sin(a)*r)}px; --d:${Math.round(80+Math.random()*260)}ms"></i>`;
+  }
+  el.className=""; void el.offsetWidth;
+  el.style.setProperty("--cs-dur",dur+"ms");
+  el.innerHTML=`<div class="csbg"></div><div class="csbox"><div class="csrays"></div>${parts}
+    <div class="csart">${d.art[grade===5?2:grade===3?1:0]}</div>
+    <div class="csnm">${esc(dishName(d,grade))}</div>
+    <div class="cssub">${gradeName(grade)} ・ ${count}つできました${first?'<span class="csnew">NEW</span>':""}</div></div>`;
+  el.className="on g"+grade;
+  sfxCook(grade);
+  clearTimeout(cookShowTimer);
+  cookShowTimer=setTimeout(()=>{ el.className=""; el.innerHTML=""; },dur);
+}
+function sfxCook(grade){
+  noise(.35,3200,.7,.06); noise(.25,1800,.9,.04,.08);            // ジュッ(焼ける音)
+  if(grade===5){ sfxWaku(5); setTimeout(()=>{ beep(784,1.2,"sine",.05); beep(988,1.2,"sine",.04); beep(1175,1.2,"sine",.04); beep(1568,1.2,"triangle",.03); },420); }
+  else if(grade===3) setTimeout(()=>seq([880,1109,1319,1760,2217],55,"triangle",.05,.18),120);
+  else setTimeout(()=>seq([784,988,1175,1568],60,"triangle",.05,.14),120);
+}
 function cookMake(id,times){
   const d=DISH[id]; if(!d || !S.recipes[id]) return;
   const g=cookGrade[id]??0;
-  let made=0, grade=null, extra=0, saved=0;
+  let made=0, grade=null, extra=0, saved=0, isFirst=false;
   for(let i=0;i<times;i++){
     const plan=cookPlan(d.ing,g); if(!plan) break;
     if(Math.random()<ev("P2",.2,.5,0)) saved++; else consume(plan.take);   // 料理: 材料の節約
@@ -7463,11 +7524,11 @@ function cookMake(id,times){
     if(Math.random()<ev("P1",.2,1,0)+kitVal("pot")/100){ S.dishes[id][grade]++; extra++; }   // 料理・鉄の両手鍋: おかわり
     const bk=bookKeyOf(grade); S.dishMade[id]=S.dishMade[id]||{};
     const first=!S.dishMade[id][bk]; S.dishMade[id][bk]=true;
-    if(first) toast(`📖 ${dishIco(d,bk)} ${esc(dishName(d,bk))}が料理図鑑に載りました`,"good",3600,true);
+    if(first){ isFirst=true; toast(`📖 ${dishIco(d,bk)} ${esc(dishName(d,bk))}が料理図鑑に載りました`,"good",3600,true); }
     made++; S.cookCount=(S.cookCount||0)+1;
   }
   if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
-  sfx.buy();
+  cookShow(d,grade,made+extra,isFirst);
   toast(`${dishIco(d,grade)} ${esc(dishName(d,grade))}(${gradeName(grade)})を ${made+extra}つ 作りました${extra?`(おかわり +${extra})`:""}${saved?`・材料が減らなかった ${saved}回`:""}`,isMutT(grade)?"good mut"+(grade===5?" sup":""):"good",3000,true);
   save(); renderAll(); renderCook();
 }
