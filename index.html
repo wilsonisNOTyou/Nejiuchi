@@ -54,13 +54,13 @@ body{
 body.dishtheme .word-panel{background:linear-gradient(180deg,color-mix(in srgb, var(--dish) 22%, #333a45),color-mix(in srgb, var(--dish) 18%, #262c36) 55%,color-mix(in srgb, var(--dish) 20%, #2b323d))}
 body.dishtheme .plate{background:repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 2px, transparent 2px 4px),linear-gradient(180deg,color-mix(in srgb, var(--dish) 24%, #4a5261),color-mix(in srgb, var(--dish) 20%, #3a414d))}
 /* 料理の色(変異・超変異): 背景をはっきり料理の色に。作物が舞い、ネジが料理に */
-body.dishfun:not(.garden):not(.washi){
+body.dishtheme.dishfun:not(.garden):not(.washi){
   background-image:
     repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.06) 34px 36px),
     radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--dish) 92%, #fff) 0%, color-mix(in srgb, var(--dish) 78%, #000) 55%, var(--bg) 100%);
 }
 body.dishfun:not(.garden):not(.washi) #app{position:relative; z-index:1}
-body.dishfun h1, body.dishfun .subtitle, body.dishfun .mode-head{text-shadow:0 2px 0 rgba(0,0,0,.35), 0 0 12px rgba(0,0,0,.25)}
+body.dishtheme h1, body.dishtheme .subtitle, body.dishtheme .mode-head{text-shadow:0 3px 0 rgba(0,0,0,.5), 0 0 16px rgba(0,0,0,.4)}
 #dishFloat{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0}
 body.garden #dishFloat, body.washi #dishFloat{display:none}
 #dishFloat span{position:absolute; bottom:-70px; opacity:.55; animation:dishfloat linear infinite; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
@@ -73,8 +73,8 @@ body.garden #dishFloat, body.washi #dishFloat{display:none}
 /* 料理の色: 背景の光も料理の色に */
 body.dishtheme:not(.garden):not(.washi){
   background-image:
-    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.02) 34px 36px),
-    radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--dish) 35%, #232a35) 0%, var(--bg) 60%);
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.05) 34px 36px),
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--dish) 82%, #fff) 0%, color-mix(in srgb, var(--dish) 68%, #000) 55%, var(--bg) 100%);
 }
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
@@ -7428,15 +7428,17 @@ function applyTheme(){
     themeFloat(true,d,b.t);
     return;
   }
+  // ふつう: 演出はなし。背景と板の色だけ、はっきり料理の色に(変異・超変異より少し落ち着いた色)
   document.body.classList.remove("dishfun"); themeFloat(false);
-  de.style.setProperty("--dish",c);
-  de.style.setProperty("--bg",mix(18,"#101216"));
-  de.style.setProperty("--panel",mix(22,"#262a32"));
-  de.style.setProperty("--panel-hi",mix(26,"#363c47"));
-  de.style.setProperty("--line",mix(38,"#4a5262"));
-  de.style.setProperty("--amber",a);
-  de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 55%, #000)`);
-  de.style.setProperty("--steel",`color-mix(in srgb, ${a} 30%, #aeb8c6)`);
+  const cf=d.accent||c, mixf=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;
+  de.style.setProperty("--dish",cf);
+  de.style.setProperty("--bg",mixf(52,"#0c0c10"));
+  de.style.setProperty("--panel",mixf(36,"#14161c"));
+  de.style.setProperty("--panel-hi",mixf(44,"#1c1f27"));
+  de.style.setProperty("--line",mixf(60,"#ffffff"));
+  de.style.setProperty("--amber",`color-mix(in srgb, ${a} 40%, #ffffff)`);
+  de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 60%, #000)`);
+  de.style.setProperty("--steel",`color-mix(in srgb, ${a} 20%, #f0f2f6)`);
 }
 /* 庭の色(変異・超変異の料理): 収穫のたびに花火 */
 function dishFirework(k){
