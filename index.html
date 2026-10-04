@@ -8129,7 +8129,7 @@ $("g-bookList").addEventListener("click",e=>{
 /* ---------- 実績 ----------
    達成するとごほうびのネジを受け取れる(S.goals に受け取り済みを記録) */
 const anyQ = t => Object.values(S.harvestQ||{}).some(a=>(a&&a[t])>0);
-const kindsQ = t => Object.values(S.harvestQ||{}).filter(a=>(a&&a[t])>0).length;          // その品質で収穫した作物の種類数
+const kindsQ = t => Object.entries(S.harvestQ||{}).filter(([id,a])=>CROP[id] && !CROP[id].treasure && (a&&a[t])>0).length;   // その品質で収穫した作物の種類数(貴重品は数えない)
 const kinds = () => Object.values(S.harvestQ||{}).filter(a=>a&&a.some(x=>x>0)).length;    // 収穫した作物の種類数
 const gotRarity = r => CROPS.some(c=>c.r===r && !c.treasure && (S.got||{})[c.id]>0) ? 1 : 0;   // ガチャで引いたことがあるか
 const treasKinds = () => Object.values(S.treas||{}).filter(n=>n>0).length;
@@ -8137,6 +8137,7 @@ const TREAS_ALL = CROPS.filter(c=>c.treasure).length;
 const kindsCrop = () => CROPS.filter(c=>!c.treasure && (S.harvestBy[c.id]||0)>0).length;   // 貴重品を除いた、収穫した作物の種類数
 const CROP_ALL  = () => CROPS.filter(c=>!c.treasure).length;
 const SUP_ALL   = () => CROPS.filter(c=>!c.treasure && hasSup(c.id)).length;
+const MUT_ALL   = () => CROPS.filter(c=>!c.treasure && hasMut(c.id)).length;
 const kitKinds  = r => KIT_ORDER.filter(id=>(!r || GUR[id].r===r) && (S.got[id]||0)>0).length;   // 台所の宝物の種類数(r: GHR / GUR)
 const kitCapped = () => KIT_ORDER.some(id=>GUR[id].kit && kitVal(id)>=GUR[id].kit.cap) ? 1 : 0;
 /* 実績(中身の名前は goal のまま)。ジャンル(cat)ごとに、やさしい順に並べる。need は数か、数を返す関数 */
@@ -8167,11 +8168,18 @@ const GOALS = [
   { cat:"実りの質", ser:"q", id:"q1",   ic:"⭐", nm:"腕が上がった",   ds:"☆の作物を収穫する",            need:1,  now:()=>anyQ(1)?1:0, rw:300 },
   { cat:"実りの質", ser:"q", id:"q2",   ic:"🌟", nm:"極上の実り",     ds:"☆☆の作物を収穫する",          need:1,  now:()=>anyQ(2)?1:0, rw:2000 },
   { cat:"実りの質", ser:"q", id:"q3",   ic:"💫", nm:"至高の実り",     ds:"☆☆☆の作物を収穫する",        need:1,  now:()=>anyQ(4)?1:0, rw:10000 },
-  { cat:"実りの質", ser:"qk", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
-  { cat:"実りの質", ser:"qk", id:"q3k5", ic:"💫", nm:"至高のコレクション", ds:"☆☆☆の作物を5種類収穫する", need:5,  now:()=>kindsQ(4),   rw:50000 },
+  { cat:"実りの質", ser:"q2k", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
+  { cat:"実りの質", ser:"q3k", id:"q3k5", ic:"💫", nm:"至高のコレクション", ds:"☆☆☆の作物を5種類収穫する", need:5,  now:()=>kindsQ(4),   rw:50000 },
+  { cat:"実りの質", ser:"q3k", id:"q3k10", ic:"💫", nm:"至高の目利き",   ds:"☆☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(4), rw:150000 },
+  { cat:"実りの質", ser:"q3k", id:"q3k20", ic:"💫", nm:"至高の畑",       ds:"☆☆☆の作物を20種類収穫する", need:20, now:()=>kindsQ(4), rw:500000 },
+  { cat:"実りの質", ser:"q3k", id:"q3k30", ic:"💫", nm:"至高の農園",     ds:"☆☆☆の作物を30種類収穫する", need:30, now:()=>kindsQ(4), rw:1500000 },
+  { cat:"実りの質", ser:"q3k", id:"q3k45", ic:"💫", nm:"至高の名人",     ds:"☆☆☆の作物を45種類収穫する", need:45, now:()=>kindsQ(4), rw:3000000 },
+  { cat:"実りの質", ser:"q3k", id:"q3kAll",ic:"🏆", nm:"すべてを至高に", ds:"すべての作物の☆☆☆を収穫する(貴重品を除く)", need:CROP_ALL, now:()=>kindsQ(4), rw:5000000 },
   { cat:"実りの質", ser:"m", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
   { cat:"実りの質", ser:"m", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
   { cat:"実りの質", ser:"m", id:"m20",  ic:"✦",  nm:"変異の研究者",   ds:"変異の作物を20種類収穫する",   need:20, now:()=>kindsQ(3),   rw:80000 },
+  { cat:"実りの質", ser:"m", id:"m30",  ic:"✦",  nm:"変異の図録",     ds:"変異の作物を30種類収穫する",   need:30, now:()=>kindsQ(3),   rw:300000 },
+  { cat:"実りの質", ser:"m", id:"mAll", ic:"🏆", nm:"変異のすべて",   ds:"すべての作物の変異を収穫する", need:MUT_ALL, now:()=>kindsQ(3), rw:3000000 },
   { cat:"実りの質", ser:"x", id:"x1",   ic:"🌈", nm:"奇跡の実り",     ds:"超変異の作物を収穫する",       need:1,  now:()=>anyQ(5)?1:0, rw:50000 },
   { cat:"実りの質", ser:"x", id:"x3",   ic:"🌈", nm:"奇跡を重ねる",   ds:"超変異の作物を3種類収穫する",  need:3,  now:()=>kindsQ(5),   rw:150000 },
   { cat:"実りの質", ser:"x", id:"x10",  ic:"🌈", nm:"奇跡の収集家",   ds:"超変異の作物を10種類収穫する", need:10, now:()=>kindsQ(5),   rw:500000 },
