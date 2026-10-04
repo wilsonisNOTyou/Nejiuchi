@@ -1115,6 +1115,7 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 }
 #screen-garden .gsumhead{display:flex; align-items:baseline; gap:.6rem; margin-bottom:.3rem}
 #screen-garden .gsumhead b{color:var(--rc); font-size:1.05rem; white-space:nowrap}
+#screen-garden .gsumit .gbonus{font-size:.68rem; color:#2e9d6a; font-weight:800}
 #screen-garden .gsumit .gfrom{color:var(--ink-l); font-weight:600}
 #screen-garden .gsumhead span{color:var(--ink-l); font-size:.8rem}
 #screen-garden .gsumitems{display:flex; flex-wrap:wrap; gap:.3rem}
@@ -6601,8 +6602,9 @@ function summarizeGacha(n,res){
   const by={};
   for(const x of res){
     const key=(x.upg?"^":"")+x.id;   // 上位種に化けた食材は、そのまま出たものと分けて数える
-    const o=by[key]||(by[key]={ id:x.id, n:0, isNew:false, sold:0, upg:!!x.upg, r:x.r });
-    o.n++; if(x.isNew) o.isNew=true; if(x.sold) o.sold+=x.sold;
+    const o=by[key]||(by[key]={ id:x.id, n:0, bonus:0, isNew:false, sold:0, upg:!!x.upg, r:x.r });
+    o.n++; if(x.dbl){ o.n++; o.bonus++; }   // 種おかわり・食材おかわりで2つになった分も数える
+    if(x.isNew) o.isNew=true; if(x.sold) o.sold+=x.sold;
   }
   const groups=[];
   for(const r of RARITY_ORDER){
@@ -6613,7 +6615,7 @@ function summarizeGacha(n,res){
   const ups=Object.values(by).filter(o=>o.upg).sort((a,b)=>RARITY_ORDER.indexOf(b.r)-RARITY_ORDER.indexOf(a.r));
   if(ups.length) groups.push({ r:ups[0].r, up:true, items:ups, total:ups.reduce((a,x)=>a+x.n,0) });
   const all=Object.values(by);
-  return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), newKinds:all.filter(x=>x.isNew).length };
+  return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), bonus:all.reduce((a,x)=>a+x.bonus,0), newKinds:all.filter(x=>x.isNew).length };
 }
 function revealNext(){
   clearTimeout(gachaTimer);
@@ -6795,7 +6797,7 @@ function gachaBigHTML(){
     return `<div class="gsumsec ${g.r}${ri>=3?" hi":""}${last?" pop":""}" style="--rc:${RARITY[g.r].color}">
       <div class="gsumhead"><b>${g.up?"✨ 上位種に化けた食材":RARITY[g.r].label}</b><span>${fmtNum(g.total)}個 ・ ${g.items.length}種${g.up?" ・ 上の段の数とは別":""}</span></div>
       <div class="gsumitems">${g.items.map(x=>{ const c=itemOf(x.id), from=x.upg && FOOD[c.up]; return `<div class="gsumit${x.isNew?" new":""}">
-        ${from?`<span class="gi">${ico(from)}</span><span class="gnm gfrom">${from.name} →</span>`:""}<span class="gi">${ico(c)}</span><span class="gnm">${c.name}</span><span class="gct">×${fmtNum(x.n)}</span>
+        ${from?`<span class="gi">${ico(from)}</span><span class="gnm gfrom">${from.name} →</span>`:""}<span class="gi">${ico(c)}</span><span class="gnm">${c.name}</span><span class="gct">×${fmtNum(x.n)}</span>${x.bonus?`<span class="gbonus">(おかわり +${fmtNum(x.bonus)})</span>`:""}
         ${x.isNew?'<span class="gnew">NEW</span>':""}${x.sold?`<span class="gsold">+${fmtNum(x.sold)}</span>`:""}</div>`; }).join("")}</div>
     </div>`;
   }).join("");
@@ -6811,7 +6813,7 @@ function gachaBigHTML(){
       : `<div class="gspot plain">今回は HR 以上・NEW はありませんでした。また挑戦しましょう</div>`;
   }
   return `<div class="gsum">
-    <div class="gsumtop">${fmtNum(B.n)}連の結果${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}ネジ`:""}`:" ・ 開封中…"}</div>
+    <div class="gsumtop">${fmtNum(B.n)}連の結果${B.bonus?` ・ おかわり +${fmtNum(B.bonus)}個`:""}${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}ネジ`:""}`:" ・ 開封中…"}</div>
     ${secs}${spot}
   </div>`;
 }
