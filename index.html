@@ -6585,7 +6585,7 @@ function drawGacha(n){
       if(Math.random()<ev("Q1",.2,.5,0)){ S.seeds[x.id]++; x.dbl=true; }
     }
   }
-  S.gachaCount=(S.gachaCount||0)+n;
+  S.gachaCount=(S.gachaCount||0)+res.length;   // ガチャおかわりで増えた分も、引いた回数に数える
   if(!ownedSeeds().includes(S.seedId)){ const sd=res.find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
   checkUnlocks(); save();
   if(n>=1111){
