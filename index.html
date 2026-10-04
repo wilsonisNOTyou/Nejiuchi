@@ -6429,7 +6429,7 @@ function gainGur(id){
   return "";
 }
 const guardEvery = () => ev("λ",8,5,11);   // SR以上が1つ確定する間隔
-let gachaNote=[];   // 演出が終わってから出す GUR の知らせ
+let gachaNote=[];   // 演出が終わってから出す台所の宝物の知らせ(はじめての1回だけ)
 function flushGachaNote(){ for(const m of gachaNote) toast(m,"good mut sup",8000,true); gachaNote=[]; }
 function buyGachaPass(n,m="n"){
   if(gachaPass(n,m)) return;
@@ -6474,7 +6474,7 @@ function drawGacha(n){
       if(Math.random()<ev("ζ",.2,1,0)){ S.food[x.id]++; x.dbl=true; }
       continue;
     }
-    if(GUR[x.id]){ gachaNote.push(gainGur(x.id)); continue; }
+    if(GUR[x.id]){ const m=gainGur(x.id); if(S.got[x.id]===1) gachaNote.push(m); continue; }   // 知らせは、その宝物をはじめて手に入れたときだけ
     if(autoSeed(x.id)){                      // 種の自動売却
       const two=Math.random()<ev("Q1",.2,.5,0);   // 料理: 種おかわり
       const gain=seedPrice(CROP[x.id])*(two?2:1);
