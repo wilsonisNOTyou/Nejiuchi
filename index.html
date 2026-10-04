@@ -6093,15 +6093,15 @@ function shopRows(){
         keys: S.counter?"":"<b>Enter</b> 買う", enter:()=>buyCounter(), shift:()=>buyCounter() });
     }
     // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)。種ガチャとわくわくガチャは別々に買う
+    // 並べるのは、まだ持っていない中でいちばん少ない連だけ(1,111連 → 11,111連 → 111,111連の順に買う)
     for(const m of ["n","w"]){
       if(m==="w" && !cookOpen()) continue;   // わくわくガチャが解放されてから並べる
-      for(const n of GACHA_BIG){
-        const has=gachaPass(n,m);
-        rows.push({ ic:"🎟️",
-          nm: `${MACHINES[m].name}の${fmtNum(n)}連の権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(passPrice(n,m))+"ネジ"}</span>`,
-          ds: `${MACHINES[m].name}で ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n,m))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます`,
-          keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n,m), shift:()=>buyGachaPass(n,m) });
-      }
+      const n=GACHA_BIG.find(n=>!gachaPass(n,m));
+      if(!n) continue;
+      rows.push({ ic:"🎟️",
+        nm: `${MACHINES[m].name}の${fmtNum(n)}連の権利 <span style="color:var(--ink-l)">${fmtNum(passPrice(n,m))}ネジ</span>`,
+        ds: `${MACHINES[m].name}で ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n,m))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます`,
+        keys: "<b>Enter</b> 買う", enter:()=>buyGachaPass(n,m), shift:()=>buyGachaPass(n,m) });
     }
   }else if(shopTab===4){
     if(!cookOpen()) rows.push({ ic:"🔒", nm:"レシピ", ds:COOK_LOCK_MSG(), keys:"", locked:true, enter:()=>{}, shift:()=>{} });
@@ -6736,7 +6736,7 @@ function gachaHTML(){
         <div class="gneck"></div>
         <div class="gbody"><span class="gknob"></span><span class="gout"></span></div>
       </div>
-      <div class="gcost"><div class="gcrows">${[1,11,111,...GACHA_BIG.filter(n=>gachaPass(n))].map(n=>`<span class="gcl">${fmtNum(n)}回</span><span class="gcv"><b>${fmtNum(gachaCost(n))}</b>ネジ</span>`).join("")}</div><small>${guardEvery()}回ごとにSR以上1つ確定${ev("γ",1,1,0)?" ・ おかわりあり":""}${gachaM==="w"?" ・ 作物の種・食材・GUR が出ます":""}${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
+      <div class="gcost"><div class="gcrows">${[1,11,111,...GACHA_BIG.filter(n=>gachaPass(n))].map(n=>`<span class="gcl">${fmtNum(n)}回</span><span class="gcv"><b>${fmtNum(gachaCost(n))}</b>ネジ</span>`).join("")}</div><small>${guardEvery()}回ごとにSR以上1つ確定${ev("γ",1,1,0)?" ・ おかわりあり":""}${gachaM==="w"?" ・ 作物の種と食材が出ます":""}${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
       <div class="gtotal">これまで ${fmtNum(S.gachaCount||0)}回</div>
     </div>
     <div class="gright">
