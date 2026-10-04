@@ -6144,6 +6144,7 @@ function renderShop(){
 function shopActBtns(keys){
   if(!keys) return "";
   return `<div class="acts">`+keys.split("<br>").map(part=>{
+    const a=part.match(/<b>A<\/b>\s*(.*)/); if(a) return `<button class="sbtn" data-act="auto">${a[1].replace(/<[^>]*>/g,"").trim()}</button>`;   // 料理番の村人
     const m=part.match(/<b>(Shift\+|Ctrl\+)?Enter<\/b>\s*(.*)/); if(!m) return "";
     const label=m[2].replace(/<[^>]*>/g,"").trim()||"決定";
     const act=m[1]==="Shift+"?"shift":m[1]==="Ctrl+"?"all":"enter";
@@ -6723,7 +6724,7 @@ function kitSub(id){   // 台所の宝物の「今の状態」
   const g=GUR[id], n=kitN(id);
   if(g.kit) return `今の合計 <b>+${kitVal(id)}${g.kit.unit}</b>${kitVal(id)>=g.kit.cap?" (上限)":""}`;
   if(id==="hourglass"||id==="bento") return n>0?`<b>Enter</b> で使う${id==="bento"&&bentoOn()?` ・ 使っています(残り ${fmtLeft(S.bentoUntil-Date.now())})`:""}`:"";
-  if(id==="fridge") return n>0?"<b>はたらいています</b>(閉じている間、料理の効果時間が減りません)":"";
+  if(id==="fridge") return "";
   if(id==="cookvil") return n>0?`任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(料理の「作る」で A)`:"";
   const sw = `<span class="kswap"><button class="sbtn" data-kd="-1">◀ Q</button><button class="sbtn" data-kd="1">E ▶</button></span>`;   // ボタンは名前より前(名前の長さで位置が動かないように)
   if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${S.kamado&&DISH[S.kamado]?`${esc(M_COLOR[S.kamado]||"")}(${esc(DISH[S.kamado].name)})`:"なし"}</b>`:"";
@@ -7359,7 +7360,7 @@ function cookRowsOf(){
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${seen?dishIco(d,g):"❔"}</span>`,
         nm:`${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}(${fmtMin(min)}) ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
         ds:`効果: ${effLine(d,plan?plan.grade:g)} ・ 作り置き ×${(S.dishes[d.id]||{})[plan?plan.grade:g]||0}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
-        keys: plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"",
+        keys: [plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"", kitN("cookvil")>0?`<b>A</b> ${ac?"料理番をやめる":"料理番に任せる"}`:""].filter(Boolean).join("<br>"),
         locked:!plan, enter:()=>cookMake(d.id,1), shift:()=>cookMake(d.id,99), left:()=>cookStep(d.id,-1), right:()=>cookStep(d.id,1), auto:()=>toggleAutoCook(d.id,g) });
     }
   }else if(cookTab===1){
@@ -7525,7 +7526,7 @@ function renderCook(){
     body.innerHTML=rows.map((r,i)=>`<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
       <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
-      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("");
+      <div class="keyk">${window.IS_MOBILE ? shopActBtns(r.keys) : (i===cur?r.keys:"")}</div></div>`).join("");
   }
   $("g-cookHint").innerHTML = window.IS_MOBILE ? "" :
     `<b>Tab</b> ${COOK_TABS.map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / 変異 / 超変異)"+(kitN("cookvil")>0?` ・ <b>A</b> 料理番に任せる(${(S.autoCook||[]).length} / ${kitN("cookvil")})`:""):cookTab===1?" ・ <b>← →</b> 段階(作り置きのあるもの)":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
@@ -7553,6 +7554,7 @@ $("g-cookBody").addEventListener("click",e=>{
   const r=cookRows[cookCur[cookTab]];
   const g=e.target.closest(".dgrade"); if(g && r && r.left){ r.right(); return; }
   const b=e.target.closest("[data-act]");
+  if(b && r && b.dataset.act==="auto" && r.auto){ r.auto(); return; }   // 材料が足りなくても任せられる
   if(b && r && !r.locked){ (b.dataset.act==="shift"?r.shift:r.enter)(); return; }
   renderCook();
 });
