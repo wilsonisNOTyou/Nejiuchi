@@ -1059,6 +1059,19 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #g-cookShow.g3 .csnm{color:#6a3aa8}
 #g-cookShow.g5 .csnm{color:#b8327a}
 #g-cookShow .cssub{position:relative; font-weight:800; font-size:1rem; color:#5a3a12; background:rgba(255,250,235,.92); border:2px solid #c8a06a; border-radius:999px; padding:.15rem .9rem}
+#g-cookShow .cstop{position:relative; font-size:1.05rem; font-weight:900; color:#fff; background:#c8742a; border-radius:999px; padding:.1rem .9rem; box-shadow:0 3px 0 #8a4a14}
+#g-cookShow.k-eat .cstop{background:#e2589b; box-shadow:0 3px 0 #a8306a}
+#g-cookShow.k-prep .cstop{background:#8a6a3a; box-shadow:0 3px 0 #5a4220}
+#g-cookShow .cssub{max-width:min(36rem,86vw); text-align:center; line-height:1.5}
+#g-cookShow.k-eat .csart{animation:g-csbite var(--cs-dur) ease-in-out forwards}
+#g-cookShow.k-prep .csart{animation:g-csprep var(--cs-dur) ease-out forwards}
+#g-cookShow .csemo{display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:7rem}
+#g-cookShow .csp.heart{border-radius:50% 50% 0 50%; transform:rotate(45deg)}
+#g-cookShow.k-eat .csrays{background:repeating-conic-gradient(rgba(255,170,200,.55) 0 10deg, transparent 10deg 20deg)}
+#g-cookShow.k-prep .csrays{background:repeating-conic-gradient(rgba(220,180,120,.5) 0 10deg, transparent 10deg 20deg)}
+#g-cookShow.k-eat.g3 .csrays, #g-cookShow.k-prep.g3 .csrays{background:repeating-conic-gradient(rgba(190,140,255,.6) 0 10deg, transparent 10deg 20deg)}
+@keyframes g-csbite{0%,20%{transform:scale(1)} 26%{transform:scale(.9,1.06)} 32%{transform:scale(1)} 38%{transform:scale(.9,1.06)} 44%{transform:scale(1)} 50%{transform:scale(.9,1.06)} 56%{transform:scale(1)} 100%{transform:scale(.55); opacity:.0}}
+@keyframes g-csprep{0%{transform:translateY(-60px) scale(.6)} 18%{transform:translateY(0) scale(1.08,.92)} 26%{transform:scale(.96,1.04)} 34%{transform:scale(1)} 100%{transform:scale(1)}}
 #g-cookShow .csnew{margin-left:.4rem; color:#fff; background:#e2589b; border-radius:6px; padding:0 .4rem; font-size:.85rem}
 #g-cookShow .csp{position:absolute; top:50%; left:50%; width:.7rem; height:.7rem; border-radius:50%; background:var(--c); opacity:0;
   animation:g-cspop 1.1s ease-out var(--d) forwards}
@@ -1066,7 +1079,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 @keyframes g-csbox{0%{opacity:0; transform:scale(.25) rotate(-12deg)} 14%{opacity:1; transform:scale(1.12) rotate(3deg)} 22%{transform:scale(1) rotate(0)} 80%{opacity:1; transform:scale(1)} 100%{opacity:0; transform:scale(1.08) translateY(-10px)}}
 @keyframes g-csspin{to{transform:rotate(360deg)}}
 @keyframes g-cspop{0%{opacity:1; transform:translate(-50%,-50%) scale(.4)} 100%{opacity:0; transform:translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1)}}
-@media (prefers-reduced-motion:reduce){ #g-cookShow .csrays, #g-cookShow .csp{animation:none; display:none} #g-cookShow .csbox{animation:g-csbg var(--cs-dur) linear forwards} }
+@media (prefers-reduced-motion:reduce){ #g-cookShow .csrays, #g-cookShow .csp{animation:none; display:none} #g-cookShow .csbox{animation:g-csbg var(--cs-dur) linear forwards} #g-cookShow .csart{animation:none!important} }
 html.mobile #g-cookShow .csart{width:7rem; height:7rem}
 html.mobile #g-cookShow .csnm{font-size:1.3rem}
 #g-gachaFlash{position:fixed; inset:0; pointer-events:none; z-index:3; opacity:0}
@@ -5029,6 +5042,7 @@ function newState(){
     fromTypingMin:0, fromTypingScrews:0,
     villagers:0, vLog:{}, vilLv:0,
     vilOrder:false, vilAutoH:true, vilAutoM:false,   // 村人の指示書(自動収穫・変異の自動収穫)
+    cut:{},   // 演出カット: { cook / eat / prep : 0 なし・1 買った(演出あり)・2 カット中 }
     counter:false,                                   // 畑のカウンタ
     owner:Math.random().toString(36).slice(2)+Date.now().toString(36),  // 番付で自分の記録を見分ける印
     rankName:"",
@@ -6124,6 +6138,14 @@ function shopRows(){
         nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"ネジ"}</span>`,
         ds: `庭の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します(村人の区画と設置物は数えません)`,
         keys: S.counter?"":"<b>Enter</b> 買う", enter:()=>buyCounter(), shift:()=>buyCounter() });
+    }
+    // 演出カット(料理・食べる・仕込み)。買ったあとは Enter でカットする / しないを切り替える
+    if(cookOpen()) for(const k of Object.keys(CUTS)){
+      const st=(S.cut||{})[k]||0;
+      rows.push({ ic:"✂️",
+        nm: `${CUTS[k]}の演出カット <span style="color:var(--ink-l)">${st?(st===2?"カット中":"演出あり"):fmtNum(CUT_COST)+"ネジ"}</span>`,
+        ds: `${CUTS[k]}に画面の中央に出る、大きな絵の演出を出さないようにします(お知らせは出ます)。${st?"":"買ったあとは、いつでも戻せます"}`,
+        keys: st?`<b>Enter</b> ${st===2?"演出を見せる":"演出をカットする"}`:"<b>Enter</b> 買う", enter:()=>buyCut(k), shift:()=>buyCut(k) });
     }
     // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)。種ガチャとわくわくガチャは別々に買う
     // 並べるのは、まだ持っていない中でいちばん少ない連だけ(1,111連 → 11,111連 → 111,111連の順に買う)
@@ -7483,34 +7505,62 @@ function cookStep(id,dir){
   cookGrade[id]=DISH_GRADES[(i+dir+DISH_GRADES.length)%DISH_GRADES.length];
   sfx.tab(); renderCook();
 }
-/* 料理ができたときの演出: 中央に大きく絵と名前を出す。段階が上がるほど光と音が豪華になる */
+/* 料理・食べる・仕込みの演出: 中央に大きく絵と名前を出す。変異・超変異ほど光と音が豪華になる。
+   お店の「演出カット」でそれぞれ止められる(止めたときは false を返すので、ふだんの音だけ鳴らす) */
+const CUTS = { cook:"料理を作ったとき", eat:"料理を食べたとき", prep:"仕込みをしたとき" };
+const CUT_COST = 30000;
+const cutOn = k => (S.cut||{})[k]===2;
 let cookShowTimer=null;
-function cookShow(d,grade,count,first){
-  const el=$("g-cookShow"); if(!el) return;
-  const dur = grade===5 ? 2600 : grade===3 ? 2100 : 1700;
-  const cols = grade===5 ? ["#ff9ec4","#ffd86a","#7fd4ff","#b0f0c0","#c8a8ff"] : grade===3 ? ["#c8a8ff","#e8d8ff","#9a6ae8"] : ["#ffd86a","#ffb35c","#fff2c0"];
+function bigShow(kind,o){
+  const el=$("g-cookShow"); if(!el || cutOn(kind)) return false;
+  const grade=o.grade||0;
+  const dur = (grade===5 ? 2600 : grade===3 ? 2100 : 1700) + (kind==="eat" ? 500 : 0);
+  const cols = kind==="eat" ? ["#ff8fb0","#ffc2d4","#ffd86a"]
+             : grade===5 ? ["#ff9ec4","#ffd86a","#7fd4ff","#b0f0c0","#c8a8ff"] : grade===3 ? ["#c8a8ff","#e8d8ff","#9a6ae8"]
+             : kind==="prep" ? ["#e8c48a","#c8a06a","#fff2c0"] : ["#ffd86a","#ffb35c","#fff2c0"];
   const np = grade===5 ? 28 : grade===3 ? 18 : 12;
   let parts="";
   for(let i=0;i<np;i++){
     const a=i/np*Math.PI*2+Math.random()*.4, r=110+Math.random()*90;
-    parts+=`<i class="csp" style="--c:${cols[i%cols.length]}; --x:${Math.round(Math.cos(a)*r)}px; --y:${Math.round(Math.sin(a)*r)}px; --d:${Math.round(80+Math.random()*260)}ms"></i>`;
+    parts+=`<i class="csp${kind==="eat"?" heart":""}" style="--c:${cols[i%cols.length]}; --x:${Math.round(Math.cos(a)*r)}px; --y:${Math.round(Math.sin(a)*r)}px; --d:${Math.round((kind==="eat"?700:80)+Math.random()*260)}ms"></i>`;
   }
   el.className=""; void el.offsetWidth;
   el.style.setProperty("--cs-dur",dur+"ms");
   el.innerHTML=`<div class="csbg"></div><div class="csbox"><div class="csrays"></div>${parts}
-    <div class="csart">${d.art[grade===5?2:grade===3?1:0]}</div>
-    <div class="csnm">${esc(dishName(d,grade))}</div>
-    <div class="cssub">${gradeName(grade)} ・ ${count}つできました${first?'<span class="csnew">NEW</span>':""}</div></div>`;
-  el.className="on g"+grade;
-  sfxCook(grade);
+    ${o.top?`<div class="cstop">${o.top}</div>`:""}
+    <div class="csart">${o.art}</div>
+    <div class="csnm">${esc(o.title)}</div>
+    <div class="cssub">${o.sub}${o.first?'<span class="csnew">NEW</span>':""}</div></div>`;
+  el.className=`on g${grade} k-${kind}`;
+  ({cook:sfxCook, eat:sfxEat, prep:sfxPrep})[kind](grade);
   clearTimeout(cookShowTimer);
   cookShowTimer=setTimeout(()=>{ el.className=""; el.innerHTML=""; },dur);
+  return true;
 }
+const cookShow = (d,grade,count,first) => bigShow("cook",{ art:d.art[grade===5?2:grade===3?1:0], title:dishName(d,grade), grade, first,
+  sub:`${gradeName(grade)} ・ ${count}つできました` });
 function sfxCook(grade){
   noise(.35,3200,.7,.06); noise(.25,1800,.9,.04,.08);            // ジュッ(焼ける音)
   if(grade===5){ sfxWaku(5); setTimeout(()=>{ beep(784,1.2,"sine",.05); beep(988,1.2,"sine",.04); beep(1175,1.2,"sine",.04); beep(1568,1.2,"triangle",.03); },420); }
   else if(grade===3) setTimeout(()=>seq([880,1109,1319,1760,2217],55,"triangle",.05,.18),120);
   else setTimeout(()=>seq([784,988,1175,1568],60,"triangle",.05,.14),120);
+}
+function sfxEat(grade){
+  for(const t of [250,520,790]) setTimeout(()=>{ noise(.09,900,1.2,.09); beep(180,.07,"sine",.05); },t);   // もぐもぐ
+  setTimeout(()=>{ if(grade===5){ sfxWaku(4); } else if(grade===3) seq([1047,1319,1568,2093],60,"triangle",.05,.2); else seq([880,1109,1319],70,"sine",.05,.16); },1050);
+}
+function sfxPrep(grade){
+  for(const t of [0,170,340]) setTimeout(()=>{ beep(260,.09,"triangle",.07); noise(.05,700,1.4,.05); },t);   // トントントン
+  setTimeout(()=>grade ? seq([988,1319,1568,1976],55,"triangle",.05,.18) : seq([659,880,1047],65,"sine",.05,.14),520);
+}
+/* 演出カットを買う / オンオフ */
+function buyCut(k){
+  S.cut=S.cut||{};
+  if(S.cut[k]){ S.cut[k]=S.cut[k]===2?1:2; sfx.tool(); toast(`${CUTS[k]}の演出を ${S.cut[k]===2?"カットします":"見せます"}`,"",2600); save(); renderAll(); return; }
+  if(!spend(CUT_COST)) return;
+  S.cut[k]=2; sfx.buy();
+  toast(`${CUTS[k]}の演出カットを買いました。これからは演出が出ません(お店の効率化の Enter で、いつでも戻せます)`,"good",4200);
+  save(); renderAll();
 }
 function cookMake(id,times){
   const d=DISH[id]; if(!d || !S.recipes[id]) return;
@@ -7528,7 +7578,7 @@ function cookMake(id,times){
     made++; S.cookCount=(S.cookCount||0)+1;
   }
   if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
-  cookShow(d,grade,made+extra,isFirst);
+  if(!cookShow(d,grade,made+extra,isFirst)) sfx.buy();
   toast(`${dishIco(d,grade)} ${esc(dishName(d,grade))}(${gradeName(grade)})を ${made+extra}つ 作りました${extra?`(おかわり +${extra})`:""}${saved?`・材料が減らなかった ${saved}回`:""}`,isMutT(grade)?"good mut"+(grade===5?" sup":""):"good",3000,true);
   save(); renderAll(); renderCook();
 }
@@ -7537,23 +7587,28 @@ function cookEat(id,g){
   if(d.eff==="P8" && !buffNow()){ sfx.nope(); toast("今かかっている料理の効果がないので、延ばせません","warn",3200); return; }
   st[g]--; S.ateCount=(S.ateCount||0)+1;
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
+  let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
     const hours = isMutT(g) ? 72 : 6;
     tick(); advanceAll(hours*HOUR);
+    what=`すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
   }else if(d.eff==="P8"){   // 効果を延ばす: 今の効果に時間を足す
     const b=buffNow();
     const add = isMutT(g) ? 60 : 10;
     b.until+=add*60000;
     const b2=buff2Now(); if(b2) b2.until+=add*60000;
+    what=`${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました(残り ${fmtLeft(b.until-Date.now())})`,"good",5200,true);
   }else{
     const old=buffNow(), two=bentoOn() && old;   // 二段重ねのお弁当箱: 前の効果を2つ目に残す
     if(two){ const lost=buff2Now(); S.buff2=old; if(lost) toast(`${esc(dishName(DISH[lost.d],lost.t))}の効果は終わりました(お弁当箱に入るのは2つまで)`,"warn",4200); }
     S.buff={ d:id, t:g, until:Date.now()+dishMin(g)*60000 };
+    what=`${esc(effText(d,g))}(${fmtMin(dishMin(g))})`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。${esc(effText(d,g))}(${fmtMin(dishMin(g))})${two?` ・ ${esc(dishName(DISH[old.d],old.t))}の効果も続いています(お弁当箱)`:(old?` ・ ${esc(dishName(DISH[old.d],old.t))}の効果は上書きされました`:"")}`,"good",5200,true);
   }
-  sfx.vil(); save(); renderAll(); renderCook();
+  if(!bigShow("eat",{ art:d.art[g===5?2:g===3?1:0], title:dishName(d,g), grade:g, top:"いただきます!", sub:what })) sfx.vil();
+  save(); renderAll(); renderCook();
 }
 /* 料理番の村人: 任せた料理を、作り置きが10個になるまで材料があるかぎり作る(1分ごと) */
 function toggleAutoCook(id,g){
@@ -7624,7 +7679,8 @@ function prepMake(pid,up,times){
     if(Math.random()<ev("X",.2,1,0)+kitVal("board")/100){ S.food[out]++; S.got[out]++; extra++; } }   // 料理・ひのきのまな板: 仕込みおかわり
   S.prepCount=(S.prepCount||0)+made;
   if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
-  sfx.buy();
+  const f=FOOD[out];
+  if(!bigShow("prep",{ art:f.art||`<span class="csemo">${f.icon}</span>`, title:f.name, grade:up?3:0, top:"仕込みができました", sub:`${up?"上位種 ・ ":""}${made+extra}つできました` })) sfx.buy();
   toast(`${ico(FOOD[out])} ${esc(FOOD[out].name)}を ${made+extra}つ 仕込みました${extra?`(おかわり +${extra})`:""}`,"good",3000,true);
   save(); renderAll(); renderCook();
 }
