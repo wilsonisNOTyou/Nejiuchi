@@ -5146,12 +5146,14 @@ const sgCropId = () => { const ok=sgCrops(); return ok.some(c=>c.id===S.sgCrop) 
 /* 村人が育てる作物。元気の種を買うたびに、お店にいつも並ぶ作物の中で1段上がる */
 const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","nejitree"];
 const VIL_UP_PRICES = [30000,60000,120000,250000,500000,1000000,2000000,4000000];
-/* 料理: 村人がガチャの作物を育てる(ふつう SRまで / 強い HR〜GSR) */
+/* 料理: 村人がガチャの作物を育てる(ふつう N・R / 強い SR〜UR) */
 function vilGachaCrop(){
-  const rs = eff("O")===2 ? ["HR","UR","GSR"] : ["N","R","SR"];
+  const rs = eff("O")===2 ? ["SR","HR","UR"] : ["N","R"];
   const pool=CROPS.filter(c=>c.gacha && !c.treasure && rs.includes(c.r));
   return pool[Math.floor(Math.random()*pool.length)].id;
 }
+/* 村人の種代: ガチャの作物は種代がないので、お店の作物と同じくらい(売値の1/3)を払う */
+const vilSeedCost = c => c.cost>0 ? c.cost : Math.round(c.price/3);
 const vilCropId = () => VIL_LADDER[Math.min(S.vilLv||0, VIL_LADDER.length-1)];
 const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length-1)];
 function villagerAdvance(p,dt){
@@ -5161,7 +5163,7 @@ function villagerAdvance(p,dt){
     if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
       const c=CROP[p.vil==="sg" ? sgCropId() : (eff("O") ? vilGachaCrop() : vilCropId())];   // シゴデキ村人は選んだ作物
-      const cost=Math.round(c.cost*ev("Z",.5,0,1));   // 料理で半分・無料
+      const cost=Math.round(vilSeedCost(c)*ev("Z",.5,0,1));   // 料理で半分・無料
       if(S.money<cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
       S.money-=cost;
       S.vLog.spent=(S.vLog.spent||0)+cost;
@@ -7213,7 +7215,7 @@ const EFFS = {
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
   M:{ nm:"画面の色",             n:"ホーム画面とネジ打ちが料理の色に染まる", s:"ホーム画面とネジ打ちが料理の色に鮮やかに染まり、作物が舞い、ネジが料理に変わる。庭では収穫のたびに花火があがる" },
   N:{ nm:"1語のネジ",            n:"ネジ打ちから庭に届くネジ 2倍",         s:"ネジ打ちから庭に届くネジ 4倍" },
-  O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(SRまで)を育てる",  s:"村人がガチャの作物(HR〜GSR)を育てる" },
+  O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(N・R)を育てる",  s:"村人がガチャの作物(SR〜UR)を育てる" },
   P:{ nm:"一括水やり",           n:"じょうろ1回で、その畑ぜんぶに水やり",  s:"じょうろ1回で、すべての畑に水やり" },
   Q:{ nm:"一括収穫",             n:"収穫すると、その畑の実りをぜんぶ収穫", s:"収穫すると、すべての畑の実りをぜんぶ収穫" },
   R:{ nm:"品質アップ",           n:"収穫する作物が1段上の品質になる",      s:"収穫する作物がかならず ☆☆☆ になる" },
