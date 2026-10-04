@@ -5823,15 +5823,15 @@ function harvestOne(k){
   if(autoCrop(c.id) && !mut){                           // 変異は自動売却しない
     const gain=priceOf(c.id,t)*num;
     S.money+=gain; S.totalSales+=gain;
-    floatAt(k,`${ico(c)}${QUALITY[t].mark}${num>1?"×2":""} +${fmtNum(gain)}`);
+    floatAt(k,`${ico(c)}${QUALITY[t].mark}${num>1?"×"+num:""} +${fmtNum(gain)}`);
   }else{
     invAdd(c.id,t,num);
-    floatAt(k,"+"+icoQ(c,t)+(mut?"":QUALITY[t].mark)+(num>1?"×2":""));
+    floatAt(k,"+"+icoQ(c,t)+(mut?"":QUALITY[t].mark)+(num>1?"×"+num:""));
   }
   const first=!((S.harvestQ[c.id]||[])[t]>0);
   for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
   if(mut){
-    toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))} が穫れました${first?"(図鑑に載りました)":""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
+    toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))}${num>1?` ×${num}`:""} が穫れました${first?"(図鑑に載りました)":""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
     sfx.vil();
   }
   else if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。${kb("図鑑(Space)","図鑑")}に載りました`,"good",4000,true);
@@ -5872,9 +5872,11 @@ function act(k){
                                : [k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]));
       for(const x of targets) harvestOne(x);
       if(eff("Q")===2 && !realFields){   // 料理: すべての畑の実りを収穫する(ほかの畑は演出なし)
-        const here=S.cur;
+        const here=S.cur, h0=S.totalHarvest, m0=S.money;
         S.fields.forEach((fx,fi)=>{ if(fi===here) return; S.cur=fi; quietFx=true; for(const x of KEYS){ const q=fx[x]; if(q.crop && isRipe(q) && (!q.vil || q.crop.mut || !S.vilAutoH)) harvestOne(x); } quietFx=false; });
         S.cur=here;
+        const nh=S.totalHarvest-h0, gm=S.money-m0;
+        if(nh>0) toast(`ほかの畑でも ${fmtNum(nh)}個 収穫しました${gm>0?`(自動売却 +${fmtNum(gm)}ネジ)`:""}`,"good",4200);
       }
       sfx.harvest();
       checkUnlocks();
@@ -6615,7 +6617,7 @@ function summarizeGacha(n,res){
   const ups=Object.values(by).filter(o=>o.upg).sort((a,b)=>RARITY_ORDER.indexOf(b.r)-RARITY_ORDER.indexOf(a.r));
   if(ups.length) groups.push({ r:ups[0].r, up:true, items:ups, total:ups.reduce((a,x)=>a+x.n,0) });
   const all=Object.values(by);
-  return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), bonus:all.reduce((a,x)=>a+x.bonus,0), newKinds:all.filter(x=>x.isNew).length };
+  return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), extra:res.filter(x=>x.extra).length, bonus:all.reduce((a,x)=>a+x.bonus,0), newKinds:all.filter(x=>x.isNew).length };
 }
 function revealNext(){
   clearTimeout(gachaTimer);
@@ -6813,7 +6815,7 @@ function gachaBigHTML(){
       : `<div class="gspot plain">今回は HR 以上・NEW はありませんでした。また挑戦しましょう</div>`;
   }
   return `<div class="gsum">
-    <div class="gsumtop">${fmtNum(B.n)}連の結果${B.bonus?` ・ おかわり +${fmtNum(B.bonus)}個`:""}${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}ネジ`:""}`:" ・ 開封中…"}</div>
+    <div class="gsumtop">${fmtNum(B.n)}連の結果${B.extra?` ・ ガチャおかわり +${fmtNum(B.extra)}回`:""}${B.bonus?` ・ 種・食材おかわり +${fmtNum(B.bonus)}個`:""}${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}ネジ`:""}`:" ・ 開封中…"}</div>
     ${secs}${spot}
   </div>`;
 }
