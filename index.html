@@ -860,6 +860,11 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .xbtn{margin-left:.4rem}
 #screen-garden .modal{cursor:pointer}
 #screen-garden .modal .panel{cursor:default}
+#screen-garden .noticepanel{max-width:40rem}
+#screen-garden .noticebody{line-height:1.8; margin:.4rem 0 1rem}
+#screen-garden .noticebody li{margin:.35rem 0}
+#screen-garden .noticebody b{color:#a0522d}
+#screen-garden .noticefoot{text-align:center}
 #screen-garden .rk-input{
   font-family:inherit; font-size:1.05rem; color:var(--ink); background:#fff;
   border:2px solid var(--wood-d); border-radius:8px; padding:.55rem .9rem; width:min(300px,80vw);
@@ -1835,6 +1840,15 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div id="g-dbookDetail" class="bookdetail"></div>
       </div>
       <div class="keyhint"><b>↑ ↓</b> 料理を選ぶ ・ <b>← →</b> ふつう / 変異 / 超変異を切り替え ・ <b>Tab</b> 実績・図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <!-- 料理の解放のお知らせ(Enter で閉じる。まわりを押しても閉じない) -->
+  <div class="modal" id="g-notice">
+    <div class="panel noticepanel">
+      <div class="phead"><h2>🍳 料理とわくわくガチャが解放されました!</h2></div>
+      <div id="g-noticeBody" class="noticebody"></div>
+      <div class="noticefoot"><button class="sbtn main" id="g-noticeOk">わかった(Enter)</button></div>
     </div>
   </div>
 
@@ -5489,7 +5503,8 @@ function checkUnlocks(){
   if(cookOpen() && !S.known.includes("cook")){
     S.known.push("cook");
     S.recipes=S.recipes||{}; S.recipes.carrotsoup=true;   // 最初の1品はレシピを渡す(にんじんだけで作れる)
-    toast("🍳 料理とわくわくガチャが解放されました! にんじんスープのレシピをもらいました。0 で料理、ガチャ(7)の ← → でわくわくガチャへ。ほかのレシピはお店で買えます","good mut",10000,true);
+    S.inv.carrot=S.inv.carrot||[0,0,0,0,0,0]; S.inv.carrot[0]=(S.inv.carrot[0]||0)+10;   // にんじん10本も渡す
+    S.cookNotice=true;   // 説明のお知らせ(庭が開いているときに出す)
     renderCookLock();
   }
   for(const it of items){
@@ -8222,6 +8237,7 @@ function onKey(e){
   if(modal==="book"){ bookKey(e); return; }
   if(modal==="goal"){ goalKey(e); return; }
   if(modal==="dbook"){ dbookKey(e); return; }
+  if(modal==="notice"){ e.preventDefault(); if(e.key==="Enter") closeModal(); return; }   // 料理の解放のお知らせは Enter でだけ閉じる
   if(modal==="cook"){ cookKey(e); return; }
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
@@ -8266,10 +8282,24 @@ $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
 $("g-cookBtn").addEventListener("click",()=>{ if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } openModal("cook"); });
 /* 料理のボタン: 解放前は鍵つきで薄く */
+/* 料理の解放のお知らせ: 大事な説明なので、勝手に閉じず Enter で閉じる */
+function showCookNotice(){
+  if(!S.cookNotice || scene!=="garden" || modal || realFields) return;
+  S.cookNotice=false; save();
+  $("g-noticeBody").innerHTML=`<ul>
+    <li>${dishIco(DISH.carrotsoup,0)} <b>にんじんスープのレシピ</b>と、🥕 <b>にんじん10本</b>をもらいました。<b>0</b> で料理の画面を開き、「作る」で <b>Enter</b> を押すと作れます。</li>
+    <li>作った料理は作り置きできます。「食べる」で食べると、<b>10分</b>のあいだ効果が続きます。かかる効果は1つだけで、次に食べると上書きされます。</li>
+    <li>ほかのレシピは、お店(<b>Tab</b>)の「レシピ」で買えます。材料の多くは、わくわくガチャから出る食材です。</li>
+    <li><b>わくわくガチャ</b>は、ガチャ(<b>7</b>)で <b>← →</b> を押すと切り替わります。1回1,000ネジで、作物の種と食材、まれに台所の宝物が出ます。</li>
+    <li>変異・超変異の作物と、上位種の食材だけで作ると、<b>変異・超変異の料理</b>になり、効果が強くなります。</li>
+  </ul>`;
+  openModal("notice"); sfx.vil();
+}
 function renderCookLock(){ const b=$("g-cookBtn"); if(!b) return; const ok=cookOpen(); b.classList.toggle("locked",!ok); b.title=ok?"":COOK_LOCK_MSG(); }
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
-root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) closeModal(); }));
+root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m && m.id!=="g-notice") closeModal(); }));   // お知らせは、まわりを押しても閉じない
+$("g-noticeOk").addEventListener("click",()=>closeModal());
 // ボタンにフォーカスが残って Enter/Space が二重に効かないようにする
 root.querySelectorAll("button").forEach(b=>b.setAttribute("tabindex","-1"));
 
@@ -8300,7 +8330,7 @@ function enter(){
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ const q3=ev("Q3",10/60,30/60,0); /* 料理: 庭の時計(分) */ if(q3) applySkip(q3); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
+  loopId=setInterval(()=>{ const q3=ev("Q3",10/60,30/60,0); /* 料理: 庭の時計(分) */ if(q3) applySkip(q3); showCookNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
