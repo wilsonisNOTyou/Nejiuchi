@@ -5011,6 +5011,9 @@ function normalize(o){
   for(const f of s.fields) for(const k of KEYS){ if(f[k].obj==="spr2") f[k].obj="spr"; }
   if(!["vil","sgvil",...OBJ_ALL].includes(s.objSel)) s.objSel="spr";
   for(const key of ["recipes","dishes","dishMade","dishEaten"]) s[key]=s[key]||{};
+  for(const st of Object.values(s.dishes)){ if(!st) continue; for(const q of [1,2,4]) if(st[q]){ st[0]=(st[0]||0)+st[q]; delete st[q]; } }
+  if(Array.isArray(s.autoCook)) s.autoCook=s.autoCook.map(a=>({ id:a.id, g:[3,5].includes(a.g)?a.g:0 })).filter((a,i,arr)=>arr.findIndex(b=>b.id===a.id&&b.g===a.g)===i);
+  if(s.buff && [1,2,4].includes(s.buff.t)) s.buff.t=0;
   if(s.cookCount==null) s.cookCount=Object.values(s.dishes).reduce((a,st)=>a+Object.values(st||{}).reduce((x,n)=>x+(n||0),0),0);
   s.ateCount=s.ateCount||0; s.prepCount=s.prepCount||0;
   if(s.buff && !(s.buff.d && s.buff.until)) s.buff=null;
@@ -6827,7 +6830,7 @@ $("g-treasBody").addEventListener("click",e=>{
 
 /* ---------- 料理 ----------
    レシピはお店で買う。作った料理は作り置きでき、食べると効果がかかる(効果は1つだけ。次に食べると上書き)。
-   ふつうの料理: 作物の品質のいちばん低いもので時間が決まる(ふつう5分・☆10分・☆☆20分・☆☆☆30分)
+   ふつうの料理: 作物の品質(☆)にかかわらず10分
    変異の料理: 作物がすべて変異・食材がすべて上位種。強い効果が10分
    超変異の料理: 作物がすべて超変異・食材がすべて上位種。強い効果が30分
    効果の時間は、ゲームを閉じている間も減る */
@@ -7210,8 +7213,8 @@ const EFFS = {
 };
 const instantEff = e => e==="β" || e==="P8";   // 食べた瞬間に効く(今の効果は消えない)
 /* 料理の段階(作物の品質の番号をそのまま使う): 0 ふつう / 1 ☆ / 2 ☆☆ / 4 ☆☆☆ / 3 変異 / 5 超変異 */
-const DISH_GRADES = [0,1,2,4,3,5];
-const DISH_MIN = { 0:5, 1:10, 2:20, 4:30, 3:10, 5:30 };   // 効果の時間(分)
+const DISH_GRADES = [0,3,5];   // ふつう / 変異 / 超変異(作物の ☆ は売値だけに効く)
+const DISH_MIN = { 0:10, 3:10, 5:30 };   // 効果の時間(分)
 const gradeName = g => g===5?"超変異":g===3?"変異":(g?QUALITY[g].mark:"ふつう");
 const bookKeyOf = g => g===5?5:g===3?3:0;                   // 料理図鑑の3項目(ふつう・変異・超変異)
 const dishMin = g => Math.round(DISH_MIN[g]*(1+kitVal("pan")/100));   // 効果の時間(分)。鉄のフライパンで延びる
@@ -7291,11 +7294,8 @@ function cookPlan(ing, g){
       }
     }
   }
-  // ふつうの料理は、使う作物のいちばん低い品質で段階が決まる
-  if(g!==3 && g!==5){
-    const ts=take.filter(x=>x[0]==="c").map(x=>TIERS.indexOf(x[2]));
-    grade = ts.length ? TIERS[Math.min(...ts)] : 0;
-  }
+  // ふつうの料理は、作物の品質(☆)にかかわらず「ふつう」(☆の低い作物から使う)
+  if(g!==3 && g!==5) grade=0;
   return { take, grade };
 }
 function consume(take){
@@ -7517,7 +7517,7 @@ function renderCook(){
       <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("");
   }
   $("g-cookHint").innerHTML = window.IS_MOBILE ? "" :
-    `<b>Tab</b> ${COOK_TABS.map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異 / 超変異)"+(kitN("cookvil")>0?` ・ <b>A</b> 料理番に任せる(${(S.autoCook||[]).length} / ${kitN("cookvil")})`:""):cookTab===1?" ・ <b>← →</b> 段階(作り置きのあるもの)":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
+    `<b>Tab</b> ${COOK_TABS.map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / 変異 / 超変異)"+(kitN("cookvil")>0?` ・ <b>A</b> 料理番に任せる(${(S.autoCook||[]).length} / ${kitN("cookvil")})`:""):cookTab===1?" ・ <b>← →</b> 段階(作り置きのあるもの)":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
 function cookNowText(){
@@ -7581,7 +7581,7 @@ function renderDbook(){
   }).join("");
   const d=DISHES[dbookCur], t=dbookTier, made=(S.dishMade[d.id]||{})[t];
   const lore = t===5 ? d.l5 : t===3 ? d.l3 : d.l0;
-  const durTxt = instantEff(d.eff) ? "食べた瞬間に効く" : t===5 ? "30分" : t===3 ? "10分" : "5分〜30分(作物の品質で変わる)";
+  const durTxt = instantEff(d.eff) ? "食べた瞬間に効く" : fmtMin(dishMin(t));
   $("g-dbookDetail").innerHTML=`
     <div class="btabs">${[0,3,5].map(q=>`<span class="btab${q===3?" mut":(q===5?" mut sup":"")}${q===t?" on":""}${(S.dishMade[d.id]||{})[q]?"":" dim"}" data-t="${q}">${gradeName(q)}</span>`).join("")}</div>
     <div class="bic"><span class="dbig${made?"":" unknown"}${t===5?" sup":t===3?" mut":""}">${made?dishIco(d,t):"？"}</span></div>
