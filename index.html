@@ -1151,7 +1151,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .dbig.unknown{color:var(--ink-l)}
 #screen-garden .dbig.mut{filter:drop-shadow(0 0 8px rgba(178,124,232,.9))}
 #screen-garden .dbig.sup{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px rgba(255,205,90,.85))}
-#screen-garden .qm.d0{font-size:.62rem; line-height:1; vertical-align:.12em; margin-right:.1em}
+#screen-garden .qm.d0{font-size:.48rem; line-height:1; align-self:center; margin-right:.12em}
 #screen-garden .qm.d0.on{color:#e0a800; text-shadow:0 0 3px rgba(255,190,0,.6)}
 #screen-garden .gcard .gextra{position:absolute; left:50%; bottom:-7px; transform:translateX(-50%); background:#2e9d6a; color:#fff; font-size:.56rem; font-weight:800; padding:.05rem .35rem; border-radius:999px; white-space:nowrap}
 .fw{position:fixed; width:6px; height:6px; border-radius:50%; pointer-events:none; z-index:9999; animation:g-fw .9s ease-out forwards; box-shadow:0 0 6px currentColor}
@@ -6153,9 +6153,10 @@ function buyField(){
   checkUnlocks();
   save(); renderAll();
 }
-/* 種の売値(買値の25%。ガチャ限定は売値の3分の1を元値とみなす) */
+/* 種の売値(買値の25%。ガチャ限定は売値の3分の1を元値とみなす)
+   お店の種は、貴重品や料理で安く買えるときでも、そのときの買値の半分までしか売れない(買って売るだけで増えないように) */
 const seedBase  = c => c.cost>0 ? c.cost : Math.round(c.price/3);
-const seedPrice = c => Math.max(1, Math.round(seedBase(c)*0.25));
+const seedPrice = c => Math.max(1, c.cost>0 ? Math.min(Math.round(c.cost*0.25), Math.floor(seedCost(c)*0.5)) : Math.round(seedBase(c)*0.25));
 function sellSeed(id,n){
   const c=CROP[id], have=S.seeds[id]||0; if(!c||have<=0) return;
   const k = n==="all" ? have : Math.min(have,n);
