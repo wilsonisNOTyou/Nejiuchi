@@ -6726,7 +6726,7 @@ function kitSub(id){   // 台所の宝物の「今の状態」
   if(id==="fridge") return n>0?"<b>はたらいています</b>(閉じている間、料理の効果時間が減りません)":"";
   if(id==="cookvil") return n>0?`任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(料理の「作る」で A)`:"";
   const sw = `<span class="kswap"><button class="sbtn" data-kd="-1">◀ Q</button><button class="sbtn" data-kd="1">E ▶</button></span>`;   // ボタンは名前より前(名前の長さで位置が動かないように)
-  if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${S.kamado&&DISH[S.kamado]?esc(DISH[S.kamado].name):"なし"}</b>`:"";
+  if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${S.kamado&&DISH[S.kamado]?`${esc(M_COLOR[S.kamado]||"")}(${esc(DISH[S.kamado].name)})`:"なし"}</b>`:"";
   if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b> ・ あと${sgFree()}区画`:"";
   if(id==="sgk") return n>0?"畑の P に置くと、1打の時短 +2分・カラスよけ・自動の水やり":"";
   if(id==="ticket") return n>0?`畑 ${FS().length} / ${FIELD_MAX}枚`:"";
@@ -7389,7 +7389,9 @@ function cookRowsOf(){
   }
   return rows;
 }
-const effText = (d,g) => isMutT(g) ? EFFS[d.eff].s : EFFS[d.eff].n;
+/* 画面の色の料理は、何色になるかを具体的に書く(変異・超変異でも色は同じ) */
+const M_COLOR = { strawmilk:"ピンク", sherbet:"赤", lemonade:"黄色", melonsoda:"緑", bluetart:"青", grapejuice:"紫", chips:"濃い紫", vanillaice:"クリーム色" };
+const effText = (d,g) => { const t=isMutT(g) ? EFFS[d.eff].s : EFFS[d.eff].n; return d.eff==="M" && M_COLOR[d.id] ? t.replace("料理の色",M_COLOR[d.id]) : t; };
 function cookStep(id,dir){
   const i=DISH_GRADES.indexOf(cookGrade[id]??0);
   cookGrade[id]=DISH_GRADES[(i+dir+DISH_GRADES.length)%DISH_GRADES.length];
