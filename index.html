@@ -6153,10 +6153,9 @@ function buyField(){
   checkUnlocks();
   save(); renderAll();
 }
-/* 種の売値(買値の25%。ガチャ限定は売値の3分の1を元値とみなす)
+/* 種の売値(お店の種は買値の25%。ガチャ限定は作物の売値の30分の1。ガチャを引いて売るだけで増えないように)
    お店の種は、貴重品や料理で安く買えるときでも、そのときの買値の半分までしか売れない(買って売るだけで増えないように) */
-const seedBase  = c => c.cost>0 ? c.cost : Math.round(c.price/3);
-const seedPrice = c => Math.max(1, c.cost>0 ? Math.min(Math.round(c.cost*0.25), Math.floor(seedCost(c)*0.5)) : Math.round(seedBase(c)*0.25));
+const seedPrice = c => Math.max(1, c.cost>0 ? Math.min(Math.round(c.cost*0.25), Math.floor(seedCost(c)*0.5)) : Math.round(c.price/30));
 function sellSeed(id,n){
   const c=CROP[id], have=S.seeds[id]||0; if(!c||have<=0) return;
   const k = n==="all" ? have : Math.min(have,n);
@@ -7009,7 +7008,7 @@ const EFFS = {
   P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が30分延びる", s:"食べた瞬間、今かかっている料理の効果が6時間延びる" },
   Q1:{ nm:"種おかわり",          n:"ガチャで出た作物の種が20%で2つ",       s:"ガチャで出た作物の種が50%で2つ" },
   Q2:{ nm:"変わり種の売値",      n:"変異・超変異の作物の売値 1.5倍",       s:"変異・超変異の作物の売値 3倍" },
-  Q3:{ nm:"庭の時計",            n:"庭を開いている間、1秒ごとに水の効いている作物が1分育つ", s:"庭を開いている間、1秒ごとに水の効いている作物が5分育つ" },
+  Q3:{ nm:"庭の時計",            n:"庭を開いている間、1秒ごとに水の効いている作物が10秒育つ", s:"庭を開いている間、1秒ごとに水の効いている作物が30秒育つ" },
 };
 const instantEff = e => e==="β" || e==="P8";   // 食べた瞬間に効く(今の効果は消えない)
 /* 料理の段階(作物の品質の番号をそのまま使う): 0 ふつう / 1 ☆ / 2 ☆☆ / 4 ☆☆☆ / 3 変異 / 5 超変異 */
@@ -7932,7 +7931,7 @@ function enter(){
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ const q3=ev("Q3",1,5,0); if(q3) applySkip(q3); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
+  loopId=setInterval(()=>{ const q3=ev("Q3",10/60,30/60,0); /* 料理: 庭の時計(分) */ if(q3) applySkip(q3); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
