@@ -6406,26 +6406,38 @@ function switchMachine(m){
   sfx.tab(); renderGacha();
 }
 /* GUR を受け取る。知らせる文を返す */
-function gainGur(id){
-  const g=GUR[id];
-  if(id==="mfert"||id==="sfert"){ S[id]=(S[id]||0)+1; return `${ico(g)} ${g.name}を手に入れました。5 で持って ← → で選び、植わっている作物にまけます`; }
+function gainGur(id){   // 返す文は、その宝物をはじめて手に入れたときの知らせ(何ができるかを伝える)
+  const g=GUR[id], I=ico(g), KT="台所の宝物(8 → Tab)";
+  const FERT="5 で持って ← → で選び、作物の植わっている区画のキーを押すとまけます";
+  if(id==="mfert"||id==="sfert"){ S[id]=(S[id]||0)+1;
+    return id==="sfert" ? `${I} 不思議な肥料を手に入れました! 植わっている作物にまくと、その作物が変異になり、3個穫れます。${FERT}`
+                        : `${I} 摩訶不思議な肥料を手に入れました! 植わっている作物にまくと、その作物が必ず超変異になり、3個穫れます。${FERT}`; }
   if(id==="ticket"){
     const fs=FS();
-    if(fs.length>=FIELD_MAX){ S.money+=1000000; S.totalSales+=1000000; return `${ico(g)} 畑はもう${FIELD_MAX}枚あるので、かわりに 1,000,000ネジ を受け取りました`; }
+    if(fs.length>=FIELD_MAX){ S.money+=1000000; S.totalSales+=1000000; return `${I} 畑チケット! 畑はもう上限の${FIELD_MAX}枚あるので、かわりに 1,000,000ネジ を受け取りました`; }
     fs.push(makeField());
-    return `${ico(g)} 畑チケット! 畑が ${fs.length}枚 になりました。↑↓ で行き来できます`;
+    return `${I} 畑チケット! 畑が1枚増えて ${fs.length}枚 になりました。↑ ↓ で畑を行き来できます`;
   }
-  if(id==="sgvil"){ S.sgVil=(S.sgVil||0)+1; S.objSel="sgvil"; return `${ico(g)} シゴデキ村人が来てくれました。育てる作物は台所の宝物(8 → Tab)で Q / E を押して選び、6 で持って区画を${SG_SLOTS}つ押してください`; }
-  if(id==="hourglass"||id==="bento"){ S[id]=(S[id]||0)+1; return `${ico(g)} ${g.name}を手に入れました。台所の宝物(8 → Tab)で Enter を押すと使えます`; }
+  if(id==="sgvil"){ S.sgVil=(S.sgVil||0)+1; S.objSel="sgvil";
+    return `${I} シゴデキ村人が来てくれました! 図鑑に載っている好きな作物を、${SG_SLOTS}区画で育ててくれます。${KT}で Q / E を押して作物を選び、6 で持って区画を${SG_SLOTS}つ押してください`; }
+  if(id==="hourglass"){ S.hourglass=(S.hourglass||0)+1;
+    return `${I} 時渡りの砂時計を手に入れました! 使うと、すべての畑の時間が12時間進みます。${KT}で選んで Enter で使えます`; }
+  if(id==="bento"){ S.bento=(S.bento||0)+1;
+    return `${I} 二段重ねのお弁当箱を手に入れました! 使うと1時間、料理の効果を2つまで同時にかけられます。${KT}で選んで Enter で使えます`; }
   if(g.kit || ["fridge","cookvil","kamado"].includes(id)){
     S.kit=S.kit||{}; S.kit[id]=(S.kit[id]||0)+1;
-    const n=S.kit[id];
-    if(id==="fridge") return n===1 ? `${ico(g)} 魔法の冷蔵庫! これからは、ゲームを閉じている間も料理の効果時間が減りません` : `${ico(g)} 魔法の冷蔵庫(${n}台目)を手に入れました`;
-    if(id==="cookvil") return `${ico(g)} 料理番の村人が来てくれました(${n}人)。料理の「作る」で A を押すと、その料理を任せられます`;
-    if(id==="kamado") return n===1 ? `${ico(g)} 永遠のかまど! 台所の宝物(8 → Tab)で Q / E を押すと、画面の色を、食べたことのある料理の色に固定できます` : `${ico(g)} 永遠のかまど(${n}つ目)を手に入れました`;
-    return `${ico(g)} ${g.name}を手に入れました(${n}個・${g.kit.unit==="%"?`今の合計 +${kitVal(id)}%`:""})`;
+    const k=g.kit, more = k ? `重ねるほど強くなり、最大 +${k.cap}${k.unit}です` : "";
+    if(id==="fridge")  return `${I} 魔法の冷蔵庫を手に入れました! これからは、ゲームを閉じている間も料理の効果時間が減りません(持っているだけで効きます)`;
+    if(id==="cookvil") return `${I} 料理番の村人が来てくれました! 決めた料理を、材料があるかぎり自動で作り置きしてくれます。料理(0)の「作る」で任せたい料理を選んで A を押してください(1人で1種類)`;
+    if(id==="kamado")  return `${I} 永遠のかまどを手に入れました! 画面の色を、食べたことのある料理の色にずっと固定できます。${KT}で Q / E を押して色を選んでください`;
+    if(id==="pan")     return `${I} 鉄のフライパンを手に入れました! 料理の効果時間が +${k.per}${k.unit} 延びます(${more})`;
+    if(id==="pot")     return `${I} 鉄の両手鍋を手に入れました! 料理を作ると、+${k.per}${k.unit}の確率でもう1つできます(${more})`;
+    if(id==="board")   return `${I} ひのきのまな板を手に入れました! 仕込みで、+${k.per}${k.unit}の確率でもう1つできます(${more})`;
+    if(id==="loupe")   return `${I} 目利きの虫眼鏡を手に入れました! わくわくガチャの食材が、+${k.per}${k.unit}の確率で上位種に化けます(${more})`;
+    return `${I} ${g.name}を手に入れました! ${g.desc}`;
   }
-  if(id==="sgk"){ S.objs.sgk=(S.objs.sgk||0)+1; S.objSel="sgk"; return `${ico(g)} シゴデキ案山子を手に入れました。6 で持って、畑の P(案山子置き場)に置けます`; }
+  if(id==="sgk"){ S.objs.sgk=(S.objs.sgk||0)+1; S.objSel="sgk";
+    return `${I} シゴデキ案山子を手に入れました! P(案山子置き場)に置くと、その畑にカラスが来なくなり、ネジ打ち1打で進む時間が +2分 増え、畑じゅうの水やりが自動になります。6 で持って P を押すと置けます`; }
   return "";
 }
 const guardEvery = () => ev("λ",8,5,11);   // SR以上が1つ確定する間隔
