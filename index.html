@@ -1352,6 +1352,11 @@ html.mobile .bk-pconly{display:none}
 #screen-garden .tbtn.goal .gbadge:not(:empty){display:inline-grid; place-items:center; min-width:1.3em; height:1.3em; margin-left:.3rem; padding:0 .3em; border-radius:999px; background:var(--alert); color:#fff; font-size:.75rem}
 #screen-garden .rowi .goalok{color:#2e7d32; font-weight:800}
 #screen-garden .rowi.claimed{opacity:.55}
+#screen-garden .gsteps{display:inline-flex; align-items:center; gap:3px; margin-left:.5rem; vertical-align:middle}
+#screen-garden .gsteps i{width:8px; height:8px; border-radius:50%; background:#e7dfcc; display:inline-block}
+#screen-garden .gsteps i.on{background:#8fbf5a}
+#screen-garden .gsteps i.ready{background:#f0b030; box-shadow:0 0 4px #f0b030}
+#screen-garden .gsteps small{margin-left:.25rem; font-size:.72rem; color:var(--ink-l); font-weight:600}
 #screen-garden .rowi .gprog{height:6px; border-radius:3px; background:#e7dfcc; margin-top:.3rem; overflow:hidden}
 #screen-garden .rowi .gprog i{display:block; height:100%; background:#8fbf5a}
 #g-goalBody .ghead{display:flex; justify-content:space-between; align-items:baseline; margin:.7rem .2rem .25rem; padding-bottom:.2rem;
@@ -8118,6 +8123,11 @@ const kinds = () => Object.values(S.harvestQ||{}).filter(a=>a&&a.some(x=>x>0)).l
 const gotRarity = r => CROPS.some(c=>c.r===r && !c.treasure && (S.got||{})[c.id]>0) ? 1 : 0;   // ガチャで引いたことがあるか
 const treasKinds = () => Object.values(S.treas||{}).filter(n=>n>0).length;
 const TREAS_ALL = CROPS.filter(c=>c.treasure).length;
+const kindsCrop = () => CROPS.filter(c=>!c.treasure && (S.harvestBy[c.id]||0)>0).length;   // 貴重品を除いた、収穫した作物の種類数
+const CROP_ALL  = () => CROPS.filter(c=>!c.treasure).length;
+const SUP_ALL   = () => CROPS.filter(c=>!c.treasure && hasSup(c.id)).length;
+const kitKinds  = r => KIT_ORDER.filter(id=>(!r || GUR[id].r===r) && (S.got[id]||0)>0).length;   // 台所の宝物の種類数(r: GHR / GUR)
+const kitCapped = () => KIT_ORDER.some(id=>GUR[id].kit && kitVal(id)>=GUR[id].kit.cap) ? 1 : 0;
 /* 実績(中身の名前は goal のまま)。ジャンル(cat)ごとに、やさしい順に並べる。need は数か、数を返す関数 */
 const GOALS = [
   { cat:"収穫", id:"h1",    ic:"🧺", nm:"はじめての収穫",   ds:"作物を1個収穫する",            need:1,      now:()=>S.totalHarvest, rw:50 },
@@ -8126,42 +8136,57 @@ const GOALS = [
   { cat:"収穫", id:"h1000", ic:"🧺", nm:"伝説の収穫",       ds:"作物を1,000個収穫する",        need:1000,   now:()=>S.totalHarvest, rw:10000 },
   { cat:"収穫", id:"h5000", ic:"🧺", nm:"収穫の神様",       ds:"作物を5,000個収穫する",        need:5000,   now:()=>S.totalHarvest, rw:30000 },
   { cat:"収穫", id:"h10000",ic:"🧺", nm:"一万の実り",       ds:"作物を10,000個収穫する",       need:10000,  now:()=>S.totalHarvest, rw:60000 },
-  { cat:"作物の種類", id:"k5",  ic:"🥕", nm:"いろいろ育てる",   ds:"5種類の作物を収穫する",   need:5,  now:kinds, rw:500 },
-  { cat:"作物の種類", id:"k15", ic:"🥕", nm:"畑のレパートリー", ds:"15種類の作物を収穫する",  need:15, now:kinds, rw:3000 },
-  { cat:"作物の種類", id:"k25", ic:"🥕", nm:"なんでも育てる",   ds:"25種類の作物を収穫する",  need:25, now:kinds, rw:10000 },
-  { cat:"作物の種類", id:"k30", ic:"🥕", nm:"庭の主",         ds:"30種類の作物を収穫する",  need:30, now:kinds, rw:30000 },
+  { cat:"収穫", id:"h100k", ic:"🧺", nm:"十万の実り",       ds:"作物を100,000個収穫する",      need:1e5,    now:()=>S.totalHarvest, rw:300000 },
+  { cat:"収穫", id:"h1m",   ic:"🧺", nm:"百万の実り",       ds:"作物を1,000,000個収穫する",    need:1e6,    now:()=>S.totalHarvest, rw:1000000 },
+  { cat:"作物の種類", ser:"k", id:"k5",  ic:"🥕", nm:"いろいろ育てる",   ds:"5種類の作物を収穫する",   need:5,  now:kinds, rw:500 },
+  { cat:"作物の種類", ser:"k", id:"k15", ic:"🥕", nm:"畑のレパートリー", ds:"15種類の作物を収穫する",  need:15, now:kinds, rw:3000 },
+  { cat:"作物の種類", ser:"k", id:"k25", ic:"🥕", nm:"なんでも育てる",   ds:"25種類の作物を収穫する",  need:25, now:kinds, rw:10000 },
+  { cat:"作物の種類", ser:"k", id:"k30", ic:"🥕", nm:"庭の主",         ds:"30種類の作物を収穫する",  need:30, now:kinds, rw:30000 },
+  { cat:"作物の種類", ser:"k", id:"k45", ic:"🥕", nm:"作物博士",     ds:"45種類の作物を収穫する",  need:45, now:kindsCrop, rw:100000 },
+  { cat:"作物の種類", ser:"k", id:"kAll",ic:"🏆", nm:"すべての作物", ds:"すべての作物を収穫する(貴重品を除く)", need:CROP_ALL, now:kindsCrop, rw:500000 },
   { cat:"売上", id:"s1k",   ic:"💰", nm:"はじめての商い",   ds:"累計売上 1,000ネジ",           need:1000,     now:()=>S.totalSales, rw:200 },
   { cat:"売上", id:"s10k",  ic:"💰", nm:"売れっ子農家",     ds:"累計売上 10,000ネジ",          need:10000,    now:()=>S.totalSales, rw:1000 },
   { cat:"売上", id:"s100k", ic:"💰", nm:"大きな庭",           ds:"累計売上 100,000ネジ",         need:100000,   now:()=>S.totalSales, rw:8000 },
   { cat:"売上", id:"s1m",   ic:"💰", nm:"百万長者",         ds:"累計売上 1,000,000ネジ",       need:1000000,  now:()=>S.totalSales, rw:30000 },
   { cat:"売上", id:"s10m",  ic:"💰", nm:"ネジ財閥",   ds:"累計売上 10,000,000ネジ",      need:10000000, now:()=>S.totalSales, rw:150000 },
-  { cat:"実りの質", id:"q1",   ic:"⭐", nm:"腕が上がった",   ds:"☆の作物を収穫する",            need:1,  now:()=>anyQ(1)?1:0, rw:300 },
-  { cat:"実りの質", id:"q2",   ic:"🌟", nm:"極上の実り",     ds:"☆☆の作物を収穫する",          need:1,  now:()=>anyQ(2)?1:0, rw:2000 },
-  { cat:"実りの質", id:"q3",   ic:"💫", nm:"至高の実り",     ds:"☆☆☆の作物を収穫する",        need:1,  now:()=>anyQ(4)?1:0, rw:10000 },
-  { cat:"実りの質", id:"q3k5", ic:"💫", nm:"至高のコレクション", ds:"☆☆☆の作物を5種類収穫する", need:5,  now:()=>kindsQ(4),   rw:50000 },
-  { cat:"実りの質", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
-  { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
-  { cat:"実りの質", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
-  { cat:"実りの質", id:"m20",  ic:"✦",  nm:"変異の研究者",   ds:"変異の作物を20種類収穫する",   need:20, now:()=>kindsQ(3),   rw:80000 },
-  { cat:"実りの質", id:"x1",   ic:"🌈", nm:"奇跡の実り",     ds:"超変異の作物を収穫する",       need:1,  now:()=>anyQ(5)?1:0, rw:50000 },
-  { cat:"実りの質", id:"x3",   ic:"🌈", nm:"奇跡を重ねる",   ds:"超変異の作物を3種類収穫する",  need:3,  now:()=>kindsQ(5),   rw:150000 },
-  { cat:"実りの質", id:"x10",  ic:"🌈", nm:"奇跡の収集家",   ds:"超変異の作物を10種類収穫する", need:10, now:()=>kindsQ(5),   rw:500000 },
+  { cat:"売上", id:"s100m", ic:"💰", nm:"億万長者",         ds:"累計売上 1億ネジ",             need:1e8,  now:()=>S.totalSales, rw:1000000 },
+  { cat:"売上", id:"s1b",   ic:"💰", nm:"ネジ王国",         ds:"累計売上 10億ネジ",            need:1e9,  now:()=>S.totalSales, rw:5000000 },
+  { cat:"売上", id:"s10b",  ic:"👑", nm:"ネジの大富豪",     ds:"累計売上 100億ネジ",           need:1e10, now:()=>S.totalSales, rw:20000000 },
+  { cat:"売上", id:"s100b", ic:"👑", nm:"伝説の大商人",     ds:"累計売上 1,000億ネジ",         need:1e11, now:()=>S.totalSales, rw:50000000 },
+  { cat:"実りの質", ser:"q", id:"q1",   ic:"⭐", nm:"腕が上がった",   ds:"☆の作物を収穫する",            need:1,  now:()=>anyQ(1)?1:0, rw:300 },
+  { cat:"実りの質", ser:"q", id:"q2",   ic:"🌟", nm:"極上の実り",     ds:"☆☆の作物を収穫する",          need:1,  now:()=>anyQ(2)?1:0, rw:2000 },
+  { cat:"実りの質", ser:"q", id:"q3",   ic:"💫", nm:"至高の実り",     ds:"☆☆☆の作物を収穫する",        need:1,  now:()=>anyQ(4)?1:0, rw:10000 },
+  { cat:"実りの質", ser:"qk", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
+  { cat:"実りの質", ser:"qk", id:"q3k5", ic:"💫", nm:"至高のコレクション", ds:"☆☆☆の作物を5種類収穫する", need:5,  now:()=>kindsQ(4),   rw:50000 },
+  { cat:"実りの質", ser:"m", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
+  { cat:"実りの質", ser:"m", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
+  { cat:"実りの質", ser:"m", id:"m20",  ic:"✦",  nm:"変異の研究者",   ds:"変異の作物を20種類収穫する",   need:20, now:()=>kindsQ(3),   rw:80000 },
+  { cat:"実りの質", ser:"x", id:"x1",   ic:"🌈", nm:"奇跡の実り",     ds:"超変異の作物を収穫する",       need:1,  now:()=>anyQ(5)?1:0, rw:50000 },
+  { cat:"実りの質", ser:"x", id:"x3",   ic:"🌈", nm:"奇跡を重ねる",   ds:"超変異の作物を3種類収穫する",  need:3,  now:()=>kindsQ(5),   rw:150000 },
+  { cat:"実りの質", ser:"x", id:"x10",  ic:"🌈", nm:"奇跡の収集家",   ds:"超変異の作物を10種類収穫する", need:10, now:()=>kindsQ(5),   rw:500000 },
+  { cat:"実りの質", ser:"x", id:"x30",  ic:"🌈", nm:"奇跡の目録",     ds:"超変異の作物を30種類収穫する", need:30, now:()=>kindsQ(5),   rw:2000000 },
+  { cat:"実りの質", ser:"x", id:"xAll", ic:"🏆", nm:"奇跡のすべて",   ds:"すべての作物の超変異を収穫する", need:SUP_ALL, now:()=>kindsQ(5), rw:10000000 },
   { cat:"ガチャ", id:"g1",    ic:"🎰", nm:"はじめてのガチャ", ds:"ガチャを1回引く",             need:1,     now:()=>S.gachaCount||0, rw:100 },
   { cat:"ガチャ", id:"g11",   ic:"🎰", nm:"ガチャ好き",       ds:"ガチャを合計11回引く",        need:11,    now:()=>S.gachaCount||0, rw:500 },
   { cat:"ガチャ", id:"g100",  ic:"🎰", nm:"ガチャ通",         ds:"ガチャを合計100回引く",       need:100,   now:()=>S.gachaCount||0, rw:3000 },
   { cat:"ガチャ", id:"g1000", ic:"🎰", nm:"ガチャの達人",     ds:"ガチャを合計1,000回引く",     need:1000,  now:()=>S.gachaCount||0, rw:20000 },
   { cat:"ガチャ", id:"g10000",ic:"🎰", nm:"ガチャの王",       ds:"ガチャを合計10,000回引く",    need:10000, now:()=>S.gachaCount||0, rw:100000 },
-  { cat:"ガチャ", id:"rSR",   ic:"💎", nm:"キラリと光る",     ds:"ガチャでSRの種を引く",        need:1, now:()=>gotRarity("SR"),  rw:1000 },
-  { cat:"ガチャ", id:"rHR",   ic:"💎", nm:"ひと味ちがう",     ds:"ガチャでHRの種を引く",        need:1, now:()=>gotRarity("HR"),  rw:3000 },
-  { cat:"ガチャ", id:"rUR",   ic:"💎", nm:"ウルトラレア",     ds:"ガチャでURの種を引く",        need:1, now:()=>gotRarity("UR"),  rw:10000 },
-  { cat:"ガチャ", id:"rGSR",  ic:"👑", nm:"黄金の引き",       ds:"ガチャでGSRの種を引く",       need:1, now:()=>gotRarity("GSR"), rw:30000 },
+  { cat:"ガチャ", id:"g100k", ic:"🎰", nm:"ガチャ皇帝",       ds:"ガチャを合計100,000回引く",   need:1e5, now:()=>S.gachaCount||0, rw:500000 },
+  { cat:"ガチャ", id:"g1m",   ic:"🎰", nm:"ガチャの化身",     ds:"ガチャを合計1,000,000回引く", need:1e6, now:()=>S.gachaCount||0, rw:3000000 },
+  { cat:"ガチャ", id:"g10m",  ic:"🌌", nm:"ガチャの宇宙",     ds:"ガチャを合計10,000,000回引く",need:1e7, now:()=>S.gachaCount||0, rw:10000000 },
+  { cat:"ガチャ", ser:"r", id:"rSR",   ic:"💎", nm:"キラリと光る",     ds:"ガチャでSRの種を引く",        need:1, now:()=>gotRarity("SR"),  rw:1000 },
+  { cat:"ガチャ", ser:"r", id:"rHR",   ic:"💎", nm:"ひと味ちがう",     ds:"ガチャでHRの種を引く",        need:1, now:()=>gotRarity("HR"),  rw:3000 },
+  { cat:"ガチャ", ser:"r", id:"rUR",   ic:"💎", nm:"ウルトラレア",     ds:"ガチャでURの種を引く",        need:1, now:()=>gotRarity("UR"),  rw:10000 },
+  { cat:"ガチャ", ser:"r", id:"rGSR",  ic:"👑", nm:"黄金の引き",       ds:"ガチャでGSRの種を引く",       need:1, now:()=>gotRarity("GSR"), rw:30000 },
   { cat:"図鑑", id:"b10",  ic:"📖", nm:"図鑑づくり",       ds:"図鑑を10項目うめる",           need:10,  now:()=>bookProgress().got, rw:3000 },
   { cat:"図鑑", id:"b30",  ic:"📖", nm:"図鑑が育ってきた", ds:"図鑑を30項目うめる",           need:30,  now:()=>bookProgress().got, rw:10000 },
   { cat:"図鑑", id:"b60",  ic:"📖", nm:"分厚い図鑑",       ds:"図鑑を60項目うめる",           need:60,  now:()=>bookProgress().got, rw:30000 },
   { cat:"図鑑", id:"b100", ic:"📚", nm:"図鑑の大家",       ds:"図鑑を100項目うめる",          need:100, now:()=>bookProgress().got, rw:100000 },
   { cat:"図鑑", id:"b200", ic:"📚", nm:"図鑑の生き字引",   ds:"図鑑を200項目うめる",          need:200, now:()=>bookProgress().got, rw:500000 },
+  { cat:"図鑑", id:"b300", ic:"📚", nm:"図鑑の守り人",     ds:"図鑑を300項目うめる",          need:300, now:()=>bookProgress().got, rw:2000000 },
   { cat:"図鑑", id:"bAll", ic:"🏆", nm:"図鑑コンプリート", ds:"図鑑をすべてうめる",           need:()=>bookProgress().all, now:()=>bookProgress().got, rw:5000000 },
   { cat:"料理", id:"ce1",  ic:"🍽️", nm:"いただきます",       ds:"料理を食べる",                 need:1,    now:()=>S.ateCount||0,  rw:500 },
+  { cat:"料理", id:"ce1000",ic:"🍽️", nm:"食いしん坊",        ds:"料理を合計1,000回食べる",      need:1000, now:()=>S.ateCount||0,  rw:500000 },
   { cat:"料理", id:"cm1",  ic:"🍳", nm:"はじめての料理",     ds:"料理を作る",                   need:1,    now:()=>S.cookCount||0, rw:1000 },
   { cat:"料理", id:"cp1",  ic:"🫙", nm:"仕込み上手",         ds:"仕込みをする",                 need:1,    now:()=>S.prepCount||0, rw:1000 },
   { cat:"料理", id:"cm10", ic:"🍳", nm:"料理好き",           ds:"料理を合計10回作る",           need:10,   now:()=>S.cookCount||0, rw:5000 },
@@ -8171,6 +8196,8 @@ const GOALS = [
   { cat:"料理", id:"cb35", ic:"📖", nm:"料理図鑑づくり",     ds:"料理図鑑を35項目うめる",       need:35,   now:()=>dishBookGot(), rw:50000 },
   { cat:"料理", id:"crAll",ic:"📜", nm:"レシピ全集",         ds:"すべてのレシピを買う",         need:()=>DISHES.length, now:()=>Object.keys(S.recipes||{}).length, rw:100000 },
   { cat:"料理", id:"cm1000",ic:"👨‍🍳", nm:"料理長",           ds:"料理を合計1,000回作る",        need:1000, now:()=>S.cookCount||0, rw:100000 },
+  { cat:"料理", id:"cm10k",ic:"👨‍🍳", nm:"料理の鉄人",         ds:"料理を合計10,000回作る",       need:1e4,  now:()=>S.cookCount||0, rw:1000000 },
+  { cat:"料理", id:"cdAll",ic:"🏆", nm:"全メニュー制覇",     ds:"すべての料理を作る(段階はどれでも)", need:()=>DISHES.length, now:()=>DISHES.filter(dishMadeAny).length, rw:1000000 },
   { cat:"料理", id:"cms",  ic:"🌈", nm:"奇跡の味",           ds:"超変異の料理を作る",           need:1,    now:()=>DISHES.some(d=>(S.dishMade[d.id]||{})[5])?1:0, rw:200000 },
   { cat:"料理", id:"cbAll",ic:"🏆", nm:"料理図鑑コンプリート", ds:"料理図鑑をすべてうめる",     need:()=>DISHES.length*3, now:()=>dishBookGot(), rw:3000000 },
   { cat:"庭づくり", id:"o1", ic:"💦", nm:"畑の道具",     ds:"スプリンクラーか案山子を置く", need:1, now:()=>FS().some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
@@ -8178,33 +8205,54 @@ const GOALS = [
   { cat:"庭づくり", id:"f3", ic:"🎫", nm:"広い庭",     ds:"畑を3枚にする",                need:3, now:()=>FS().length, rw:5000 },
   { cat:"庭づくり", id:"f5", ic:"🎫", nm:"見渡すかぎりの畑", ds:"畑を5枚にする",            need:5, now:()=>FS().length, rw:30000 },
   { cat:"庭づくり", id:"f10",ic:"🎫", nm:"果てしない畑",   ds:"畑を10枚にする",            need:10, now:()=>FS().length, rw:100000 },
+  { cat:"庭づくり", id:"f20",ic:"🎫", nm:"大農園",         ds:"畑を20枚にする",            need:20, now:()=>FS().length, rw:1000000 },
+  { cat:"庭づくり", id:"f50",ic:"🎫", nm:"地平線の畑",     ds:"畑を50枚にする",            need:50, now:()=>FS().length, rw:10000000 },
   { cat:"庭づくり", id:"v1", ic:"👩‍🌾", nm:"なかまができた", ds:"村人を雇う",               need:1, now:()=>S.villagers, rw:3000 },
   { cat:"庭づくり", id:"v3", ic:"👩‍🌾", nm:"にぎやかな村",   ds:"村人を3人雇う",            need:3, now:()=>S.villagers, rw:20000 },
   { cat:"貴重品", id:"t1",  ic:"✨", nm:"たからもの",       ds:"貴重品を手に入れる",           need:1, now:treasKinds, rw:10000 },
   { cat:"貴重品", id:"t3",  ic:"✨", nm:"宝物庫",           ds:"貴重品を3種類手に入れる",      need:3, now:treasKinds, rw:50000 },
   { cat:"貴重品", id:"tAll",ic:"🏆", nm:"すべての宝",       ds:"貴重品をすべて手に入れる",     need:()=>TREAS_ALL, now:treasKinds, rw:300000 },
+  { cat:"台所の宝物", ser:"kt", id:"kt1",  ic:"🍳", nm:"台所の宝物",     ds:"台所の宝物を手に入れる",          need:1,  now:()=>kitKinds(), rw:100000 },
+  { cat:"台所の宝物", ser:"kt", id:"ktAll",ic:"🏆", nm:"台所の主",       ds:"台所の宝物をすべて手に入れる",    need:()=>KIT_ORDER.length, now:()=>kitKinds(), rw:10000000 },
+  { cat:"台所の宝物", id:"ktGHR",ic:"🔪", nm:"道具そろえ",       ds:"GHR の台所の宝物を6種類すべて手に入れる", need:()=>KIT_ORDER.filter(id=>GUR[id].r==="GHR").length, now:()=>kitKinds("GHR"), rw:1000000 },
+  { cat:"台所の宝物", id:"ktGUR",ic:"💠", nm:"伝説の台所",       ds:"GUR の台所の宝物を手に入れる",    need:1,  now:()=>kitKinds("GUR"), rw:1000000 },
+  { cat:"台所の宝物", id:"ktCap",ic:"⭐", nm:"使い込んだ道具",   ds:"重ねる台所の宝物を、どれか1つ上限まで重ねる", need:1, now:kitCapped, rw:3000000 },
 ];
 const needOf = g => typeof g.need==="function" ? g.need() : g.need;
-let goalCur=0;
+let goalCur=0;   // 行(まとめた実績)の番号
 const goalDone = g => g.now()>=needOf(g);
 const goalClaimed = g => !!(S.goals && S.goals[g.id]);
-const goalsReady = () => GOALS.filter(g=>goalDone(g) && !goalClaimed(g)).length;
+const goalVisible = g => g.cat!=="台所の宝物" || kitAny();   // 台所の宝物はシークレット: 1つ手に入れるまで出さない
+const goalsReady = () => GOALS.filter(g=>goalVisible(g) && goalDone(g) && !goalClaimed(g)).length;
+/* 同じ種類(ser か、同じ数え方)の実績を1行にまとめる。行には、まだ受け取っていない一番下の段を出す */
+function goalRows(){
+  const rows=[], map={};
+  GOALS.forEach((g,i)=>{
+    if(!goalVisible(g)) return;
+    const key=g.cat+"|"+(g.ser||g.now.toString());
+    if(!map[key]) rows.push(map[key]={ cat:g.cat, tiers:[] });
+    map[key].tiers.push(i);
+  });
+  for(const r of rows){ const k=r.tiers.findIndex(i=>!goalClaimed(GOALS[i])); r.step = k<0 ? r.tiers.length-1 : k; r.gi=r.tiers[r.step]; r.all=k<0; }
+  return rows;
+}
 function renderGoalBadge(){ const n=goalsReady(); $("g-goalBadge").textContent = n ? n : ""; }
 function renderGoals(){
-  const done=GOALS.filter(goalClaimed).length;
-  $("g-goalRate").textContent=`解除 ${done} / ${GOALS.length}`;
-  goalCur=Math.max(0,Math.min(goalCur,GOALS.length-1));
+  const vis=GOALS.filter(goalVisible), rows=goalRows();
+  $("g-goalRate").textContent=`解除 ${vis.filter(goalClaimed).length} / ${vis.length}`;
+  goalCur=Math.max(0,Math.min(goalCur,rows.length-1));
   const body=$("g-goalBody"), top=body.scrollTop;   // 書き直しても、見ていた位置のままにする
-  body.innerHTML=GOALS.map((g,i)=>{
-    const need=needOf(g), now=Math.min(g.now(),need), ok=goalDone(g), got=goalClaimed(g);
-    const cat=GOALS.filter(x=>x.cat===g.cat), head = i===0 || GOALS[i-1].cat!==g.cat
+  body.innerHTML=rows.map((r,ri)=>{
+    const g=GOALS[r.gi], need=needOf(g), now=Math.min(g.now(),need), ok=goalDone(g), got=goalClaimed(g);
+    const cat=vis.filter(x=>x.cat===g.cat), head = ri===0 || rows[ri-1].cat!==r.cat
       ? `<div class="ghead">${esc(g.cat)}<span>${cat.filter(goalClaimed).length} / ${cat.length}</span></div>` : "";
-    const right = got ? '<span class="goalok">受け取り済み</span>'
-      : ok ? `<button class="sbtn main" data-claim="${i}">受け取る +${fmtNum(g.rw)}</button>`
+    const right = got ? '<span class="goalok">すべて受け取り済み</span>'
+      : ok ? `<button class="sbtn main" data-claim="${r.gi}">受け取る +${fmtNum(g.rw)}</button>`
       : `<span>ごほうび ${fmtNum(g.rw)}ネジ</span>`;
-    return head+`<div class="rowi ${i===goalCur?"cur":""} ${got?"claimed":""}" data-i="${i}">
+    const steps = r.tiers.length>1 ? `<span class="gsteps">${r.tiers.map(i=>`<i class="${goalClaimed(GOALS[i])?"on":goalDone(GOALS[i])?"ready":""}"></i>`).join("")}<small>${r.all?r.tiers.length:r.step+1} / ${r.tiers.length}</small></span>` : "";
+    return head+`<div class="rowi ${ri===goalCur?"cur":""} ${got?"claimed":""}" data-i="${ri}">
       <div class="ic">${g.ic}</div>
-      <div><div class="nm">${esc(g.nm)}</div><div class="ds">${esc(g.ds)} ・ ${fmtNum(now)} / ${fmtNum(need)}</div>
+      <div><div class="nm">${esc(g.nm)}${steps}</div><div class="ds">${esc(g.ds)} ・ ${fmtNum(now)} / ${fmtNum(need)}</div>
         <div class="gprog"><i style="width:${Math.floor(now/need*100)}%"></i></div></div>
       <div class="keyk">${right}</div></div>`;
   }).join("");
@@ -8212,10 +8260,10 @@ function renderGoals(){
   keepVisible(body);
   renderGoalBadge();
 }
-function claimGoal(i){
-  const g=GOALS[i]; if(!g || goalClaimed(g)) return;
+function claimGoal(i){   // i: GOALS の番号
+  const g=GOALS[i]; if(!g || goalClaimed(g) || !goalVisible(g)) return;
   if(!goalDone(g)){ sfx.nope(); toast("まだ解除していません","warn"); return; }
-  goalCur=i;   // 受け取った行を選んだままにする(一番上に戻らないように)
+  const ri=goalRows().findIndex(r=>r.tiers.includes(i)); if(ri>=0) goalCur=ri;   // 受け取った行を選んだままにする(一番上に戻らないように)
   S.goals=S.goals||{}; S.goals[g.id]=Date.now();
   const rw=Math.round(g.rw*ev("Y",1.5,2,1)), bonus=rw-g.rw;   // 料理: ごほうび 1.5倍・2倍
   S.money+=rw; if(bonus) S.goalBonus=(S.goalBonus||0)+bonus; sfx.buy();
@@ -8227,8 +8275,8 @@ function goalKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
-  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); goalCur=(goalCur+(k==="ArrowDown"?1:-1)+GOALS.length)%GOALS.length; sfx.cursor(); renderGoals(); return; }
-  if(k==="Enter"){ e.preventDefault(); claimGoal(goalCur); }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=goalRows().length; goalCur=(goalCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderGoals(); return; }
+  if(k==="Enter"){ e.preventDefault(); const r=goalRows()[goalCur]; if(r) claimGoal(r.gi); }
 }
 $("g-goalBody").addEventListener("click",e=>{
   const b=e.target.closest("[data-claim]"); if(b){ claimGoal(+b.dataset.claim); return; }
