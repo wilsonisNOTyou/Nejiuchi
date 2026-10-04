@@ -1203,6 +1203,9 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .tbtn.treas{background:linear-gradient(180deg,#ffe9d2,#ffd0a3); border-color:#c07330; box-shadow:0 3px 0 #c07330}
 #screen-garden .tbtn.rank{background:linear-gradient(180deg,#f1f1f1,#d6d6d6); border-color:#7a7a7a; box-shadow:0 3px 0 #7a7a7a}
 #screen-garden .tbtn.goal{background:linear-gradient(180deg,#ffe1dc,#ffbcb0); border-color:#b8402e; box-shadow:0 3px 0 #b8402e}
+#screen-garden .tbtn.cook.locked{filter:grayscale(1); opacity:.55}
+#screen-garden .tbtn.cook.locked::after{content:"🔒"; margin-left:.2rem; font-size:.8em}
+#screen-garden .gmtab.locked{opacity:.5}
 #screen-garden .tbtn.cook{background:linear-gradient(180deg,#e2f6d6,#bfe6a8); border-color:#4f8a3a; box-shadow:0 3px 0 #4f8a3a}
 #screen-garden .tnote{color:var(--ink-l); font-size:.85rem; line-height:1.7; margin-bottom:.7rem}
 #screen-garden .tlist{display:grid; grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); gap:.5rem}
@@ -5416,6 +5419,9 @@ const today = () => new Date().getDay();
 const isUnlocked = c =>
   c.gacha ? (S.got && S.got[c.id]>0)
   : (c.day!=null ? c.day===today() : meets(c.unlock));
+/* 料理とわくわくガチャは、ネジの木がお店に並ぶのと同じ条件で解放 */
+const cookOpen = () => meets(CROP.nejitree.unlock);
+const COOK_LOCK_MSG = () => `料理とわくわくガチャは、ネジの木と同じ ${unlockText(CROP.nejitree.unlock).replace(" で入荷","")} で解放されます`;
 const gachaText = c => c && c.waku ? "わくわくガチャから出ます" : "種ガチャから出ます";
 const dayText = c => `毎週${DAY_NAMES[c.day]}曜だけお店に並びます`;
 function unlockText(u){
@@ -5433,6 +5439,11 @@ function checkUnlocks(){
     ...OBJ_ORDER.map(id=>({key:"obj:"+id, ok:meets(OBJS[id].unlock), label:`${OBJS[id].icon} ${OBJS[id].name}`})),
     {key:"vil", ok:meets(VIL_UNLOCK), label:"👩‍🌾 村人"},
   ];
+  if(cookOpen() && !S.known.includes("cook")){
+    S.known.push("cook");
+    toast("🍳 料理とわくわくガチャが解放されました! 0 で料理、ガチャ(7)の ← → でわくわくガチャへ。レシピはお店で買えます","good mut",9000,true);
+    renderCookLock();
+  }
   for(const it of items){
     if(it.ok && !S.known.includes(it.key)){
       S.known.push(it.key);
@@ -5592,6 +5603,7 @@ const placedOn = id => S.fields.some(f=>f[POST].obj===id);
 const crowPlaced =()=>placedOn("crow");
 const ownedObjs =()=>OBJ_ALL.filter(id=>(S.objs[id]||0)>0 || (isScare(id)&&placedOn(id))).concat(S.villagers>0?["vil"]:[], (S.bnVil||0)>0?["bnvil"]:[]);
 function renderBar(){
+  renderCookLock();
   root.querySelectorAll(".slot").forEach(s=>s.classList.toggle("on", +s.dataset.tool===S.tool));
   $("g-canName").textContent=canInfo().name;
   $("g-sickName").textContent=sickleInfo().name;
@@ -5879,7 +5891,7 @@ function openModal(name){
   if(name==="goal") renderGoals();
   if(name==="dbook") renderDbook();
   if(name==="cook") renderCook();
-  if(SPACE_TABS.some(([m])=>m===name)) renderSpaceTabs();
+  if(SPACE_ALL.some(([m])=>m===name)) renderSpaceTabs();
 }
 function closeModal(silent){
   if(!modal) return;
@@ -6016,7 +6028,8 @@ function shopRows(){
         keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
     }
   }else if(shopTab===4){
-    rows.push(...recipeRows());
+    if(!cookOpen()) rows.push({ ic:"🔒", nm:"レシピ", ds:COOK_LOCK_MSG(), keys:"", locked:true, enter:()=>{}, shift:()=>{} });
+    else rows.push(...recipeRows());
   }else{
     for(const c of CROPS) for(const t of QORDER){
       const n=invN(c.id,t); if(n<=0) continue;
@@ -6306,6 +6319,7 @@ const gachaCost = (n,m=gachaM) => Math.max(1, Math.round((
 /* ガチャの台を切り替える(引いた結果は消える) */
 function switchMachine(m){
   if(gachaBusy() || m===gachaM || window.tutGachaEggplant) return;   // はじめてガイドの1回(なす確定)は種ガチャで
+  if(m==="w" && !cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; }
   gachaM=m; gachaRes=[]; gachaShown=0; gachaBig=null;
   sfx.tab(); renderGacha();
 }
@@ -6603,7 +6617,7 @@ function gachaBigHTML(){
 function gachaHTML(){
   const rates=MACHINES[gachaM].order.map(r=>
     `<div class="grate" style="--rc:${RARITY[r].color}"><b>${RARITY[r].label}</b><span>${rateOf(r)}%</span><small>${poolOf(r).length}種</small></div>`).join("");
-  const tabs=`<div class="gmtabs">${Object.keys(MACHINES).map(m=>`<button class="gmtab ${m}${m===gachaM?" on":""}" data-gm="${m}">${MACHINES[m].name}</button>`).join("")}</div>`;
+  const tabs=`<div class="gmtabs">${Object.keys(MACHINES).map(m=>`<button class="gmtab ${m}${m===gachaM?" on":""}${m==="w"&&!cookOpen()?" locked":""}" data-gm="${m}">${MACHINES[m].name}${m==="w"&&!cookOpen()?" 🔒":""}</button>`).join("")}</div>`;
   const spinning = gachaBusy();
   const cards=gachaRes.slice(0,gachaShown).map((x,i)=>{
     const c=itemOf(x.id);
@@ -7355,13 +7369,17 @@ $("g-dbookDetail").addEventListener("click",e=>{ const b=e.target.closest && e.t
 $("g-dbookList").addEventListener("click",e=>{ const r=e.target.closest && e.target.closest(".rowi"); if(!r) return; dbookCur=+r.dataset.i; renderDbook(); });
 
 /* ---- Space の画面: 図鑑 → 料理図鑑 → 実績(Tab で切り替え) ---- */
-const SPACE_TABS=[["book","図鑑"],["dbook","料理図鑑"],["goal","実績"]];
+const SPACE_ALL=[["book","図鑑"],["dbook","料理図鑑"],["goal","実績"]];
+let SPACE_TABS=SPACE_ALL;
+const spaceTabsNow = () => (SPACE_TABS = cookOpen() ? SPACE_ALL : SPACE_ALL.filter(([m])=>m!=="dbook"));
 function spaceTab(dir){
+  spaceTabsNow();
   const i=SPACE_TABS.findIndex(([m])=>m===modal);
   openModal(SPACE_TABS[(i+dir+SPACE_TABS.length)%SPACE_TABS.length][0], true);
 }
 function renderSpaceTabs(){
   root.querySelectorAll(".sptabs").forEach(el=>{
+    spaceTabsNow();
     el.innerHTML=SPACE_TABS.map(([m,nm])=>`<button class="tab${m===modal?" on":""}" data-sp="${m}" tabindex="-1">${nm}${m==="goal"&&goalsReady()?' <span class="gbadge on">!</span>':""}</button>`).join("")+`<span class="sphint">Tab で切り替え</span>`;
   });
 }
@@ -7965,7 +7983,7 @@ function onKey(e){
   if(k==="8"){ e.preventDefault(); openModal("treas"); return; }
   if(k===" "){ e.preventDefault(); openModal("book"); return; }
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
-  if(k==="0"){ e.preventDefault(); openModal("cook"); return; }
+  if(k==="0"){ e.preventDefault(); if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } openModal("cook"); return; }
   if(k==="Escape"){ backToTitle(); return; }
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
@@ -7990,7 +8008,9 @@ $("g-treasBtn").addEventListener("click",()=>openModal("treas"));
 $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
-$("g-cookBtn").addEventListener("click",()=>openModal("cook"));
+$("g-cookBtn").addEventListener("click",()=>{ if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } openModal("cook"); });
+/* 料理のボタン: 解放前は鍵つきで薄く */
+function renderCookLock(){ const b=$("g-cookBtn"); if(!b) return; const ok=cookOpen(); b.classList.toggle("locked",!ok); b.title=ok?"":COOK_LOCK_MSG(); }
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
 root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) closeModal(); }));
@@ -8075,7 +8095,33 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { screwMul, charmLives, applyTheme, themeScrewArt, enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName };
+/* デバッグ2: 料理とわくわくガチャが解放された直後くらいの記録(ネジの木の条件をちょうど越えたところ) */
+function debugStart2(){
+  S=newState();
+  S.money=45000; S.totalSales=52000; S.totalHarvest=320; S.gachaCount=80;
+  S.fields=[makeField(),makeField(),makeField()];
+  S.canLv=3; S.hoeLv=3; S.sickLv=3; S.fert=12;
+  S.objs={spr:2, crow:2};
+  const shop=CROPS.filter(c=>!c.gacha && c.day==null);
+  const hv={carrot:120, potato:80, tomato:55, corn:30, eggplant:15, strawberry:10, pumpkin:6, melon:4};
+  for(const c of shop){
+    const n=hv[c.id]||0;
+    if(n){ S.harvestBy[c.id]=n; S.harvestQ[c.id]=[n,0,0,0,0,0]; }
+    S.seeds[c.id]=c.id==="nejitree"?0:3;
+  }
+  S.seeds.carrot=8; S.inv.carrot=[6,2,0,0,0,0]; S.inv.tomato=[4,0,0,0,0,0]; S.inv.corn=[2,0,0,0,0,0];
+  // 種ガチャで引いたもの(N〜SR を少し)
+  const gs=["N","R","SR"].flatMap(r=>CROPS.filter(c=>c.gacha && !c.waku && !c.treasure && c.r===r).slice(0,r==="SR"?2:3));
+  for(const c of gs){ S.got[c.id]=1; S.seeds[c.id]=(S.seeds[c.id]||0)+1; }
+  // 1枚目の畑: にんじんが育っている途中(水やり済み)
+  const now=Date.now();
+  for(const k of KEYS){ const p=S.fields[0][k]; if(p.s==="post") continue; p.s="soil"; p.crop={ id:"carrot", grown:need({id:"carrot",grown:0})*0.5 }; p.wet=now+12*HOUR; }
+  // お店にはもう並んでいる(料理とわくわくガチャの解放のお知らせは、庭に入ったときに出る)
+  S.known=["carrot","potato",...shop.filter(c=>meets(c.unlock)).map(c=>c.id),"fert","obj:spr","obj:crow"];
+  S.lastTick=now;
+  save();
+}
+return { screwMul, charmLives, applyTheme, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -8120,6 +8166,24 @@ function backupImport(){
   if(window.IS_MOBILE) return;   // 記録文字列での引き継ぎはパソコンだけ
   const note=$("bkImportNote"), str=$("bkImport").value;
   if(!str.trim()){ note.textContent="記録文字列を貼り付けてください(I で貼り付け欄へ)"; return; }
+  // デバッグ用の合言葉2: 料理とわくわくガチャが解放された直後くらいの記録にする
+  if(str.trim().toLowerCase()==="nejiuchi-debug2"){
+    if(!confirm("デバッグ用: 料理とわくわくガチャが解放された直後くらいの記録に置き換えます。今の記録は消えます。よろしいですか?")) return;
+    try{
+      const words=WORDS_NORMAL.slice(0,120).map(w=>w.k);
+      localStorage.setItem(LS_PREFIX+"dict", JSON.stringify(words));
+      localStorage.setItem(LS_PREFIX+"best-easy","28");
+      localStorage.setItem(LS_PREFIX+"best-normal","20");
+      localStorage.setItem(LS_PREFIX+"playerName","デバッグ2");
+      localStorage.setItem(LS_PREFIX+"stats", JSON.stringify({plays:30,screws:900}));
+      localStorage.setItem(LS_PREFIX+"garden:inbox", JSON.stringify({keys:0,screws:0}));
+      localStorage.setItem(LS_PREFIX+"debug","1");   // この記録はランキングに載せない
+      Garden.debugStart2();
+    }catch(e){ note.textContent="うまくいきませんでした"; return; }
+    note.textContent="料理の解放直後の記録にしました。画面を読み直します…";
+    setTimeout(()=>location.reload(),600);
+    return;
+  }
   // デバッグ用の合言葉: すべての要素を解放した状態にする
   if(str.trim().toLowerCase()==="nejiuchi-debug"){
     if(!confirm("デバッグ用: すべての要素を解放した記録に置き換えます。今の記録は消えます。よろしいですか?")) return;
