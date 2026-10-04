@@ -6065,13 +6065,16 @@ function shopRows(){
         ds: `庭の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します(村人の区画と設置物は数えません)`,
         keys: S.counter?"":"<b>Enter</b> 買う", enter:()=>buyCounter(), shift:()=>buyCounter() });
     }
-    // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)
-    for(const n of GACHA_BIG){
-      const has=gachaPass(n);
-      rows.push({ ic:"🎟️",
-        nm: `${fmtNum(n)}連ガチャの権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(GACHA_PASS_PRICE[n])+"ネジ"}</span>`,
-        ds: `種ガチャ・わくわくガチャで ${fmtNum(n)}連 が引けるようになります(種ガチャなら1回 ${fmtNum(gachaCost(n,"n"))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます${has?"":" ・ 結果は作物ごとにまとめて表示します"}`,
-        keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
+    // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)。種ガチャとわくわくガチャは別々に買う
+    for(const m of ["n","w"]){
+      if(m==="w" && !cookOpen()) continue;   // わくわくガチャが解放されてから並べる
+      for(const n of GACHA_BIG){
+        const has=gachaPass(n,m);
+        rows.push({ ic:"🎟️",
+          nm: `${MACHINES[m].name}の${fmtNum(n)}連の権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(passPrice(n,m))+"ネジ"}</span>`,
+          ds: `${MACHINES[m].name}で ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n,m))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます`,
+          keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n,m), shift:()=>buyGachaPass(n,m) });
+      }
     }
   }else if(shopTab===4){
     if(!cookOpen()) rows.push({ ic:"🔒", nm:"レシピ", ds:COOK_LOCK_MSG(), keys:"", locked:true, enter:()=>{}, shift:()=>{} });
@@ -6358,8 +6361,11 @@ function drawOne(minIdx){
 /* 1111連・11111連: お店で権利を買うと引けるようになる(ガチャ代は別) */
 const GACHA_COST1111=100000, GACHA_COST11111=1000000;
 const GACHA_BIG=[1111,11111];
-const GACHA_PASS_PRICE={ 1111:100000, 11111:1000000 };
-const gachaPass = n => !!(S.gachaPass && S.gachaPass[n]);
+const GACHA_PASS_PRICE={ 1111:100000, 11111:1000000 };          // 種ガチャ
+const WAKU_PASS_PRICE ={ 1111:1000000, 11111:10000000 };       // わくわくガチャ(種ガチャとは別に買う)
+const passKey   = (n,m) => m==="w" ? "w"+n : String(n);
+const passPrice = (n,m) => (m==="w" ? WAKU_PASS_PRICE : GACHA_PASS_PRICE)[n];
+const gachaPass = (n,m=gachaM) => !!(S.gachaPass && S.gachaPass[passKey(n,m)]);
 const gachaCost = (n,m=gachaM) => Math.max(1, Math.round((
   n===11111 ? GACHA_COST11111 : n===1111 ? GACHA_COST1111 : n===111 ? GACHA_COST111 : n===11 ? GACHA_COST11 : GACHA_COST1*n
 )*MACHINES[m].mult*effGacha()));
@@ -6396,11 +6402,11 @@ function gainGur(id){
 const guardEvery = () => ev("λ",8,5,11);   // SR以上が1つ確定する間隔
 let gachaNote=[];   // 演出が終わってから出す GUR の知らせ
 function flushGachaNote(){ for(const m of gachaNote) toast(m,"good mut sup",8000,true); gachaNote=[]; }
-function buyGachaPass(n){
-  if(gachaPass(n)) return;
-  if(!spend(GACHA_PASS_PRICE[n])) return;
-  S.gachaPass=S.gachaPass||{}; S.gachaPass[n]=true;
-  toast(`🎟️ ${fmtNum(n)}連ガチャの権利を買いました。ガチャで ${fmtNum(n)}連 が引けます`,"good",4200);
+function buyGachaPass(n,m="n"){
+  if(gachaPass(n,m)) return;
+  if(!spend(passPrice(n,m))) return;
+  S.gachaPass=S.gachaPass||{}; S.gachaPass[passKey(n,m)]=true;
+  toast(`🎟️ ${MACHINES[m].name}の ${fmtNum(n)}連の権利を買いました。${MACHINES[m].name}で ${fmtNum(n)}連 が引けます`,"good",4200);
   save(); renderAll();
 }
 let gachaRes=[], gachaShown=0, gachaTimer=null;
@@ -6409,7 +6415,7 @@ let gachaBig=null;   // { n, groups:[{ r, total, items:[{id,n,isNew,sold}] }], s
 const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length);
 function drawGacha(n){
   if(gachaBusy()) return;                     // 演出中は引けない
-  if(GACHA_BIG.includes(n) && !gachaPass(n)){ sfx.nope(); toast(`${fmtNum(n)}連は、お店(効率化)で権利を買うと引けます`,"warn",3200); return; }
+  if(GACHA_BIG.includes(n) && !gachaPass(n)){ sfx.nope(); toast(`${MACHINES[gachaM].name}の ${fmtNum(n)}連は、お店(効率化)で権利を買うと引けます`,"warn",3200); return; }
   const cost=gachaCost(n);
   if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return; }
   S.money-=cost;
@@ -6587,7 +6593,7 @@ function renderGacha(){
     const card=body.querySelector(".gcard.pop");
     if(card) gachaFollow(body,card, gachaRes.length>20 ? "auto" : "smooth");
   }
-  const bigBtns=GACHA_BIG.filter(gachaPass);
+  const bigBtns=GACHA_BIG.filter(n=>gachaPass(n));
   if(window.IS_MOBILE){
     $("g-gachaHint").innerHTML = gachaBusy()
       ? `<div class="acts gacts"><button class="sbtn main" data-g="skip">早送り</button></div>`
@@ -6693,7 +6699,7 @@ function gachaHTML(){
         <div class="gneck"></div>
         <div class="gbody"><span class="gknob"></span><span class="gout"></span></div>
       </div>
-      <div class="gcost">1回 <b>${fmtNum(gachaCost(1))}</b>ネジ<br>11回 <b>${fmtNum(gachaCost(11))}</b>ネジ<br>111回 <b>${fmtNum(gachaCost(111))}</b>ネジ${GACHA_BIG.filter(gachaPass).map(n=>`<br>${fmtNum(n)}回 <b>${fmtNum(gachaCost(n))}</b>ネジ`).join("")}<small>${guardEvery()}回ごとにSR以上1つ確定${ev("γ",1,1,0)?" ・ おかわりあり":""}${gachaM==="w"?" ・ 作物の種・食材・GUR が出ます":""}${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
+      <div class="gcost">1回 <b>${fmtNum(gachaCost(1))}</b>ネジ<br>11回 <b>${fmtNum(gachaCost(11))}</b>ネジ<br>111回 <b>${fmtNum(gachaCost(111))}</b>ネジ${GACHA_BIG.filter(n=>gachaPass(n)).map(n=>`<br>${fmtNum(n)}回 <b>${fmtNum(gachaCost(n))}</b>ネジ`).join("")}<small>${guardEvery()}回ごとにSR以上1つ確定${ev("γ",1,1,0)?" ・ おかわりあり":""}${gachaM==="w"?" ・ 作物の種・食材・GUR が出ます":""}${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
       <div class="gtotal">これまで ${fmtNum(S.gachaCount||0)}回</div>
     </div>
     <div class="gright">
@@ -8326,7 +8332,7 @@ function debugUnlock(){
   }
   for(const f of FOODS){ S.got[f.id]=1; S.food[f.id]=3; }
   for(const g of GURS) S.got[g.id]=1;
-  S.mfert=3; S.sfert=3; S.sgVil=1; S.objs.sgk=2; S.hourglass=3; S.bento=2; S.kit={pan:20,pot:20,board:20,loupe:20,fridge:1,cookvil:2,kamado:1};
+  S.gachaPass={1111:true,11111:true,w1111:true,w11111:true}; S.mfert=3; S.sfert=3; S.sgVil=1; S.objs.sgk=2; S.hourglass=3; S.bento=2; S.kit={pan:20,pot:20,board:20,loupe:20,fridge:1,cookvil:2,kamado:1};
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
