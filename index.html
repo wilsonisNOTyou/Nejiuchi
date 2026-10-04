@@ -1221,6 +1221,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .ttabs .sphint{font-size:.72rem; color:var(--ink-l); align-self:center; margin-left:.4rem}
 #screen-garden .kswap{display:inline-flex; gap:.2rem; vertical-align:middle}
 #screen-garden .kswap .sbtn{padding:.05rem .45rem; font-size:.75rem}
+#screen-garden .isrc{color:var(--ink-l); font-weight:400; margin-left:.1em}
 #screen-garden .ingok{white-space:nowrap}
 #screen-garden .ingng{white-space:nowrap; color:#c0392b; font-weight:800}
 #screen-garden .dauto{color:#2f7a3a; font-weight:800}
@@ -7241,7 +7242,6 @@ const ev = (k,a,b,none) => { const x=eff(k); return x===2 ? b : x===1 ? a : none
 /* ---- 材料 ---- */
 const cropKnown = id => (S.harvestBy[id]||0)>0 || (S.got[id]||0)>0 || (CROP[id] && !CROP[id].gacha && isUnlocked(CROP[id]));
 const itemKnown = id => CROP[id] ? cropKnown(id) : (S.got[id]||0)>0;
-const ingName = id => itemKnown(id) ? itemOf(id).name : "？？？";
 const haveFood = id => foodN(id);
 /* その段階で作るときに使う材料の組み合わせ。足りなければ null。grade: 実際にできる段階 */
 function cookPlan(ing, g){
@@ -7300,21 +7300,23 @@ function ingHave(id,g){
   if(mutG){ const u=f.up?f:upOf(id); return u?haveFood(u.id):0; }
   return haveFood(id) + (upOf(id)?haveFood(upOf(id).id):0);
 }
+/* 材料の出どころ(まだ手に入れていない材料に添える) */
+const srcOf = id => { const c=CROP[id]; if(c) return c.waku?"わくわくガチャ":c.gacha?"種ガチャ":c.day!=null?"曜日のお店":"お店"; return isPrepFood(id)?"仕込み":"わくわくガチャ"; };
+/* 材料の名前(料理を始めたばかりでも分かるように、いつも名前を出す) */
+function ingLabel(id,g){
+  const mutG = g===3 || g===5;
+  const shown = mutG && FOOD[id] && upOf(id) ? upOf(id) : itemOf(id);
+  const nm = CROP[id] && mutG ? `${gradeName(g)}の${shown.name}` : shown.name;
+  return `${ico(shown)}${esc(nm)}${itemKnown(shown.id)?"":`<small class="isrc">(${srcOf(shown.id)})</small>`}`;
+}
 const ingHaveText = (ing,g) => ing.map(([id,n])=>{
-  const mutG = g===3 || g===5;
-  const shown = mutG && FOOD[id] && upOf(id) ? upOf(id) : itemOf(id);
-  const known = itemKnown(shown.id);
-  const nm = known ? (CROP[id] && mutG ? `${gradeName(g)}の${shown.name}` : shown.name) : "？？？";
   const have=ingHave(id,g), ok=have>=n;
-  return `<span class="${ok?"ingok":"ingng"}">${known?ico(shown):"❔"}${esc(nm)} ${fmtNum(have)}/${n}</span>`;
+  return `<span class="${ok?"ingok":"ingng"}">${ingLabel(id,g)} ${fmtNum(have)}/${n}</span>`;
 }).join(" ・ ");
-const ingText = (ing,g) => ing.map(([id,n])=>{
-  const mutG = g===3 || g===5;
-  const shown = mutG && FOOD[id] && upOf(id) ? upOf(id) : itemOf(id);
-  const known = itemKnown(shown.id);
-  const nm = known ? (CROP[id] && mutG ? `${gradeName(g)}の${shown.name}` : shown.name) : "？？？";
-  return `${known?ico(shown):"❔"}${esc(nm)}${n>1?"×"+n:""}`;
-}).join(" ・ ");
+const ingText = (ing,g) => ing.map(([id,n])=>`${ingLabel(id,g)}${n>1?"×"+n:""}`).join(" ・ ");
+/* 効果: ふつうの料理はいつも見せる。変異・超変異は一度作るか食べるまで伏せる */
+const effKnown = (d,g) => !isMutT(g) || !!((S.dishMade[d.id]||{})[bookKeyOf(g)] || (S.dishEaten[d.id]||{})[bookKeyOf(g)]);
+const effLine = (d,g) => effKnown(d,g) ? esc(effText(d,g)) : "変異・超変異の料理は、効果がもっと強くなります(一度作るとわかります)";
 
 /* ---- 料理の画面(0): 作る / 食べる / 仕込み ---- */
 const COOK_TABS=["作る","食べる","仕込み"];
@@ -7331,9 +7333,10 @@ function cookRowsOf(){
       const gl = g===5||g===3 ? gradeName(g) : (plan ? gradeName(plan.grade) : gradeName(g));
       const min = plan ? dishMin(plan.grade) : dishMin(g);
       const ac=(S.autoCook||[]).some(a=>a.id===d.id && a.g===g);
-      rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${dishIco(d,g)}</span>`,
-        nm:`${esc(dishName(d,g))} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}(${fmtMin(min)}) ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
-        ds:`${(()=>{ const eg=plan?plan.grade:g, known=(S.dishEaten[d.id]||{})[bookKeyOf(eg)]; return known?`効果: ${esc(effText(d,eg))}`:"効果: 食べるとわかります"; })()} ・ 作り置き ×${(S.dishes[d.id]||{})[plan?plan.grade:g]||0}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
+      const seen=!isMutT(g) || (S.dishMade[d.id]||{})[bookKeyOf(g)];   // 変異・超変異の料理は、一度作るまで名前と絵を伏せる
+      rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${seen?dishIco(d,g):"❔"}</span>`,
+        nm:`${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}(${fmtMin(min)}) ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
+        ds:`効果: ${effLine(d,plan?plan.grade:g)} ・ 作り置き ×${(S.dishes[d.id]||{})[plan?plan.grade:g]||0}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
         keys: plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"",
         locked:!plan, enter:()=>cookMake(d.id,1), shift:()=>cookMake(d.id,99), left:()=>cookStep(d.id,-1), right:()=>cookStep(d.id,1), auto:()=>toggleAutoCook(d.id,g) });
     }
@@ -7343,11 +7346,10 @@ function cookRowsOf(){
       const gs=DISH_GRADES.filter(g=>(st[g]||0)>0); if(!gs.length) continue;
       if(!gs.includes(eatGrade[d.id])) eatGrade[d.id]=gs[0];
       const g=eatGrade[d.id], n=st[g];
-      const known=(S.dishEaten[d.id]||{})[bookKeyOf(g)];
       const step=dir=>{ eatGrade[d.id]=gs[(gs.indexOf(g)+dir+gs.length)%gs.length]; sfx.tab(); renderCook(); };
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${dishIco(d,g)}</span>`,
         nm:`${esc(dishName(d,g))} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ×${n} ▶</span>${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
-        ds: known ? `${esc(effText(d,g))}${instantEff(d.eff)?"":`(${fmtMin(dishMin(g))})`}` : `効果は、食べるとわかります${instantEff(d.eff)?"":`(${fmtMin(dishMin(g))})`}`,
+        ds: `${effLine(d,g)}${instantEff(d.eff)?"":`(${fmtMin(dishMin(g))})`}`,
         keys:"<b>Enter</b> 食べる", enter:()=>cookEat(d.id,g), shift:()=>cookEat(d.id,g), left:()=>step(-1), right:()=>step(1) });
     }
   }else{
@@ -7355,9 +7357,9 @@ function cookRowsOf(){
       for(const up of [false,true]){
         const out=FOOD[up?p.upOut:p.out], ing=up?p.upIng:p.ing;
         const plan=prepPlan(ing,up);
-        rows.push({ ic:itemKnown(out.id)||!up?ico(out):"❔",
-          nm:`${itemKnown(out.id)||!up?esc(out.name):"？？？"}${up?' <span class="upnm">上位種</span>':""} <small class="dhave">持っている ×${foodN(out.id)}</small>`,
-          ds:`材料: ${ing.map(([id,n])=>{ const c=CROP[id]; const nm = c ? (up?`変異の${ingName(id)}`:ingName(id)) : ingName(id); return `${itemKnown(id)?ico(itemOf(id)):"❔"}${esc(nm)}${n>1?"×"+n:""}`; }).join(" ・ ")}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
+        rows.push({ ic:ico(out),
+          nm:`${esc(out.name)}${up?' <span class="upnm">上位種</span>':""} <small class="dhave">持っている ×${foodN(out.id)}</small>`,
+          ds:`材料: ${ing.map(([id,n])=>{ const it=itemOf(id), nm = CROP[id]&&up ? `変異の${it.name}` : it.name; return `${ico(it)}${esc(nm)}${itemKnown(id)?"":`<small class="isrc">(${srcOf(id)})</small>`}${n>1?"×"+n:""}`; }).join(" ・ ")}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
           keys: plan?"<b>Enter</b> 1つ仕込む<br><b>Shift+Enter</b> 仕込めるだけ":"", locked:!plan,
           enter:()=>prepMake(p.id,up,1), shift:()=>prepMake(p.id,up,99) });
       }
@@ -7539,7 +7541,7 @@ function recipeRows(){
   return left.map(d=>{
     const has=!!S.recipes[d.id], cost=recipeCost(d);
     return { ic:`<span class="dic">${dishIco(d,0)}</span>`, nm:`${esc(d.name)}のレシピ <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(cost)+"ネジ"}</span>`,
-      ds:`材料: ${ingText(d.ing,0)}${d.eff==="M"?" ・ 庭の色が変わる料理":""}`,
+      ds:`効果: ${esc(effText(d,0))}${instantEff(d.eff)?"(食べた瞬間に効く)":""}<br>材料: ${ingText(d.ing,0)}`,
       keys: has?"":"<b>Enter</b> 買う", enter:()=>buyRecipe(d.id), shift:()=>buyRecipe(d.id) };
   });
 }
@@ -7564,7 +7566,7 @@ function renderDbook(){
     return `<div class="rowi ${known?"":"locked"} ${i===dbookCur?"cur":""}" data-i="${i}">
       <div class="ic">${known?`<span class="dic">${dishIco(d,0)}</span>`:"❔"}</div><div class="nm">${known?esc(d.name):"？？？"}</div><div class="qmarks">${marks}</div></div>`;
   }).join("");
-  const d=DISHES[dbookCur], t=dbookTier, made=(S.dishMade[d.id]||{})[t], eaten=(S.dishEaten[d.id]||{})[t];
+  const d=DISHES[dbookCur], t=dbookTier, made=(S.dishMade[d.id]||{})[t];
   const lore = t===5 ? d.l5 : t===3 ? d.l3 : d.l0;
   const durTxt = instantEff(d.eff) ? "食べた瞬間に効く" : t===5 ? "30分" : t===3 ? "10分" : "5分〜30分(作物の品質で変わる)";
   $("g-dbookDetail").innerHTML=`
@@ -7572,9 +7574,9 @@ function renderDbook(){
     <div class="bic"><span class="dbig${made?"":" unknown"}${t===5?" sup":t===3?" mut":""}">${made?dishIco(d,t):"？"}</span></div>
     <div class="bnm">${made?esc(dishName(d,t)):"？？？"}</div>
     <dl>
-      <dt>材料</dt><dd>${made||S.recipes[d.id]?ingText(d.ing,t):"？？？"}</dd>
-      <dt>効果</dt><dd>${eaten?esc(effText(d,t)):"？？？(食べるとわかります)"}</dd>
-      <dt>効く時間</dt><dd>${eaten?durTxt:"？？？"}</dd>
+      <dt>材料</dt><dd>${ingText(d.ing,t)}</dd>
+      <dt>効果</dt><dd>${effLine(d,t)}</dd>
+      <dt>効く時間</dt><dd>${effKnown(d,t)?durTxt:"？？？"}</dd>
       <dt>レシピ</dt><dd>${S.recipes[d.id]?"持っている":`お店で買えます(${fmtNum(recipeCost(d))}ネジ)`}</dd>
     </dl>
     <div class="lore ${made?"":"unknown"}">${made?esc(lore):(t===5?"作物をすべて超変異に、食材をすべて上位種にして作ると、ここに載ります。":t===3?"作物をすべて変異に、食材をすべて上位種にして作ると、ここに載ります。":"一度作ると、ここに説明が書き込まれます。")}</div>`;
