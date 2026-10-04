@@ -7394,6 +7394,9 @@ function fridgeKeep(){
   }
   S.aliveAt=now;
 }
+/* いまかかっている効果(1つ目が先に切れて、お弁当箱の2つ目だけ残っていることもある) */
+const buffList = () => [buffNow(), buff2Now()].filter(Boolean);
+const mBuff = () => buffList().find(b=>DISH[b.d] && DISH[b.d].eff==="M") || null;   // 画面の色の料理
 /* 効果の強さ: 0 なし / 1 ふつうの料理 / 2 変異・超変異の料理(お弁当箱の2つ目も見る) */
 function eff(k){
   let x=0;
@@ -7617,7 +7620,7 @@ function cookMake(id,times){
 }
 function cookEat(id,g){
   const d=DISH[id], st=S.dishes[id]; if(!d||!st||!(st[g]>0)) return;
-  if(d.eff==="P8" && !buffNow()){ sfx.nope(); toast("今かかっている料理の効果がないので、延ばせません","warn",3200); return; }
+  if(d.eff==="P8" && !buffList().length){ sfx.nope(); toast("今かかっている料理の効果がないので、延ばせません","warn",3200); return; }
   st[g]--; S.ateCount=(S.ateCount||0)+1;
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
   let what="";   // 演出に出す、食べて起きたこと
@@ -7627,10 +7630,9 @@ function cookEat(id,g){
     what=`すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
   }else if(d.eff==="P8"){   // 効果を延ばす: 今の効果に時間を足す
-    const b=buffNow();
+    const bs=buffList(), b=bs[0];
     const add = isMutT(g) ? 60 : 10;
-    b.until+=add*60000;
-    const b2=buff2Now(); if(b2) b2.until+=add*60000;
+    for(const x of bs) x.until+=add*60000;   // かかっている効果を全部延ばす
     what=`${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました(残り ${fmtLeft(b.until-Date.now())})`,"good",5200,true);
   }else{
@@ -7736,7 +7738,7 @@ function renderCook(){
   keepVisible(body);
 }
 function cookNowText(){
-  const b=buffNow(), b2=buff2Now();
+  const [b,b2]=buffList();
   const one = x => `${dishIco(DISH[x.d],x.t)} ${esc(dishName(DISH[x.d],x.t))} ・ ${esc(effText(DISH[x.d],x.t))} ・ 残り ${fmtLeft(x.until-Date.now())}`;
   return b ? `今の効果: ${one(b)}${b2?`<br>2つ目: ${one(b2)}`:""}${bentoOn()?` ・ 🍱 お弁当箱 残り ${fmtLeft(S.bentoUntil-Date.now())}`:""}` : (bentoOn()?`🍱 お弁当箱 残り ${fmtLeft(S.bentoUntil-Date.now())}(料理の効果を2つまでかけられます)`:"今かかっている料理の効果はありません");
 }
@@ -7840,13 +7842,13 @@ root.querySelectorAll(".sptabs").forEach(el=>el.addEventListener("click",e=>{ co
 
 /* ---- 今かかっている効果(庭の上に出す)・庭の色 ---- */
 function renderBuff(){
-  const el=$("g-buff"), b=buffNow();
+  const el=$("g-buff"), [b,b2]=buffList();
   applyTheme();
   if(!b){ el.hidden=true; return; }
   const d=DISH[b.d];
   el.hidden=false;
   el.className="buff"+(b.t===5?" sup":b.t===3?" mut":"");
-  const b2=buff2Now(), d2=b2&&DISH[b2.d];
+  const d2=b2&&DISH[b2.d];
   el.innerHTML=`${dishIco(d,b.t)} ${esc(EFFS[d.eff].nm)} <b>${fmtLeft(b.until-Date.now())}</b>`+(d2?` ・ ${dishIco(d2,b2.t)} ${esc(EFFS[d2.eff].nm)} <b>${fmtLeft(b2.until-Date.now())}</b>`:"")+(bentoOn()?` ・ 🍱 <b>${fmtLeft(S.bentoUntil-Date.now())}</b>`:"");
   el.title=`${dishName(d,b.t)}: ${effText(d,b.t)}`+(d2?` / ${dishName(d2,b2.t)}: ${effText(d2,b2.t)}`:"");
 }
@@ -7855,7 +7857,7 @@ const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--a
 let themeKey="";   // いまの色(同じなら作り直さない)
 /* ネジ打ちで使う: 変異・超変異の画面の色のとき、ネジの代わりに出す料理の絵 */
 function themeScrewArt(){
-  const b=buffNow(), d=b && DISH[b.d];
+  const b=mBuff(), d=b && DISH[b.d];
   return d && d.eff==="M" && isMutT(b.t) ? d.art[b.t===5?2:1] : null;
 }
 /* 背景に舞う作物: 料理の材料(変異・超変異の絵)と、庭の作物いろいろ */
@@ -7881,7 +7883,7 @@ function themeFloat(on,d,t){
   }).join("");
 }
 function applyTheme(){
-  let b=buffNow(); if(!(b && DISH[b.d].eff==="M")){ const b2=buff2Now(); if(b2 && DISH[b2.d].eff==="M") b=b2; }
+  let b=mBuff();
   if(!(b && DISH[b.d].eff==="M") && S.kamado && kitN("kamado")>0 && DISH[S.kamado] && kamadoDishes().includes(S.kamado)) b={ d:S.kamado, t:0 };   // 永遠のかまど(食べたことのある料理の色)
   const d=b && DISH[b.d], de=document.documentElement;
   if(!d || d.eff!=="M"){ themeKey=""; document.body.classList.remove("dishtheme","dishfun"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
@@ -7916,7 +7918,7 @@ function applyTheme(){
 }
 /* 庭の色(変異・超変異の料理): 収穫のたびに花火 */
 function dishFirework(k){
-  const b=buffNow(); if(!b || DISH[b.d].eff!=="M" || !isMutT(b.t)) return;
+  const b=mBuff(); if(!b || !isMutT(b.t)) return;
   const el=plotEls[k]; if(!el) return;
   const r=el.getBoundingClientRect(), c=DISH[b.d].color;
   for(let i=0;i<14;i++){
