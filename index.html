@@ -1221,6 +1221,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden #g-treasBody .ghead span{font-size:.85rem; color:var(--ink-l)}
 #screen-garden .titem.kitem.cur{outline:3px solid #f4c542; outline-offset:1px}
 #screen-garden #g-treasTabs{margin:-.2rem 0 .5rem}
+html.mobile #screen-garden .sphint{display:none}   /* スマホでは Tab キーが無いので出さない */
 #screen-garden .ttabs .sphint{font-size:.72rem; color:var(--ink-l); align-self:center; margin-left:.4rem}
 #screen-garden .kswap{display:inline-flex; gap:.2rem; vertical-align:middle}
 #screen-garden .kswap .sbtn{padding:.05rem .45rem; font-size:.75rem}
@@ -1845,10 +1846,11 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div class="money cooknow" id="g-cookNow"></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
-      <div class="tabs" id="g-cookTabs">
+      <div class="tabs ttabs" id="g-cookTabs">
         <button class="tab" data-tab="0">作る</button>
         <button class="tab" data-tab="1">食べる</button>
         <button class="tab" data-tab="2">仕込み</button>
+        <span class="sphint">Tab で切り替え</span>
       </div>
       <div id="g-cookBody" class="plist"></div>
       <div class="keyhint" id="g-cookHint"></div>
@@ -7546,7 +7548,7 @@ function recipeRows(){
   return left.map(d=>{
     const has=!!S.recipes[d.id], cost=recipeCost(d);
     return { ic:`<span class="dic">${dishIco(d,0)}</span>`, nm:`${esc(d.name)}のレシピ <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(cost)+"ネジ"}</span>`,
-      ds:`効果: ${esc(effText(d,0))}${instantEff(d.eff)?"(食べた瞬間に効く)":""}<br>材料: ${d.ing.map(([id,n])=>itemKnown(id)?`${ingLabel(id,0)}${n>1?"×"+n:""}`:`❔？？？${n>1?"×"+n:""}`).join(" ・ ")}${d.ing.some(([id])=>!itemKnown(id))?"(？？？は買うとわかります)":""}`,
+      ds:`効果: ${esc(effText(d,0))}${instantEff(d.eff)?"(食べた瞬間に効く)":""}<br>材料: ${d.ing.map(([id,n])=>itemKnown(id)?`${ingLabel(id,0)}${n>1?"×"+n:""}`:`❔？？？${n>1?"×"+n:""}`).join(" ・ ")}`,
       keys: has?"":"<b>Enter</b> 買う", enter:()=>buyRecipe(d.id), shift:()=>buyRecipe(d.id) };
   });
 }
