@@ -4581,7 +4581,7 @@ const GURS = [
 ];
 const GUR = Object.fromEntries(GURS.map(g=>[g.id,g]));
 /* 台所の宝物(わくわくガチャの GHR・GUR) */
-const KIT_ORDER=["sfert","pan","pot","board","loupe","hourglass","bento","fridge","cookvil","kamado","mfert","deed","sgk","sgvil"];
+const KIT_ORDER=["sfert","pan","pot","board","loupe","hourglass","mfert","bento","fridge","cookvil","kamado","deed","sgk","sgvil"];
 const kitN = id => ({ sfert:S.sfert, mfert:S.mfert, hourglass:S.hourglass, bento:S.bento, sgk:(S.objs.sgk||0)+FS().filter(f=>f[POST].obj==="sgk").length, sgvil:S.sgVil, deed:S.deeds||0 })[id] ?? ((S.kit&&S.kit[id])||0);
 const kitVal = id => { const g=GUR[id]; if(!g||!g.kit) return 0; return Math.min(g.kit.cap, g.kit.per*((S.kit&&S.kit[id])||0)); };   // 鍋・まな板など(%)
 const SG_SLOTS = 3;   // シゴデキ村人1人が世話する区画の数
@@ -6863,7 +6863,7 @@ function kitSub(id){   // 台所の宝物の「今の状態」
   if(id==="cookvil") return n>0?`任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(${kb("料理の「作る」で A","料理の「作る」の「料理番に任せる」")})`:"";
   const sw = `<span class="kswap"><button class="sbtn" data-kd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-kd="1">${kb("E ▶","▶")}</button></span>`;   // ボタンは名前より前(名前の長さで位置が動かないように)
   if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${S.kamado&&DISH[S.kamado]?`${esc(M_COLOR[S.kamado]||"")}(${esc(DISH[S.kamado].name)})`:"なし"}</b>`:"";
-  if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b> ・ あと${sgFree()}区画`:"";
+  if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b> ・ 使っている区画 <b>${vilUsed("sg")} / ${(S.sgVil||0)*SG_SLOTS}</b>`:"";
   if(id==="sgk") return n>0?`${OBJ_HOW}畑の P に置くと、1打の時短 +2分・カラスよけ・自動の水やり`:"";
   if(id==="deed") return (S.got.deed||0)>0?`持っている ${n}枚 ・ 畑 ${FS().length} / ${FIELD_MAX}枚`:"";
   if(id==="sfert"||id==="mfert") return n>0?kb("肥料(5)で持って、← → で選んでまく","道具の「肥料」を持って、◀ ▶ で選んでまく"):"";
@@ -8594,7 +8594,7 @@ window.addEventListener("beforeunload",()=>{ tick(); save(); });
 /* デバッグ用: 庭のすべての要素を解放した状態にする */
 function debugUnlock(){
   S=newState();
-  S.money=1000000000; S.totalSales=1000000000; S.totalHarvest=100000; S.gachaCount=1000;
+  S.money=10000000000000; S.totalSales=1000000000; S.totalHarvest=100000; S.gachaCount=1000;   // 畑を50枚まで買えるくらい
   S.fields=[makeField(),makeField(),makeField(),makeField(),makeField()];
   S.canLv=CANS.length; S.hoeLv=HOES.length; S.sickLv=SICKLES.length; S.fert=999;
   S.objs={spr:9, crow:9}; S.villagers=3; S.vilLv=VIL_LADDER.length-1;
@@ -8605,9 +8605,9 @@ function debugUnlock(){
     if(c.treasure){ S.treas[c.id]=1; }
     else{ S.inv[c.id]=[3,3,3,3,3,2]; S.auto[c.id]={c:false,s:false}; }
   }
-  for(const f of FOODS){ S.got[f.id]=1; S.food[f.id]=3; }
+  for(const f of FOODS){ S.got[f.id]=1; S.food[f.id]=999; }
   for(const g of GURS) S.got[g.id]=1;
-  S.gachaPass={1111:true,11111:true,111111:true,w1111:true,w11111:true,w111111:true}; S.mfert=3; S.sfert=3; S.sgVil=1; S.objs.sgk=2; S.hourglass=3; S.bento=2; S.deeds=3; S.kit={pan:20,pot:20,board:20,loupe:20,fridge:1,cookvil:2,kamado:1};
+  S.gachaPass={1111:true,11111:true,111111:true,w1111:true,w11111:true,w111111:true}; S.mfert=3; S.sfert=3; S.sgVil=1; S.objs.sgk=2; S.hourglass=3; S.bento=2; S.deeds=45; S.kit={pan:20,pot:20,board:20,loupe:20,fridge:1,cookvil:2,kamado:1};
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
