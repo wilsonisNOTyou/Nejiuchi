@@ -6442,7 +6442,7 @@ function gainGur(id){   // 返す文は、その宝物をはじめて手に入�
 }
 const guardEvery = () => ev("λ",8,5,11);   // SR以上が1つ確定する間隔
 let gachaNote=[];   // 演出が終わってから出す台所の宝物の知らせ(はじめての1回だけ)
-function flushGachaNote(){ for(const m of gachaNote) toast(m,"good mut sup",8000,true); gachaNote=[]; }
+function flushGachaNote(){ for(const m of gachaNote) toast(m,"good mut sup",15000,true); gachaNote=[]; }
 function buyGachaPass(n,m="n"){
   if(gachaPass(n,m)) return;
   if(!spend(passPrice(n,m))) return;
@@ -7408,8 +7408,9 @@ function cookRowsOf(){
       const gl = g===5||g===3 ? gradeName(g) : (plan ? gradeName(plan.grade) : gradeName(g));
       const min = plan ? dishMin(plan.grade) : dishMin(g);
       const ac=(S.autoCook||[]).some(a=>a.id===d.id && a.g===g);
-      const seen=!isMutT(g) || (S.dishMade[d.id]||{})[bookKeyOf(g)];   // 変異・超変異の料理は、一度作るまで名前と絵を伏せる
-      rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${seen?dishIco(d,g):"❔"}</span>`,
+      const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)];   // 絵は、その段階を一度作るまで伏せる
+      const seen=!isMutT(g) || made;                        // 変異・超変異の料理は、名前も伏せる
+      rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
         nm:`${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}(${fmtMin(min)}) ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
         ds:`効果: ${effLine(d,plan?plan.grade:g)} ・ 作り置き ×${(S.dishes[d.id]||{})[plan?plan.grade:g]||0}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
         keys: [plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"", kitN("cookvil")>0?`<b>A</b> ${ac?"料理番をやめる":"料理番に任せる"}`:""].filter(Boolean).join("<br>"),
@@ -7618,7 +7619,7 @@ function recipeRows(){
   if(!left.length) return [{ ic:"📜", nm:"すべてのレシピを持っています", ds:"料理(0)で作れます", keys:"", locked:true, enter:()=>{}, shift:()=>{} }];
   return left.map(d=>{
     const has=!!S.recipes[d.id], cost=recipeCost(d);
-    return { ic:`<span class="dic">${dishIco(d,0)}</span>`, nm:`${esc(d.name)}のレシピ <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(cost)+"ネジ"}</span>`,
+    return { ic:"📜", nm:`${esc(d.name)}のレシピ <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(cost)+"ネジ"}</span>`,
       ds:`効果: ${esc(effText(d,0))}${instantEff(d.eff)?"(食べた瞬間に効く)":""}<br>材料: ${d.ing.map(([id,n])=>itemKnown(id)?`${ingLabel(id,0)}${n>1?"×"+n:""}`:`❔？？？${n>1?"×"+n:""}`).join(" ・ ")}`,
       keys: has?"":"<b>Enter</b> 買う", enter:()=>buyRecipe(d.id), shift:()=>buyRecipe(d.id) };
   });
@@ -7642,7 +7643,7 @@ function renderDbook(){
     const m=S.dishMade[d.id]||{}, known=dishMadeAny(d);
     const marks=`<span class="qm d0${m[0]?" on":""}">●</span><span class="qm mut${m[3]?" on":""}">✦</span><span class="qm sup${m[5]?" on":""}">✦</span>`;
     return `<div class="rowi ${known?"":"locked"} ${i===dbookCur?"cur":""}" data-i="${i}">
-      <div class="ic">${known?`<span class="dic">${dishIco(d,0)}</span>`:"❔"}</div><div class="nm">${known?esc(d.name):"？？？"}</div><div class="qmarks">${marks}</div></div>`;
+      <div class="ic">${known?`<span class="dic">${dishIco(d,[0,3,5].find(t=>m[t]))}</span>`:"❔"}</div><div class="nm">${known?esc(d.name):"？？？"}</div><div class="qmarks">${marks}</div></div>`;
   }).join("");
   const d=DISHES[dbookCur], t=dbookTier, made=(S.dishMade[d.id]||{})[t];
   const lore = t===5 ? d.l5 : t===3 ? d.l3 : d.l0;
@@ -8324,7 +8325,7 @@ function showCookNotice(){
   if(!S.cookNotice || scene!=="garden" || modal || realFields) return;
   S.cookNotice=false; save();
   $("g-noticeBody").innerHTML=`<ul>
-    <li>${dishIco(DISH.carrotsoup,0)} <b>にんじんスープのレシピ</b>と、🥕 <b>にんじん10本</b>をもらいました。<b>0</b> で料理の画面を開き、「作る」で <b>Enter</b> を押すと作れます。</li>
+    <li>📜 <b>にんじんスープのレシピ</b>と、🥕 <b>にんじん10本</b>をもらいました。<b>0</b> で料理の画面を開き、「作る」で <b>Enter</b> を押すと作れます。</li>
     <li>作った料理は作り置きできます。「食べる」で食べると、<b>10分</b>のあいだ効果が続きます。かかる効果は1つだけで、次に食べると上書きされます。</li>
     <li>ほかのレシピは、お店(<b>Tab</b>)の「レシピ」で買えます。材料の多くは、わくわくガチャから出る食材です。</li>
     <li><b>わくわくガチャ</b>は、ガチャ(<b>7</b>)で <b>← →</b> を押すと切り替わります。1回1,000ネジで、作物の種と食材が出ます。</li>
