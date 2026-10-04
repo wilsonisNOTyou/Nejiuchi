@@ -6474,7 +6474,7 @@ function drawGacha(n){
       if(Math.random()<ev("ζ",.2,1,0)){ S.food[x.id]++; x.dbl=true; }
       continue;
     }
-    if(GUR[x.id]){ const m=gainGur(x.id); if(S.got[x.id]===1) gachaNote.push(m); continue; }   // 知らせは、その宝物をはじめて手に入れたときだけ
+    if(GUR[x.id]){ const m=gainGur(x.id); if(S.got[x.id]===1 || x.id==="ticket") gachaNote.push(m); continue; }   // 知らせは、その宝物をはじめて手に入れたときだけ(畑チケットは毎回)
     if(autoSeed(x.id)){                      // 種の自動売却
       const two=Math.random()<ev("Q1",.2,.5,0);   // 料理: 種おかわり
       const gain=seedPrice(CROP[x.id])*(two?2:1);
