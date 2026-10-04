@@ -1070,7 +1070,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
   animation:g-shine 1.8s linear infinite;
 }
 #screen-garden .gsumhead{display:flex; align-items:baseline; gap:.6rem; margin-bottom:.3rem}
-#screen-garden .gsumhead b{color:var(--rc); font-size:1.05rem}
+#screen-garden .gsumhead b{color:var(--rc); font-size:1.05rem; white-space:nowrap}
+#screen-garden .gsumit .gfrom{color:var(--ink-l); font-weight:600}
 #screen-garden .gsumhead span{color:var(--ink-l); font-size:.8rem}
 #screen-garden .gsumitems{display:flex; flex-wrap:wrap; gap:.3rem}
 #screen-garden .gsumit{position:relative; display:flex; align-items:center; gap:.25rem; background:#faf5ea; border-radius:999px; padding:.15rem .6rem .15rem .3rem; font-size:.82rem; font-weight:700}
@@ -6502,7 +6503,8 @@ function drawGacha(n){
 function summarizeGacha(n,res){
   const by={};
   for(const x of res){
-    const o=by[x.id]||(by[x.id]={ id:x.id, n:0, isNew:false, sold:0 });
+    const key=(x.upg?"^":"")+x.id;   // 上位種に化けた食材は、そのまま出たものと分けて数える
+    const o=by[key]||(by[key]={ id:x.id, n:0, isNew:false, sold:0, upg:!!x.upg, r:x.r });
     o.n++; if(x.isNew) o.isNew=true; if(x.sold) o.sold+=x.sold;
   }
   const groups=[];
@@ -6510,6 +6512,9 @@ function summarizeGacha(n,res){
     const items=poolOf(r).map(c=>by[c.id]).filter(Boolean);
     if(items.length) groups.push({ r, items, total:items.reduce((a,x)=>a+x.n,0) });
   }
+  // 化けた食材は最後に別の段で見せる(レア度の段に混ぜると、確率より多く出たように見えるため)
+  const ups=Object.values(by).filter(o=>o.upg).sort((a,b)=>RARITY_ORDER.indexOf(b.r)-RARITY_ORDER.indexOf(a.r));
+  if(ups.length) groups.push({ r:ups[0].r, up:true, items:ups, total:ups.reduce((a,x)=>a+x.n,0) });
   const all=Object.values(by);
   return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), newKinds:all.filter(x=>x.isNew).length };
 }
@@ -6691,21 +6696,21 @@ function gachaBigHTML(){
   const secs=shown.map((g,i)=>{
     const ri=RARITY_ORDER.indexOf(g.r), last=i===shown.length-1 && !B.done;
     return `<div class="gsumsec ${g.r}${ri>=3?" hi":""}${last?" pop":""}" style="--rc:${RARITY[g.r].color}">
-      <div class="gsumhead"><b>${RARITY[g.r].label}</b><span>${fmtNum(g.total)}個 ・ ${g.items.length}種</span></div>
-      <div class="gsumitems">${g.items.map(x=>{ const c=itemOf(x.id); return `<div class="gsumit${x.isNew?" new":""}">
-        <span class="gi">${ico(c)}</span><span class="gnm">${c.name}</span><span class="gct">×${fmtNum(x.n)}</span>
+      <div class="gsumhead"><b>${g.up?"✨ 上位種に化けた食材":RARITY[g.r].label}</b><span>${fmtNum(g.total)}個 ・ ${g.items.length}種${g.up?" ・ 上の段の数とは別":""}</span></div>
+      <div class="gsumitems">${g.items.map(x=>{ const c=itemOf(x.id), from=x.upg && FOOD[c.up]; return `<div class="gsumit${x.isNew?" new":""}">
+        ${from?`<span class="gi">${ico(from)}</span><span class="gnm gfrom">${from.name} →</span>`:""}<span class="gi">${ico(c)}</span><span class="gnm">${c.name}</span><span class="gct">×${fmtNum(x.n)}</span>
         ${x.isNew?'<span class="gnew">NEW</span>':""}${x.sold?`<span class="gsold">+${fmtNum(x.sold)}</span>`:""}</div>`; }).join("")}</div>
     </div>`;
   }).join("");
   let spot="";
   if(B.done){
     const picks=[];
-    for(const g of B.groups){ const ri=RARITY_ORDER.indexOf(g.r); for(const x of g.items) if(ri>=3 || x.isNew) picks.push({...x, r:g.r}); }
+    for(const g of B.groups) for(const x of g.items){ const r=g.up?x.r:g.r; if(RARITY_ORDER.indexOf(r)>=3 || x.isNew) picks.push({...x, r}); }
     picks.sort((a,b)=>RARITY_ORDER.indexOf(b.r)-RARITY_ORDER.indexOf(a.r) || (b.isNew-a.isNew));
     spot = picks.length
       ? `<div class="gspot"><div class="gspothead">✨ 今回の目玉 ✨</div><div class="gcards">`+picks.map((x,i)=>{ const c=itemOf(x.id); return `<div class="gcard ${x.r} spot" style="animation-delay:${Math.min(i,20)*90}ms">
           <span class="gtag">${RARITY[x.r].label}</span><span class="gic">${ico(c)}</span><span class="gnm">${c.name}</span>
-          ${x.isNew?'<span class="gnew">NEW</span>':""}<span class="gcnt">×${fmtNum(x.n)}</span></div>`; }).join("")+`</div></div>`
+          ${x.upg?'<span class="gextra">化けた!</span>':""}${x.isNew?'<span class="gnew">NEW</span>':""}<span class="gcnt">×${fmtNum(x.n)}</span></div>`; }).join("")+`</div></div>`
       : `<div class="gspot plain">今回は HR 以上・NEW はありませんでした。また挑戦しましょう</div>`;
   }
   return `<div class="gsum">
