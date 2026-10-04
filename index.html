@@ -7754,7 +7754,8 @@ function renderGoals(){
   const done=GOALS.filter(goalClaimed).length;
   $("g-goalRate").textContent=`解除 ${done} / ${GOALS.length}`;
   goalCur=Math.max(0,Math.min(goalCur,GOALS.length-1));
-  $("g-goalBody").innerHTML=GOALS.map((g,i)=>{
+  const body=$("g-goalBody"), top=body.scrollTop;   // 書き直しても、見ていた位置のままにする
+  body.innerHTML=GOALS.map((g,i)=>{
     const need=needOf(g), now=Math.min(g.now(),need), ok=goalDone(g), got=goalClaimed(g);
     const cat=GOALS.filter(x=>x.cat===g.cat), head = i===0 || GOALS[i-1].cat!==g.cat
       ? `<div class="ghead">${esc(g.cat)}<span>${cat.filter(goalClaimed).length} / ${cat.length}</span></div>` : "";
@@ -7767,12 +7768,14 @@ function renderGoals(){
         <div class="gprog"><i style="width:${Math.floor(now/need*100)}%"></i></div></div>
       <div class="keyk">${right}</div></div>`;
   }).join("");
-  keepVisible($("g-goalBody"));
+  body.scrollTop=top;
+  keepVisible(body);
   renderGoalBadge();
 }
 function claimGoal(i){
   const g=GOALS[i]; if(!g || goalClaimed(g)) return;
   if(!goalDone(g)){ sfx.nope(); toast("まだ解除していません","warn"); return; }
+  goalCur=i;   // 受け取った行を選んだままにする(一番上に戻らないように)
   S.goals=S.goals||{}; S.goals[g.id]=Date.now();
   const rw=Math.round(g.rw*ev("Y",1.5,2,1)), bonus=rw-g.rw;   // 料理: ごほうび 1.5倍・2倍
   S.money+=rw; if(bonus) S.goalBonus=(S.goalBonus||0)+bonus; sfx.buy();
