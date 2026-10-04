@@ -1226,6 +1226,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden #g-treasBody .ghead span{font-size:.85rem; color:var(--ink-l)}
 #screen-garden .titem.kitem.cur{outline:3px solid #f4c542; outline-offset:1px}
 #screen-garden #g-treasTabs{margin:-.2rem 0 .5rem}
+#screen-garden #g-treasTabs[hidden]{display:none}
 html.mobile #screen-garden .sphint{display:none}   /* スマホでは Tab キーが無いので出さない */
 #screen-garden .ttabs .sphint{font-size:.72rem; color:var(--ink-l); align-self:center; margin-left:.4rem}
 #screen-garden .kswap{display:inline-flex; gap:.2rem; vertical-align:middle}
@@ -6733,6 +6734,7 @@ function gachaHTML(){
    売れないかわりに、持っているだけで庭にずっと効く */
 const TREASURES = CROPS.filter(c=>c.treasure);
 let treasTab=0, kitCur=0;
+const kitAny = () => KIT_ORDER.some(id=>(S.got[id]||0)>0);   // 台所の宝物はシークレット: 1つ手に入れるまでタブを出さない
 const KIT_NOTE="わくわくガチャの GHR・GUR から出る台所の宝物です。鍋やまな板などは、重ねるほど強くなります(上限あり)。砂時計とお弁当箱は Enter で使います。";
 const TREAS_NOTE="ガチャの GHR から出る種を育てると手に入ります。売ることはできませんが、持っているだけで庭にずっと効きます(同じものを重ねるほど強くなります)。";
 function kitSub(id){   // 台所の宝物の「今の状態」
@@ -6806,9 +6808,11 @@ function kitAct(dir){   // Enter(dir=0)・Shift+Enter(dir=-1)・◀▶ のボタ
   save(); renderAll(); renderKit();
 }
 function renderTreas(){
+  if(!kitAny()) treasTab=0;
+  $("g-treasTabs").hidden=!kitAny();
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tt===treasTab));
   $("g-treasNote").textContent = treasTab ? KIT_NOTE : TREAS_NOTE;
-  $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : "<b>Tab</b> 台所の宝物へ ・ <b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
+  $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : (kitAny()?"<b>Tab</b> 台所の宝物へ ・ ":"")+"<b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
   if(treasTab){ renderKit(); return; }
   const got=TREASURES.filter(c=>tre(c.id)>0).length;
   const total=TREASURES.reduce((a,c)=>a+tre(c.id),0);
@@ -6827,7 +6831,7 @@ function renderTreas(){
 function treasKey(e){
   const k=e.key;
   if(k==="Escape"||k==="8"){ e.preventDefault(); closeModal(); return; }
-  if(k==="Tab"){ e.preventDefault(); if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } treasTab=1-treasTab; sfx.tab(); renderTreas(); return; }
+  if(k==="Tab"){ e.preventDefault(); if(!kitAny()) return; treasTab=1-treasTab; sfx.tab(); renderTreas(); return; }
   if(treasTab){
     if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); kitCur=(kitCur+(k==="ArrowRight"?1:-1)+KIT_ORDER.length)%KIT_ORDER.length; sfx.cursor(); renderKit(); return; }
     if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); kitCur=kitBelow(kitCur,k==="ArrowDown"?1:-1); sfx.cursor(); renderKit(); return; }
@@ -6837,7 +6841,7 @@ function treasKey(e){
   }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-treasBody").scrollBy(0, k==="ArrowDown"?90:-90); }
 }
-root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.addEventListener("click",()=>{ const v=+t.dataset.tt; if(v && !cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } treasTab=v; renderTreas(); }));
+root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.addEventListener("click",()=>{ const v=+t.dataset.tt; if(v && !kitAny()) return; treasTab=v; renderTreas(); }));
 $("g-treasBody").addEventListener("click",e=>{
   const it=e.target.closest && e.target.closest(".kitem"); if(!it) return;
   const i=+it.dataset.k, sw=e.target.closest("[data-kd]");
