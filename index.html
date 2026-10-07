@@ -300,6 +300,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1rem; text-
 .rank-tabs .btn.active{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
 .rank-tabs .btn.ta.active{color:#08282b; background:linear-gradient(180deg,#9fe4e8,var(--cyan)); border-color:#3d8d95}
 .tab-group-label{color:#6b7484; font-size:.75rem; letter-spacing:.2em; margin:.5rem 0 .3rem}
+.rank-pair{display:flex; justify-content:center; gap:0 2.5rem; flex-wrap:wrap}   /* 一本勝負とネジの詩を左右に並べる */
 .rank-list{list-style:none; width:min(460px,90vw); margin:0 auto; text-align:left; max-height:42vh; overflow-y:auto}
 .rank-row{
   display:flex; align-items:center; gap:.8rem;
@@ -1729,11 +1730,16 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn ta" id="tab-ta-normal">ノーマル10本</button>
       <button class="btn ta" id="tab-ta-hard">ハード5本</button>
     </div>
-    <div class="rank-tabs" style="margin-top:.6rem">
-      <button class="btn" id="tab-oneshot">一本勝負</button>
+    <div class="rank-pair">
+      <div>
+        <p class="tab-group-label">一本勝負(本数)</p>
+        <div class="rank-tabs"><button class="btn" id="tab-oneshot">一本勝負</button></div>
+      </div>
+      <div>
+        <p class="tab-group-label">ネジの詩(タイム)</p>
+        <div class="rank-tabs" id="poemRankTabs"></div>
+      </div>
     </div>
-    <p class="tab-group-label">ネジの詩(タイム)</p>
-    <div class="rank-tabs" id="poemRankTabs"></div>
     <p class="tab-group-label">ネジ抜きの庭</p>
     <div class="rank-tabs">
       <button class="btn gtab" id="tab-g-money">所持ネジ</button>
