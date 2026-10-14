@@ -3223,9 +3223,9 @@ let gardenKeys=0;       // このプレイで正しく打った打鍵数(ネジ�
 
 /* ネジ抜きの庭へ「正しい打鍵数」と「抜いたネジ」を届ける(庭を開いたときに受け取られる) */
 const gardenScrewMul = () => { try{ return Garden.screwMul(); }catch(e){ return 1; } };   // 料理「1語のネジ」の倍率
-function sendToGarden(keys,screws,mins=0,raw=false){   // raw: 料理「1語のネジ」の倍率を掛けない(TOEIC)
+function sendToGarden(keys,screws,mins=0){
   const toInt = v => Math.max(0, Math.floor(Number(v)||0));   // 大きな数(一本勝負の倍々)でも壊れないように
-  keys=toInt(keys); screws=toInt(screws)*(raw?1:gardenScrewMul()); mins=toInt(mins);
+  keys=toInt(keys); screws=toInt(screws)*gardenScrewMul(); mins=toInt(mins);
   if(keys<=0 && screws<=0 && mins<=0) return;
   try{
     const K="nejiuchi:garden:inbox";
@@ -11962,7 +11962,7 @@ function tqChoose(i){
   if(c.ok){
     window.tqOkN=(window.tqOkN||0)+1;   // はじめてガイド(スマホ)で数える
     const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
-    sendToGarden(0, g.sc, g.min, true);   // 1問ごとにすぐ届ける(料理「1語のネジ」はタイピングだけに効く)(途中でやめても正解ぶんは届く)
+    sendToGarden(0, g.sc, g.min);   // 1問ごとにすぐ届ける(途中でやめても正解ぶんは届く)
     if(g.rose) tqRose(tqRoseLv(tqLadder[0]), g.rose);   // 一本勝負: 薔薇の種も1問ごと
     $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`正解! ネジ +${tqNum(g.sc)} ・ 庭の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
     if(tqKind==="one") tqOneOk(); else{ $("tqScore").textContent=tqNum(tqPts); }
