@@ -626,6 +626,7 @@ html.mobile .wc-bottom .wc-sm .kbdh, html.mobile .wc-panel .kbdh{display:none}
 .wc-goal.done{border-color:#ffd84a; background:rgba(255,216,74,.12)}
 .wc-goal .gleft{font-size:.72rem; color:#ffd84a; border:1px solid rgba(255,216,74,.5); border-radius:99px; padding:0 .45rem; white-space:nowrap}
 .wc-goal .gleft:empty{display:none}
+.wc-goal .ground{font-size:.72rem; font-weight:800; color:#1b1405; background:#ffd84a; border-radius:99px; padding:0 .45rem; white-space:nowrap}
 /* ごほうびを受け取ったときの演出 */
 .wc-prize{position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; background:rgba(10,12,18,.72); border-radius:inherit; overflow:hidden; cursor:pointer; animation:wcpFade .3s ease-out}
 .wc-prize .pbox{text-align:center; padding:1.2rem 1.6rem; border-radius:16px; background:linear-gradient(180deg,#3a3122,#24201a); border:2px solid #ffd84a; box-shadow:0 0 40px rgba(255,216,74,.45); animation:wcpPop .55s cubic-bezier(.2,1.6,.4,1) .55s both}
@@ -5088,6 +5089,9 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-19", t:"みんなの目標に2周目ができました", items:[
+    "みんなの目標を達成すると、同じ目標の2周目が0から始まります。何周でも続き、あとから参加しても、周を達成すればごほうびを受け取れます。ごほうびは週に1回までです",
+  ]},
   { d:"2026-10-19", t:"みんなで話せる「抜けたネジの報告」ができました", items:[
     "みんなとリアルタイムでチャットができます。ランキングと同じ名前で書き込みます。タイトルの「TOEIC 英単語」の右のボタンか C キー、庭では右下の「チャット」ボタンか Enter で開けます",
     "作り置きの料理を投げられます。30分以内に「受け取る」を押した人に、食べたときと同じ効果が半分の時間かかります",
@@ -5491,12 +5495,21 @@ function wcGoalWatch(){
   wcGoalWk=wk; wcGoalV=null;
   db.ref(`nejiuchi/worldGoal/${wk}`).on("value", snap=>{ if(wcGoalWk!==wk) return;
     const before=wcGoalV, v=snap.val(), g=wcGoalNow().g; wcGoalV=v;
-    if(before && (before.n||0)<g.need && v && (v.n||0)>=g.need){   // 見ているあいだに達成した
-      const mine=((v.by||{})[myId()]||{}).n>0;
-      if(!wcOpen) wcPopup(`🎉 みんなの目標「${wcEsc(g.nm)}」を達成しました!${mine?" 手伝ったので、抜けたネジの報告からごほうびを受け取れます":""}`);
+    if(before && v && (v.r||1)>(before.r||1)){   // 見ているあいだに達成した(次の周に進んだ)
+      const mine=!!(v.win||{})[myId()] && !Garden.wcGoalGot(wcGoalWk);
+      if(!wcOpen) wcPopup(`🎉 みんなの目標「${wcEsc(g.nm)}」の${(v.r||2)-1}周目を達成しました!${mine?" 手伝ったので、抜けたネジの報告からごほうびを受け取れます":` ${v.r}周目が始まりました`}`);
       if(wcOpen) wcGoalFx();
     }
     if(wcOpen) wcGoalRender(); }, ()=>{});
+}
+/* みんなの目標に足す(周つき)。達成したら次の周を0から始め、その周を手伝った人を win に入れる。
+   cur = { n 今の周の数, by 今の周を手伝った人, r 何周目か, win ごほうびを受け取れる人 } */
+function wcGoalApply(cur,me,nm,add){
+  const g=wcGoalNow().g; cur=cur||{ n:0, by:{} }; cur.r=cur.r||1; cur.by=cur.by||{}; cur.win=cur.win||{};
+  cur.n=(cur.n||0)+add; const b=cur.by[me]||{ n:0 }; cur.by[me]={ n:(b.n||0)+add, nm };
+  let crossed=0;
+  if(cur.n>=g.need){ crossed=cur.r; for(const u of Object.keys(cur.by)) if(cur.by[u].n>0) cur.win[u]=1; cur.r++; cur.n=0; cur.by={}; }   // 1回で何周も進まないよう、あまりは次の周に持ち越さない
+  return { cur, crossed };
 }
 function wcGoalAdd(kind,n){
   if(!db || !(n>0) || (isDebugSave() && !window.__pvDb)) return;   // デバッグでは数えない(プレビューは数える)
@@ -5507,29 +5520,29 @@ function wcGoalFlush(){
   wcGoalWatch();
   if(!db || !wcGoalPend) return;
   const n=wcGoalPend, { wk }=wcGoalNow(), me=myId(), nm=(playerName||"名無し").slice(0,10); wcGoalPend=0;
-  let crossed=false;
-  db.ref(`nejiuchi/worldGoal/${wk}`).transaction(cur=>{ cur=cur||{ n:0, by:{} }; const g=wcGoalNow().g; crossed=(cur.n||0)<g.need && (cur.n||0)+n>=g.need; cur.n=(cur.n||0)+n; cur.by=cur.by||{}; const b=cur.by[me]||{ n:0 }; cur.by[me]={ n:(b.n||0)+n, nm }; return cur; })
-    .then(res=>{ if(crossed && res && res.committed && playerName) db.ref(WC_PATH).push({ n:nm, t:Date.now(), o:me, s:1, x:`みんなの目標「${wcGoalNow().g.nm}」を達成させました! 🎉 手伝った人はごほうびを受け取れます` }).catch(()=>{}); })   // 最後のひと押しをした人が報告に載せる
+  let crossed=0;
+  db.ref(`nejiuchi/worldGoal/${wk}`).transaction(cur=>{ const r=wcGoalApply(cur,me,nm,n); crossed=r.crossed; return r.cur; })
+    .then(res=>{ if(crossed && res && res.committed && playerName) db.ref(WC_PATH).push({ n:nm, t:Date.now(), o:me, s:1, x:`みんなの目標「${wcGoalNow().g.nm}」の${crossed}周目を達成させました! 🎉 手伝った人はごほうびを受け取れます。続けて${crossed+1}周目が始まります` }).catch(()=>{}); })   // 最後のひと押しをした人が報告に載せる
     .catch(()=>{ wcGoalPend+=n; });
 }
 setInterval(wcGoalFlush,20000);
 function wcGoalRender(){
   const el=$("wcGoal"); if(!el) return;
   if(!db){ el.hidden=true; return; }
-  const { wk, g }=wcGoalNow(), v=wcGoalV||{}, n=v.n||0, by=v.by||{}, me=myId(), mine=((by[me]||{}).n||0)+wcGoalPend, done=n>=g.need;
+  const { wk, g }=wcGoalNow(), v=wcGoalV||{}, n=v.n||0, by=v.by||{}, me=myId(), mine=((by[me]||{}).n||0)+wcGoalPend, r=v.r||1, win=!!(v.win||{})[me], done=win;
   const top=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,3).map(x=>`${wcEsc(x.nm)} ${wcNum(x.n)}`).join(" ・ ");
   const got=Garden.wcGoalGot(wk);
-  const act = !done ? "" : got ? `<span class="wc-got">ごほうびを受け取りました</span>` : mine>0 ? `<button class="btn primary" id="wcGoalGet">🎁 ごほうびを受け取る <span class="kbdh">G</span></button>` : `<span class="wc-got">手伝った人がごほうびを受け取れます</span>`;
+  const act = got ? `<span class="wc-got">今週のごほうびは受け取りました</span>` : win ? `<button class="btn primary" id="wcGoalGet">🎁 ごほうびを受け取る <span class="kbdh">G</span></button>` : r>1 ? `<span class="wc-got">この周を手伝うと、ごほうびを受け取れます</span>` : "";
   el.hidden=false; el.classList.toggle("done",done);
-  el.innerHTML=`🎯 今週のみんなの目標 <span class="gleft">${done?"":`締め切りまで ${wcGoalLeft()}`}</span> <b>${g.nm}</b>${g.note?` <span class="gsub">${g.note}</span>`:""}${done?" 🎉 達成!":""}${act}
+  el.innerHTML=`🎯 今週のみんなの目標 <span class="gleft">締め切りまで ${wcGoalLeft()}</span> <b>${g.nm}</b>${r>1?` <span class="ground">${r}周目 ・ これまで${r-1}回達成 🎉</span>`:""}${g.note?` <span class="gsub">${g.note}</span>`:""}${act}
     <div class="gbar"><i style="width:${Math.min(100,n/g.need*100).toFixed(1)}%"></i></div>
     <span class="gsub">${wcNum(Math.min(n,g.need))} / ${wcNum(g.need)}${g.u} ・ あなた ${wcNum(mine)}${g.u}${top?` ・ ${top}`:""} ・ <span title="${wcPrizeText()}">ごほうび ${wcNum(WC_GOAL_PRIZE.money)}ネジ・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚 と、6種類から1つ</span> ・ 月曜0時に次の目標へ</span>`;
 }
 /* 達成したとき: 目標の帯を光らせる */
 function wcGoalFx(){ const el=$("wcGoal"); if(!el) return; el.classList.remove("done-fx"); void el.offsetWidth; el.classList.add("done-fx"); }
 function wcGoalGet(){
-  const { wk, g }=wcGoalNow(), v=wcGoalV||{}, by=v.by||{};
-  if(!((v.n||0)>=g.need) || !((by[myId()]||{}).n>0) || Garden.wcGoalGot(wk)) return;
+  const { wk }=wcGoalNow(), v=wcGoalV||{};
+  if(!(v.win||{})[myId()] || Garden.wcGoalGot(wk)) return;   // 達成した周を手伝った人が、週に1回
   const it=Garden.wcGoalPrize(wk, WC_GOAL_PRIZE.money, WC_GOAL_PRIZE.coin); if(!it) return;
   $("wcNote").textContent=`🎁 みんなの目標のごほうび ${wcNum(WC_GOAL_PRIZE.money)}ネジ・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚・${it.name} を受け取りました`;
   wcGoalRender(); wcGoalFx(); wcPrizeShow(it);
