@@ -5089,9 +5089,6 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
-  { d:"2026-10-19", t:"みんなの目標に2周目ができました", items:[
-    "みんなの目標を達成すると、同じ目標の2周目が0から始まります。何周でも続き、あとから参加しても、周を達成すればごほうびを受け取れます。ごほうびは週に1回までです",
-  ]},
   { d:"2026-10-19", t:"みんなで話せる「抜けたネジの報告」ができました", items:[
     "みんなとリアルタイムでチャットができます。ランキングと同じ名前で書き込みます。タイトルの「TOEIC 英単語」の右のボタンか C キー、庭では右下の「チャット」ボタンか Enter で開けます",
     "作り置きの料理を投げられます。30分以内に「受け取る」を押した人に、食べたときと同じ効果が半分の時間かかります",
@@ -5494,7 +5491,7 @@ function wcGoalWatch(){
   const { wk }=wcGoalNow(); if(wcGoalWk===wk) return;
   wcGoalWk=wk; wcGoalV=null;
   db.ref(`nejiuchi/worldGoal/${wk}`).on("value", snap=>{ if(wcGoalWk!==wk) return;
-    const before=wcGoalV, v=snap.val(), g=wcGoalNow().g; wcGoalV=v;
+    const before=wcGoalV, v=wcGoalNorm(snap.val()), g=wcGoalNow().g; wcGoalV=v;
     if(before && v && (v.r||1)>(before.r||1)){   // 見ているあいだに達成した(次の周に進んだ)
       const mine=!!(v.win||{})[myId()] && !Garden.wcGoalGot(wcGoalWk);
       if(!wcOpen) wcPopup(`🎉 みんなの目標「${wcEsc(g.nm)}」の${(v.r||2)-1}周目を達成しました!${mine?" 手伝ったので、抜けたネジの報告からごほうびを受け取れます":` ${v.r}周目が始まりました`}`);
@@ -5504,8 +5501,15 @@ function wcGoalWatch(){
 }
 /* みんなの目標に足す(周つき)。達成したら次の周を0から始め、その周を手伝った人を win に入れる。
    cur = { n 今の周の数, by 今の周を手伝った人, r 何周目か, win ごほうびを受け取れる人 } */
+/* 数が目標に届いたまま次の周に進んでいないもの(周ができる前に達成した週など)は、ここで次の周に進める */
+function wcGoalNorm(cur){
+  const g=wcGoalNow().g; if(!cur) return cur;
+  cur=JSON.parse(JSON.stringify(cur)); cur.r=cur.r||1; cur.by=cur.by||{}; cur.win=cur.win||{};
+  if((cur.n||0)>=g.need){ for(const u of Object.keys(cur.by)) if(cur.by[u].n>0) cur.win[u]=1; cur.r++; cur.n=0; cur.by={}; }
+  return cur;
+}
 function wcGoalApply(cur,me,nm,add){
-  const g=wcGoalNow().g; cur=cur||{ n:0, by:{} }; cur.r=cur.r||1; cur.by=cur.by||{}; cur.win=cur.win||{};
+  const g=wcGoalNow().g; cur=wcGoalNorm(cur)||{ n:0, by:{} }; cur.r=cur.r||1; cur.by=cur.by||{}; cur.win=cur.win||{};
   cur.n=(cur.n||0)+add; const b=cur.by[me]||{ n:0 }; cur.by[me]={ n:(b.n||0)+add, nm };
   let crossed=0;
   if(cur.n>=g.need){ crossed=cur.r; for(const u of Object.keys(cur.by)) if(cur.by[u].n>0) cur.win[u]=1; cur.r++; cur.n=0; cur.by={}; }   // 1回で何周も進まないよう、あまりは次の周に持ち越さない
