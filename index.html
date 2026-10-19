@@ -594,7 +594,9 @@ h1{
 /* 目標・報告・下のメニューが、スクロールしないで1画面に収まる(報告の欄が残りの高さを使う) */
 .wc-panel{display:flex; flex-direction:column; height:min(48rem,calc(100vh - 2rem)); height:min(48rem,calc(100dvh - 2rem)); max-height:none; overflow:hidden}
 .wc-panel > *{flex:none}
-.wc-panel .wc-list{flex:1 1 auto; height:auto; min-height:5rem}
+.wc-panel .wc-list{flex:1 1 auto; height:auto; min-height:5rem; overscroll-behavior:contain}   /* 端までスクロールしても、後ろの画面は動かさない */
+html.wc-lock, html.wc-lock body{overflow:hidden; overscroll-behavior:none}   /* 報告を開いているあいだは、後ろの画面をスクロールさせない */
+#wc{overscroll-behavior:contain}
 .wc-panel .wc-dish{max-height:min(13rem,24vh)}
 @media (max-height:720px){ .wc-panel .keynav{display:none} .wc-panel .wc-goal div+.gsub{display:none} }
 .wc-panel .keynav{margin:.25rem 0 0; font-size:.7rem; line-height:1.4}
@@ -5374,14 +5376,14 @@ function wcRender(){
   wcSeen=Date.now(); try{ localStorage.setItem("nejiuchi:wcSeen",String(wcSeen)); }catch(e){}
 }
 function openWorld(){
-  $("wcPop").hidden=true;
+  $("wcPop").hidden=true; document.documentElement.classList.add("wc-lock");
   wcSeen=Date.now(); try{ localStorage.setItem("nejiuchi:wcSeen",String(wcSeen)); }catch(e){}   // 開いたら未読は消す
   wcStart(); wcOpen=true; $("wc").classList.add("open"); $("wcDish").hidden=true;
   $("wcNote").textContent = !db ? "※Firebase未設定のため使えません" : playerName ? `名前「${playerName}」で書き込みます` : "書き込むには名前を決めてください(タイトルの N)";
   wcRender(); const box=$("wcList"); box.scrollTop=box.scrollHeight;
   clearInterval(openWorld.iv); openWorld.iv=setInterval(()=>{ if(wcOpen) wcRender(); },30000);   // 受け取りの残り時間を更新
 }
-function closeWorld(){ if(scene==="title") refreshBara(); wcOpen=false; $("wc").classList.remove("open"); clearInterval(openWorld.iv); const ae=document.activeElement; if(ae && ae.blur) ae.blur(); }
+function closeWorld(){ document.documentElement.classList.remove("wc-lock"); if(scene==="title") refreshBara(); wcOpen=false; $("wc").classList.remove("open"); clearInterval(openWorld.iv); const ae=document.activeElement; if(ae && ae.blur) ae.blur(); }
 async function wcPost(item){
   if(!db){ $("wcNote").textContent="※Firebase未設定のため使えません"; return false; }
   if(!playerName){ $("wcNote").textContent="書き込むには名前を決めてください"; closeWorld(); openNameWin(); return false; }
