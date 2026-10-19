@@ -7045,9 +7045,9 @@ function tickFields(last,now){
         const p=f[k];
         if(p.vil==="rf"){ const r=effGrowth()*(rb||1); roseFarm(p,dt*r,last,"t",r); continue; }   // 薔薇農家: ふつうの畑と同じ速さ
         if(p.vil){ villagerAdvance(p,dt*effVilGrow()); continue; }
-        if(rb && p.crop && !isRipe(p) && (CROP[p.crop.id].rose||CROP[p.crop.id].half)){   // 薔薇の案山子: 水が効いているあいだだけ、薔薇は1分で咲く
-          const w=(p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last), r=effGrowth()*rb;
-          if(w>0) grow(p,w*r,last,"t",r);
+        if(rb && p.crop && !isRipe(p) && (CROP[p.crop.id].rose||CROP[p.crop.id].half)){   // 薔薇の案山子: 水が効いていれば、薔薇は1分で咲く(水の時間は減らない)
+          const r=effGrowth()*rb;
+          if(isWet(fi,k,now,cov)) grow(p,dt*r,last,"t",r);
         }
         else if(p.crop && !isRipe(p)){
           const add = ((p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last)) * effGrowth();
@@ -10924,7 +10924,7 @@ function autoCookTick(){
 /* 時間を進める(β): 水の有無にかかわらず、すべての畑の作物と村人の区画を進める */
 function advanceAll(ms,wetOnly){   // wetOnly: 水が効いている区画だけ進める(時間を進める料理)
   const run=()=>{ const now=Date.now(); S.fields.forEach((f,fi)=>{ const cov=covered(fi); for(const k of KEYS){ const p=f[k]; if(p.vil==="rf"){ roseFarm(p,ms,now-ms,"c"); continue; } if(p.vil){ villagerAdvance(p,ms*effVilGrow()); continue; }
-    if(p.crop && !isRipe(p)){ const w=!wetOnly || (p.s==="soil" && cov.has(k)) ? ms : Math.max(0, Math.min(ms, (p.wet||0)-now)); if(w>0) grow(p,w,now-ms,"c"); } } }); };   // 料理のときは、水が効いている区画だけ進む(村人・薔薇農家は水もあげてくれる)
+    if(p.crop && !isRipe(p) && (!wetOnly || isWet(fi,k,now,cov))) grow(p,ms,now-ms,"c"); } }); };   // 水が効いている区画だけ、まるごと進む(水の時間は減らない。タイピングの時短と同じ)。村人・薔薇農家は水もあげてくれる
   withReal(run); if(realFields) run();
   reportVillagers();
 }
