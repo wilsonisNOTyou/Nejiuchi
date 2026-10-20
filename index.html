@@ -9802,11 +9802,15 @@ function rgConvRows(){
   return rows;
 }
 /* 薔薇の種を減らす(中身の色は、多い色から) */
-function rgTakeSeeds(k){
+function rgTakeSeeds(k){   // 多い色から1つずつ減らすのと同じ結果を、まとめて出す(何億個でも固まらないように)
   const bag=S.roseBag=S.roseBag||{};
-  for(let i=0;i<k;i++){
-    const lv=Object.keys(bag).filter(x=>bag[x]>0).sort((a,b)=>bag[b]-bag[a])[0];
-    if(lv) bag[lv]--;
+  let left=Math.min(k, Object.values(bag).reduce((a,v)=>a+Math.max(0,v),0));
+  while(left>0){   // 一番多い色たちを、次に多い色の数までそろえて削る(色の数だけ繰り返す)
+    const lvs=Object.keys(bag).filter(x=>bag[x]>0).sort((a,b)=>bag[b]-bag[a]); if(!lvs.length) break;
+    const top=bag[lvs[0]]; let m=lvs.findIndex(x=>bag[x]<top); if(m<0) m=lvs.length;
+    const next = m<lvs.length ? bag[lvs[m]] : 0, can=(top-next)*m;
+    if(can<=left){ for(let i=0;i<m;i++) bag[lvs[i]]=next; left-=can; }
+    else{ const d=Math.floor(left/m), r=left-d*m; for(let i=0;i<m;i++) bag[lvs[i]]=top-d-(i<r?1:0); left=0; }
   }
   S.seeds.rose=Math.max(0,(S.seeds.rose||0)-k);
   if(!S.seeds.rose) S.roseBag={};   // 種がなくなったら中身の色も空にする(数がずれていても残らないように)
@@ -11016,6 +11020,18 @@ function autoCookTick(){
     for(let i=0;i<(cap===Infinity?100000:99);i++){
       const plan=cookPlan(d.ing,a.g); if(!plan) break;
       if(((S.dishes[a.id]||{})[plan.grade]||0)>=cap) break;
+      if(cap===Infinity){   // 作れるだけ: 同じ材料の組み合わせで作れるぶんは、まとめて作る(材料がとても多いと、1つずつでは固まるため)
+        let r=Infinity; for(const [kind,id,t,n] of plan.take) r=Math.min(r, Math.floor((kind==="c" ? invN(id,t) : (S.food[id]||0))/n));
+        if(r>1){
+          const used=r-binom(r,ev("P2",.2,.5,0));   // 料理: 材料の節約
+          for(const [kind,id,t,n] of plan.take){ if(kind==="c") S.inv[id][t]-=n*used; else S.food[id]-=n*used; }
+          const got=r+binom(r,ev("P1",.2,1,0)+kitVal("pot")/100);
+          S.dishes[a.id]=S.dishes[a.id]||{}; S.dishes[a.id][plan.grade]=(S.dishes[a.id][plan.grade]||0)+got; k+=got;
+          const bk=bookKeyOf(plan.grade); S.dishMade[a.id]=S.dishMade[a.id]||{}; S.dishMade[a.id][bk]=true;
+          S.cookCount=(S.cookCount||0)+r;
+          continue;
+        }
+      }
       if(Math.random()<ev("P2",.2,.5,0)); else consume(plan.take);
       S.dishes[a.id]=S.dishes[a.id]||{}; S.dishes[a.id][plan.grade]=(S.dishes[a.id][plan.grade]||0)+1; k++;
       if(Math.random()<ev("P1",.2,1,0)+kitVal("pot")/100){ S.dishes[a.id][plan.grade]++; k++; }
@@ -12249,6 +12265,19 @@ function debugUnlock(){
   save();
 }
 /* デバッグ3: ネジ・薔薇ガチャコイン・料理はたくさんあるが、ガチャを一度も引いたことがない記録(3つのガチャは解放済み・大連の権利も持っている) */
+/* デバッグ4: 9000兆(正確に数えられる上限)を超えた世界。すべて解放したうえで、ネジ・コイン・種・作物をとても多くする */
+function debugStart4(){
+  debugUnlock();
+  const B=1e25;
+  S.money=B*1.2345; S.roseCoin=B/10*3.21; S.totalSales=B*5; S.fromTypingScrews=B;
+  S.roseBag={}; for(const lv of Object.keys(ROSE_LVNAME)) if(!roseOwnSeed(lv)) S.roseBag[lv]=Math.floor(B/100*(1+Math.random()));
+  S.seeds.rose=Object.values(S.roseBag).reduce((a,v)=>a+v,0);
+  for(const c of CROPS) if(!c.treasure){ S.seeds[c.id]=Math.floor(B/1000*(1+Math.random())); S.inv[c.id]=[1e18,2e18,3e18,4e18,5e17,6e16].map(x=>Math.floor(x*(1+Math.random()))); }
+  for(const r of ROSE_ALL) S.inv[r.id]=[1e17,0,0,2e16,0,3e15];
+  for(const id of Object.keys(FOOD)) S.food[id]=Math.floor(1e18*(1+Math.random()));
+  S.lastTick=Date.now();
+  save();
+}
 function debugStart3(){
   debugUnlock();
   S.got={}; S.gachaCount=0; S.roseGachaCount=0; S.roseCoinTotal=0; S.rgNoticed=false; S.rgBook={};   // ガチャから出るものは、何も手に入れたことがない
@@ -12289,7 +12318,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
@@ -12359,6 +12388,19 @@ function backupImport(){
       Garden.debugStart3();
     }catch(e){ note.textContent="うまくいきませんでした"; return; }
     note.textContent="ガチャを引く前の記録にしました。画面を読み直します…";
+    setTimeout(()=>location.reload(),600);
+    return;
+  }
+  // デバッグ用の合言葉4: 9000兆を超えた世界(すべて解放したうえで、ネジ・コイン・種・作物・食材をとても多く)
+  if(str.trim().toLowerCase()==="nejiuchi-debug4"){
+    if(!confirm("デバッグ用: すべて解放したうえで、ネジ・薔薇ガチャコイン・種・作物・食材が9000兆をはるかに超える記録に置き換えます。今の記録は消えます。よろしいですか?")) return;
+    try{
+      localStorage.setItem(LS_PREFIX+"playerName","デバッグ4");
+      localStorage.setItem(LS_PREFIX+"garden:inbox", JSON.stringify({keys:0,screws:0}));
+      localStorage.setItem(LS_PREFIX+"debug","1");   // この記録はランキングに載せない
+      Garden.debugStart4();
+    }catch(e){ note.textContent="うまくいきませんでした"; return; }
+    note.textContent="9000兆を超えた記録にしました。画面を読み直します…";
     setTimeout(()=>location.reload(),600);
     return;
   }
