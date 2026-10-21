@@ -11,18 +11,18 @@
           ],
           "$id": {
             ".write": true,
-            ".validate": "$diff.matches(/^(easy|normal|hard|barabara|ta-easy|ta-normal|ta-hard|oneshot|toeic-(choice|fill)-(b1|b2|b3|470|630|730|860|990|i1|i2)|toeic-listen-ls|poem-[a-z0-9]+)$/) && newData.hasChildren(['n', 's', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 20000 && (!$diff.matches(/^(easy|normal|hard|barabara)$/) || newData.child('s').val() <= 1500) && newData.child('t').isNumber() && (!newData.child('e').exists() || (newData.child('e').isNumber() && newData.child('e').val() >= 3)) && (!newData.child('m').exists() || newData.child('m').isNumber()) && (!newData.child('l').exists() || (newData.child('l').isString() && newData.child('l').val().length <= 4)) && (!newData.child('w').exists() || (newData.child('w').isNumber() && newData.child('w').val() >= 2 && newData.child('w').val() <= 15)) && (!newData.child('md').exists() || (newData.child('md').isString() && newData.child('md').val().length <= 40)) && (!newData.child('u').exists() || (newData.child('u').isString() && newData.child('u').val().length <= 4))"
+            ".validate": "!data.exists() && $diff.matches(/^(easy|normal|hard|barabara|ta-easy|ta-normal|ta-hard|oneshot|toeic-(choice|fill)-(b1|b2|b3|470|630|730|860|990|i1|i2)|toeic-listen-ls|poem-[a-z0-9]+)$/) && newData.hasChildren(['n', 's', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 20000 && (!$diff.matches(/^(easy|normal|hard|barabara)$/) || newData.child('s').val() <= 1500) && newData.child('t').isNumber() && (!newData.child('e').exists() || (newData.child('e').isNumber() && newData.child('e').val() >= 3)) && (!newData.child('m').exists() || newData.child('m').isNumber()) && (!newData.child('l').exists() || (newData.child('l').isString() && newData.child('l').val().length <= 4)) && (!newData.child('w').exists() || (newData.child('w').isNumber() && newData.child('w').val() >= 2 && newData.child('w').val() <= 15)) && (!newData.child('md').exists() || (newData.child('md').isString() && newData.child('md').val().length <= 40)) && (!newData.child('u').exists() || (newData.child('u').isString() && newData.child('u').val().length <= 4))"
           }
         }
       },
       "stats": {
         ".read": true,
         "plays": {
-          ".write": true,
+          ".write": "newData.exists()",
           ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 1"
         },
         "screws": {
-          ".write": true,
+          ".write": "newData.exists()",
           ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 3000"
         }
       },
@@ -58,15 +58,21 @@
           "t"
         ],
         "$id": {
-          ".write": true,
-          ".validate": "newData.hasChildren(['n', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('t').isNumber() && (!newData.child('x').exists() || (newData.child('x').isString() && newData.child('x').val().length <= 200)) && (!newData.child('o').exists() || (newData.child('o').isString() && newData.child('o').val().length <= 60)) && (!newData.child('d').exists() || (newData.child('d').isString() && newData.child('d').val().length <= 40)) && (!newData.child('g').exists() || newData.child('g').isNumber())"
+          ".write": "(!data.exists() && newData.exists()) || (!newData.exists() && data.child('t').isNumber() && data.child('t').val() < now - 604800000)",
+          ".validate": "newData.hasChildren(['n', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('t').isNumber() && (!newData.child('x').exists() || (newData.child('x').isString() && newData.child('x').val().length <= 200)) && (!newData.child('o').exists() || (newData.child('o').isString() && newData.child('o').val().length <= 60)) && (!newData.child('d').exists() || (newData.child('d').isString() && newData.child('d').val().length <= 40)) && (!newData.child('g').exists() || newData.child('g').isNumber())",
+          "r": {
+            "$u": {
+              ".write": "data.parent().parent().exists()",
+              ".validate": "$u.matches(/^[a-z0-9]{1,40}$/) && ((newData.hasChildren(['e']) && newData.child('e').isString() && newData.child('e').val().length <= 8 && (!newData.child('n').exists() || (newData.child('n').isString() && newData.child('n').val().length <= 10))) || (newData.isString() && newData.val().length <= 8))"
+            }
+          }
         }
       },
       "worldGoal": {
         ".read": true,
         "$w": {
-          ".write": true,
-          ".validate": "newData.hasChildren(['n']) && newData.child('n').isNumber()"
+          ".write": "newData.exists()",
+          ".validate": "newData.hasChildren(['n']) && newData.child('n').isNumber() && newData.child('n').val() >= 0 && (!newData.child('r').exists() || newData.child('r').isNumber()) && (!data.exists() || !data.child('r').exists() || (newData.child('r').val() === data.child('r').val() + 1 || (newData.child('r').val() === data.child('r').val() && newData.child('n').val() >= data.child('n').val())))"
         }
       }
     }
