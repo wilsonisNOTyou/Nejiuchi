@@ -5148,7 +5148,7 @@ const NEWS=[
   { d:"2026-10-19", t:"みんなで話せる「抜けたネジの報告」ができました", items:[
     "みんなとリアルタイムでチャットができます。ランキングと同じ名前で書き込みます。タイトルの「TOEIC 英単語」の右のボタンか C キー、庭では右下の「チャット」ボタンか Enter で開けます",
     "作り置きの料理を投げられます。30分以内に「受け取る」を押した人に、食べたときと同じ効果が半分の時間かかります",
-    "週ごとに「みんなの目標」が出ます。達成すると、手伝った人はごほうびを受け取れます",
+    "「みんなの目標」が出ます。達成すると、手伝った人はごほうびを受け取れ、次の目標に移ります",
   ]},
   { d:"2026-10-19", t:"1,111,111連と、大連ガチャの演出セット", items:[
     "すべてのガチャに 1,111,111連 を追加しました。お店の「効率化」で権利を買うと、F キーやボタンで引けます",
@@ -5526,7 +5526,7 @@ async function wcCardPost(i){
   const c = o.c.k==="farm" ? Object.assign({},o.c,Garden.wcFarmNow()) : o.c;
   if(await wcPost(Object.assign({ c }, x?{ x }:{}))){ $("wcText").value=""; $("wcCard").hidden=true; $("wcNote").textContent="自慢のカードを貼りました"; }
 }
-/* みんなの目標: 週ごとに1つ。達成したら、手伝った人はごほうびを受け取れる */
+/* みんなの目標: 達成したら手伝った人はごほうびを受け取れ、次の目標に移る */
 const WC_GOALS=[
   { k:"mut",   nm:"変異・超変異の作物を、みんなで100個収穫", need:100,     u:"個", note:"村人が植えた畑のぶんは数えません" },
   { k:"type",  nm:"ネジ打ちで、みんなで1,000本抜く",        need:1000,    u:"本", note:"実際に抜いた本数で数えます。料理で増えるぶんは入りません" },
@@ -5539,11 +5539,14 @@ const WC_GOALS=[
 const WC_GOAL_PRIZE={ money:1000000, coin:10000 };
 const wcPrizeText = () => `${wcNum(WC_GOAL_PRIZE.money)}ネジ と 薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚 は必ず。ほかに、貴重品などの6種類からランダムで1つ`;   // 6種類の名前はここでは出さない(まだ見ていない人もいるため)
 const wcWeek = () => Math.floor((Date.now()+9*3600000-4*86400000)/(7*86400000));   // 月曜0時(日本時間)で切り替わる
-const wcGoalNow = () => { const wk=wcWeek(); return { wk, g:WC_GOALS[(wk+1)%WC_GOALS.length] }; };   // その週の最初の目標(公開した週 2026/10/19〜 はガチャから)
+const WC_GOAL_KEY="live";   // 週の区切りはなし。ひとつの目標を達成したら、次の目標へ
+const wcGoalNow = () => ({ wk:WC_GOAL_KEY, g:WC_GOALS[(wcWeek()+1)%WC_GOALS.length] });   // 記録がまだないときの最初の目標
 /* 達成したら、同じ週のうちに次の目標へ移る。cur.k: いまの目標(なければ、その週の最初の目標) */
 const wcGoalOf = cur => (cur && WC_GOALS.find(x=>x.k===cur.k)) || wcGoalNow().g;
 const wcGoalNext = g => WC_GOALS[(WC_GOALS.indexOf(g)+1)%WC_GOALS.length];
-const wcGoalCur = () => ({ wk:wcWeek(), g:wcGoalOf(wcGoalV) });   // いま見えている目標
+const wcGoalCur = () => ({ wk:WC_GOAL_KEY, g:wcGoalOf(wcGoalV) });   // いま見えている目標
+/* ごほうびを受け取れる目標(手伝って達成した目標で、まだ受け取っていないもの)。win[人] = { 何番目の目標: 1 } */
+const wcGoalMine = v => { const w=((v||{}).win||{})[myId()]; return w && typeof w==="object" ? Object.keys(w).map(Number).filter(r=>!Garden.wcGoalGot("g"+r)).sort((a,b)=>a-b) : []; };
 const wcGoalLeft = () => { const end=(wcWeek()+1)*7*86400000+4*86400000-9*3600000, ms=Math.max(0,end-Date.now()), d=Math.floor(ms/86400000), h=Math.floor(ms%86400000/3600000);
   return d>=1 ? `あと${d}日${h?`${h}時間`:""}` : h>=1 ? `あと${h}時間` : `あと${Math.max(1,Math.ceil(ms/60000))}分`; };   // 締め切り(次の月曜0時)まで
 let wcGoalV=null, wcGoalWk=null, wcGoalPend=0;
@@ -5554,15 +5557,19 @@ function wcGoalWatch(){
   db.ref(`nejiuchi/worldGoal/${wk}`).on("value", snap=>{ if(wcGoalWk!==wk) return;
     const before=wcGoalV, v=wcGoalNorm(snap.val()); wcGoalV=v;
     if(before && v && (v.r||1)>(before.r||1)){   // 見ているあいだに達成した(次の目標に移った)
-      const mine=!!(v.win||{})[myId()] && !Garden.wcGoalGot(wcGoalWk), was=wcGoalOf(before), next=wcGoalOf(v);
+      const mine=wcGoalMine(v).length>0, was=wcGoalOf(before), next=wcGoalOf(v);
       if(!wcOpen) wcPopup(`🎉 みんなの目標「${wcEsc(was.nm)}」を達成しました!${mine?" 手伝ったので、抜けたネジの報告からごほうびを受け取れます":""} 次の目標は「${wcEsc(next.nm)}」です`);
       if(wcOpen) wcGoalFx();
     }
     if(wcOpen) wcGoalRender(); }, ()=>{});
 }
-/* みんなの目標に足す。達成したら次の目標に移って0から始め、達成した目標を手伝った人を win に入れる(ごほうびは週に1回)。
-   cur = { k いまの目標, n その数, by その目標を手伝った人, r 今週いくつ目の目標か, win ごほうびを受け取れる人 } */
-function wcGoalDone(cur){ const g=wcGoalOf(cur); for(const u of Object.keys(cur.by)) if(cur.by[u].n>0) cur.win[u]=1; cur.r++; cur.n=0; cur.by={}; cur.k=wcGoalNext(g).k; }
+/* みんなの目標に足す。達成したら次の目標に移って0から始め、達成した目標を手伝った人を win に入れる(ごほうびは目標ごと)。
+   cur = { k いまの目標, n その数, by その目標を手伝った人, r いくつ目の目標か, win ごほうびを受け取れる人(目標ごと) } */
+function wcGoalDone(cur){   // 手伝った人に、この目標のごほうびを付ける(古いぶんは30個まで残す)
+  const g=wcGoalOf(cur);
+  for(const u of Object.keys(cur.by)) if(cur.by[u].n>0){ const w=cur.win[u] && typeof cur.win[u]==="object" ? cur.win[u] : {}; w[cur.r]=1; for(const k of Object.keys(w)) if(+k<=cur.r-30) delete w[k]; cur.win[u]=w; }
+  cur.r++; cur.n=0; cur.by={}; cur.k=wcGoalNext(g).k;
+}
 /* 数が目標に届いたまま次に移っていないもの(前のしくみで達成した週など)は、ここで次の目標に移す */
 function wcGoalNorm(cur){
   if(!cur) return cur;
@@ -5598,35 +5605,35 @@ setInterval(wcGoalFlush,20000);
 function wcGoalRender(){
   const el=$("wcGoal"); if(!el) return;
   if(!db){ el.hidden=true; return; }
-  const { wk, g }=wcGoalCur(), v=wcGoalV||{}, n=v.n||0, by=v.by||{}, me=myId(), mine=((by[me]||{}).n||0)+wcGoalPend, r=v.r||1, win=!!(v.win||{})[me], done=win;
+  const { wk, g }=wcGoalCur(), v=wcGoalV||{}, n=v.n||0, by=v.by||{}, me=myId(), mine=((by[me]||{}).n||0)+wcGoalPend, r=v.r||1, done=wcGoalMine(v).length>0;
   const top=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,3).map(x=>`${wcEsc(x.nm)} ${wcNum(x.n)}`).join(" ・ ");
-  const got=Garden.wcGoalGot(wk);
-  const act = got ? `<span class="wc-got">今週のごほうびは受け取りました</span>` : win ? `<button class="btn primary" id="wcGoalGet">🎁 ごほうびを受け取る <span class="kbdh">G</span></button>` : r>1 ? `<span class="wc-got">この目標を達成すると、手伝った人はごほうびを受け取れます</span>` : "";
+  const can=wcGoalMine(v).length;
+  const act = can ? `<button class="btn primary" id="wcGoalGet">🎁 ごほうびを受け取る${can>1?`(${can}つ)`:""} <span class="kbdh">G</span></button>` : `<span class="wc-got">達成すると、手伝った人はごほうびを受け取れます</span>`;
   el.hidden=false; el.classList.toggle("done",done);
-  el.innerHTML=`🎯 今週のみんなの目標 <span class="gleft">締め切りまで ${wcGoalLeft()}</span> <b>${g.nm}</b>${r>1?` <span class="ground">今週${r}つ目の目標 ・ これまで${r-1}つ達成 🎉</span>`:""}${g.note?` <span class="gsub">${g.note}</span>`:""}${act}
+  el.innerHTML=`🎯 みんなの目標 <b>${g.nm}</b>${r>1?` <span class="ground">これまで${r-1}個達成 🎉</span>`:""}${g.note?` <span class="gsub">${g.note}</span>`:""}${act}
     <div class="gbar"><i style="width:${Math.min(100,n/g.need*100).toFixed(1)}%"></i></div>
-    <span class="gsub">${wcNum(Math.min(n,g.need))} / ${wcNum(g.need)}${g.u} ・ あなた ${wcNum(mine)}${g.u}${top?` ・ ${top}`:""} ・ <span title="${wcPrizeText()}">ごほうび ${wcNum(WC_GOAL_PRIZE.money)}ネジ・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚 と、6種類から1つ</span> ・ 月曜0時に次の目標へ</span>`;
+    <span class="gsub">${wcNum(Math.min(n,g.need))} / ${wcNum(g.need)}${g.u} ・ あなた ${wcNum(mine)}${g.u}${top?` ・ ${top}`:""} ・ <span title="${wcPrizeText()}">ごほうび ${wcNum(WC_GOAL_PRIZE.money)}ネジ・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚 と、6種類から1つ</span></span>`;
 }
 /* 達成したとき: 目標の帯を光らせる */
 function wcGoalFx(){ const el=$("wcGoal"); if(!el) return; el.classList.remove("done-fx"); void el.offsetWidth; el.classList.add("done-fx"); }
-function wcGoalGet(){
-  const { wk }=wcGoalNow(), v=wcGoalV||{};
-  if(!(v.win||{})[myId()] || Garden.wcGoalGot(wk)) return;   // 達成した周を手伝った人が、週に1回
-  const it=Garden.wcGoalPrize(wk, WC_GOAL_PRIZE.money, WC_GOAL_PRIZE.coin); if(!it) return;
-  $("wcNote").textContent=`🎁 みんなの目標のごほうび ${wcNum(WC_GOAL_PRIZE.money)}ネジ・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚・${it.name} を受け取りました`;
-  wcGoalRender(); wcGoalFx(); wcPrizeShow(it);
+function wcGoalGet(){   // 手伝って達成した目標の数だけ、まとめて受け取る
+  const rs=wcGoalMine(wcGoalV); if(!rs.length) return;
+  const its=rs.map(r=>Garden.wcGoalPrize("g"+r, WC_GOAL_PRIZE.money, WC_GOAL_PRIZE.coin)).filter(Boolean); if(!its.length) return;
+  const k=its.length;
+  $("wcNote").textContent=`🎁 みんなの目標のごほうび${k>1?` ${k}つぶん`:""} ${wcNum(WC_GOAL_PRIZE.money*k)}ネジ・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin*k)}枚・${its.map(x=>x.name).join("・")} を受け取りました`;
+  wcGoalRender(); wcGoalFx(); wcPrizeShow(its[0], k);
 }
 /* ごほうびの演出: 箱がゆれて開き、中身が出てくる。紙ふぶき。押すか少しすると閉じる */
-function wcPrizeShow(it){
+function wcPrizeShow(it,k=1){
   const panel=document.querySelector(".wc-panel"); if(!panel) return;
   const old=panel.querySelector(".wc-prize"); if(old) old.remove();
   const C=["#ffd84a","#ff7a7a","#8ad0ff","#9ad88a","#c79bff","#ffffff"];
   const conf=Array.from({length:60},()=>`<i style="left:${(Math.random()*100).toFixed(1)}%;background:${C[Math.random()*C.length|0]};animation-duration:${(1.6+Math.random()*1.6).toFixed(2)}s;animation-delay:${(.5+Math.random()*.9).toFixed(2)}s"></i>`).join("");
   const el=document.createElement("div"); el.className="wc-prize";
   el.innerHTML=`<div class="pbox"><div class="ptitle">🎉 みんなの目標 達成のごほうび</div><div class="pitems">
-    <div class="pit"><span class="pic">🔩</span><span class="pnm">${wcNum(WC_GOAL_PRIZE.money)}ネジ</span></div>
-    <div class="pit"><span class="pic">🌹</span><span class="pnm">薔薇ガチャコイン ${wcNum(WC_GOAL_PRIZE.coin)}枚</span></div>
-    <div class="pit"><span class="pic">${it.ic}</span><span class="pnm">${wcEsc(it.name)}</span></div></div>
+    <div class="pit"><span class="pic">🔩</span><span class="pnm">${wcNum(WC_GOAL_PRIZE.money*k)}ネジ</span></div>
+    <div class="pit"><span class="pic">🌹</span><span class="pnm">薔薇ガチャコイン ${wcNum(WC_GOAL_PRIZE.coin*k)}枚</span></div>
+    <div class="pit"><span class="pic">${it.ic}</span><span class="pnm">${wcEsc(it.name)}${k>1?` ほか${k-1}つ`:""}</span></div></div>
     <div class="phint">押すと閉じます</div></div><span class="pgift">🎁</span>${conf}`;
   el.querySelector(".pgift").style.cssText="position:absolute";
   panel.style.position="relative"; panel.appendChild(el);
@@ -10153,14 +10160,14 @@ function renderRoseTre(){
     return `<div class="titem ${seen?"":"locked"}"${seen?` data-act="gx:${x.k}"`:""}><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GUR から出ます"}</div>
-      ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}${x.k==="plate"?` <input id="g-plateName" class="gxname" maxlength="12" value="${esc(plateName())}" placeholder="プレートの名前"><button class="sbtn" data-gxname="1">名前を決める${kb(" (N)","")}</button>`:""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
+      ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}${x.k==="plate"?` <input id="g-plateName" class="gxname" maxlength="12" value="${esc(plateName())}" placeholder="プレートの名前"><button class="sbtn" data-gxname="1">名前を決める${kb(" (N)","")}</button>`:""}</div>`:""}</div></div>`; }).join("")+`</div>` : "")
   +(true ? `<div class="ghead">GXR<span>${rgGurGot()} / ${RG_GUR.length}</span></div><div class="tlist">`+RG_GUR.map(x=>{
     const seen=(S.got[x.id]||0)>0, n=rgGurN(x.k);
     return `<div class="titem ${seen?"":"locked"}"><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GXR から出ます"}</div>
       ${seen?`<div class="teff glore">${esc(x.lore)}</div>`:""}
-      ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "")
+      ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
   $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",()=>rkamAct(+b.dataset.rkd)));
   $("g-treasBody").querySelectorAll("[data-gxo]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxToggle(b.dataset.gxo); }));
   $("g-treasBody").querySelectorAll("[data-gxname]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxSaveName(); }));
@@ -12476,6 +12483,7 @@ function debugUnlock(){
   for(const id in RG) S.got[id]=1;
   S.petals=Object.fromEntries(PETALS.map(x=>[x.k,3]));
   S.seeds.rose_hb=20; S.seeds.rose_hr=20; S.objs.rsk=2; S.roseVil=2; S.rkam=1; S.rkamOn=true; S.rkamCol="rose_b3";
+  S.gx=Object.fromEntries(RG_GXR.map(x=>[x.k,1])); S.rgGur=Object.fromEntries(RG_GUR.map(x=>[x.k,RG_GUR_MAX])); S.lastTea={ r:"rose_rainbow", g:0 };   // 薔薇ガチャの GUR(飾り)・GXR(集める宝物)
   S.roseBag={}; for(const r of ROSES) if(!roseOwnSeed(r.lv)) S.roseBag[r.lv]=10; S.seeds.rose=Object.values(S.roseBag).reduce((a,b)=>a+b,0);
   for(const r of ROSE_USEEDS()) S.seeds[r.id]=10;
   for(const d of ROSE_TEAS){ const G=gradesOf(d); S.dishes[d.id]=Object.fromEntries(G.map(g=>[g,1])); S.dishMade[d.id]=Object.fromEntries(G.map(g=>[g,true])); S.dishEaten[d.id]=Object.fromEntries(G.map(g=>[g,true])); }
