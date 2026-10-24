@@ -3973,10 +3973,9 @@ function refreshDaily(){
 }
 /* 日替わりのご褒美が始まったお知らせ: 初めて付いたときに1回だけ(大木の解放のお知らせで話している人には出さない) */
 let dbInfoOpen=false;
-const DB_INFO_KEY = () => NEWS_SEEN_KEY.replace("newsSeen","dailyInfo");
 function dbInfoMaybe(bon){
   if(!Object.keys(bon).length || window.IS_MOBILE || scene!=="title" || document.querySelector(".bk-modal.open")) return;
-  try{ if(localStorage.getItem(DB_INFO_KEY())) return; localStorage.setItem(DB_INFO_KEY(),"1"); if(Garden.btOpen()) return; }catch(e){ return; }
+  try{ if(Garden.dbInfoSeen()) return; Garden.dbInfoMark(); if(Garden.btOpen()) return; }catch(e){ return; }   // 出したかどうかは庭の記録に残す(同期した別の端末でも出し直さない)
   dbInfoOpen=true; $("dbInfo").classList.add("open");
 }
 function closeDbInfo(){ dbInfoOpen=false; $("dbInfo").classList.remove("open"); }
@@ -13840,7 +13839,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
