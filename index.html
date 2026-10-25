@@ -660,6 +660,14 @@ body.mtb #screen-game .game-esc{display:flex; gap:.6rem; justify-content:center}
 .mt-items small{color:#8a7ab8; font-size:.75rem}
 .mt-it{display:inline-flex; align-items:center; gap:.25rem; padding:.2rem .55rem; border-radius:8px; border:1px solid #ffd24a; background:rgba(255,210,74,.12); color:#ffe9a8}
 .mt-it b{font-size:1.1rem; font-weight:400}
+.mt-items.ready .mt-it:first-child{border-width:2px; box-shadow:0 0 14px rgba(255,210,74,.8); animation:mtReady .9s ease-in-out infinite}
+.mt-space{padding:.2rem .7rem; border-radius:6px; background:#ffd24a; color:#2a1a00; font-weight:bold; font-size:.95rem; box-shadow:0 3px 0 #8a6a10, 0 0 16px rgba(255,210,74,.7); animation:mtReady .9s ease-in-out infinite}
+@keyframes mtReady{50%{transform:scale(1.08)}}
+.mt-ask{position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center; background:rgba(5,4,12,.7)}
+.mt-ask[hidden]{display:none}
+.mt-askin{padding:1.2rem 1.6rem; border-radius:12px; background:#1c1638; border:2px solid #ff7ad9; box-shadow:0 0 30px rgba(255,122,217,.5); text-align:center; max-width:min(26rem,90vw)}
+.mt-askin b{display:block; font-size:1.4rem; color:#fff; margin-bottom:.4rem}
+.mt-askin small{display:block; color:var(--steel); font-size:.85rem; line-height:1.6}
 .mt-it.spin{border-color:#4ee6ff; background:rgba(78,230,255,.15); animation:mtBlink .13s steps(2) infinite}
 .mt-it.empty{border-style:dashed; border-color:#5a4a8a; background:none; color:#5a4a8a}
 .mt-pend{color:#ff8ad8; font-weight:bold; animation:mtBlink .6s steps(2) infinite}
@@ -710,7 +718,7 @@ body.mtb-fever #screen-game .hud b{color:#ff7ad9; text-shadow:0 0 12px rgba(255,
 body.mtb-double #screen-game .timebar>i, body.mtb-goldrush #screen-game .timebar>i{background:linear-gradient(90deg,#ffd24a,#ff9a3a)}
 body.mtb-spurt #screen-game .timebar>i{background:linear-gradient(90deg,#ff3a5a,#ffd24a); animation:mtBlink .5s steps(2) infinite}
 body.mtb-spurt::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:0; box-shadow:inset 0 0 120px rgba(255,40,80,.45); animation:mtBlink 1s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){ body.mtb::before, body.mtb-spurt::after, .mt-pend, body.mtb-fever #screen-game .word-panel, body.mtb .word-panel.box::after{animation:none} }
+@media (prefers-reduced-motion:reduce){ .mt-space, .mt-items.ready .mt-it:first-child, body.mtb::before, body.mtb-spurt::after, .mt-pend, body.mtb-fever #screen-game .word-panel, body.mtb .word-panel.box::after{animation:none} }
 .wc-list{height:min(52vh,26rem); overflow:auto; display:flex; flex-direction:column; gap:.35rem; padding:.5rem; border-radius:10px; background:rgba(0,0,0,.25); margin:.4rem 0}
 .wc-msg{line-height:1.5; word-break:break-word}
 .wc-msg .wc-t{color:var(--steel); opacity:.6; font-size:.75rem; margin-right:.4rem; font-variant-numeric:tabular-nums}
@@ -3273,6 +3281,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
   </div>
 </div>
 <div id="wcPop" class="wc-pop" hidden></div>
+<div class="mt-ask" id="mtAsk" hidden><div class="mt-askin"><b>本当にやめますか?</b><small>やめると「やめました」になり、ごほうびはもらえません。試合はそのまま進んでいます</small><div class="btn-row"><button class="btn primary" id="mtAskYes">やめる <span class="kbdh">Enter</span></button><button class="btn" id="mtAskNo">つづける <span class="kbdh">Esc</span></button></div></div></div>
 <div class="mt-feed" id="mtFeed"></div><div class="mt-banner" id="mtBanner"></div><div class="mt-vs" id="mtVs" hidden></div>
 <div id="mt" class="bk-modal">
   <div class="bk-panel mt-panel">
@@ -4705,6 +4714,13 @@ document.addEventListener("keydown",e=>{
     return;
   }
   // ゲーム中
+  if(mtOn() && mtAskIsOpen()){   // 対戦: 「本当にやめますか?」が出ているとき
+    e.preventDefault();
+    if(e.key==="Enter"||e.key==="y"||e.key==="Y") mtQuitGame();
+    else if(e.key==="Escape"||e.key==="n"||e.key==="N") mtAskClose();
+    return;
+  }
+  if(mtOn() && e.key==="Escape"){ e.preventDefault(); mtAskOpen(); return; }   // 対戦は、やめる前に聞く
   if(e.key==="Escape"){
     clearInterval(timerId); clearInterval(cdId); cdId=null;   // カウントダウン中に抜けても始まらないように
     $("countdown").style.display="none";
@@ -6136,6 +6152,9 @@ $("mtLeave").addEventListener("click",mtLeave);
 $("mtBgm").addEventListener("mousedown",e=>e.preventDefault());
 $("mtBgm").addEventListener("click",mtBgmToggle);
 $("mtBgmL").addEventListener("click",mtBgmToggle);
+for(const id of ["mtAskYes","mtAskNo"]) $(id).addEventListener("mousedown",e=>e.preventDefault());
+$("mtAskYes").addEventListener("click",mtQuitGame);
+$("mtAskNo").addEventListener("click",mtAskClose);
 $("wcGoal").addEventListener("click",e=>{ if(e.target.closest("#wcGoalGet")) wcGoalGet(); });
 $("wcList").addEventListener("click",e=>{
   const rx=e.target.closest("[data-rx]"); if(rx){ wcReact(rx.dataset.rx, rx.dataset.e); return; }
@@ -6551,13 +6570,14 @@ function mtBoard(){
 function mtHud(){
   const el=$("mtHud"); if(!el || !mt || !mt.playing) return;
   const it=(k,i)=>mt.spin && mt.spin.i===i ? `<span class="mt-it spin"><b>${mt.spin.ic}</b>…</span>` : k?`<span class="mt-it"><b>${MT_ITEMS[k].ic}</b>${MT_ITEMS[k].nm}</span>`:`<span class="mt-it empty">空き</span>`;
-  el.innerHTML=`<span class="mt-chain${mt.chain>=3?" hot":""}">${mt.chain}<small>連鎖</small></span><span class="mt-items">${it(mt.items[0],0)}${it(mt.items[1],1)}<small>Space で使う</small></span>${mt.pend?`<span class="mt-pend">💜 おじゃま ×${mt.pend}</span>`:""}`;
+  const ready=mt.items.length && !(mt.spin && mt.spin.i===0);   // 使えるアイテムがある
+  el.innerHTML=`<span class="mt-chain${mt.chain>=3?" hot":""}">${mt.chain}<small>連鎖</small></span><span class="mt-items${ready?" ready":""}">${it(mt.items[0],0)}${it(mt.items[1],1)}${ready?`<span class="mt-space">Space で使う!</span>`:""}</span>${mt.pend?`<span class="mt-pend">💜 おじゃま ×${mt.pend}</span>`:""}`;
 }
 function mtPop(t,cls){ const el=$("mtPop"); if(!el) return; el.textContent=t; el.className="mt-pop "+(cls||""); void el.offsetWidth; el.classList.add("on"); }
 function mtFeed(html){ const el=$("mtFeed"); if(!el) return; const d=document.createElement("div"); d.innerHTML=html; el.prepend(d); while(el.children.length>4) el.lastChild.remove(); setTimeout(()=>d.classList.add("out"),2600); setTimeout(()=>d.remove(),3200); }
 function mtBanner(t,sub){ const el=$("mtBanner"); if(!el) return; el.innerHTML=`<b>${wcEsc(t)}</b><small>${wcEsc(sub||"")}</small>`; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on"); }
 /* ---- 終わり ---- */
-function mtStopFx(){ mtBgmStop(); if(mt){ clearInterval(mt.spinT); clearInterval(mt.vsT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
+function mtStopFx(){ mtBgmStop(); const ask=$("mtAsk"); if(ask) ask.hidden=true; if(mt){ clearInterval(mt.spinT); clearInterval(mt.vsT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
 function mtFinish(toGarden){
   const me=mtMe(), m=mt; m.playing=false; m.over=true; clearInterval(mtIv); mtStopFx(); document.body.classList.add("mtb"); for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);   // 結果も会場の見た目のまま
   if(m.evRef) m.evRef.off("child_added",m.evOn);
@@ -6619,7 +6639,18 @@ function mtQuit(){
   if(!mt.ghost && mt.ref) mt.ref.child(`p/${me}`).update({ q:1, f:1, fs:score }).catch(()=>{});
   mtEndAll();
 }
-window.addEventListener("pagehide",()=>{ if(mtOn()) mtQuit(); });   // 試合中に閉じた・読み直した: やめたことにする
+window.addEventListener("pagehide",()=>{ if(mtOn()) mtQuit(); });
+/* 試合中の「本当にやめますか?」(試合は止まらずに進む) */
+const mtAskIsOpen = () => !$("mtAsk").hidden;
+function mtAskOpen(){ $("mtAsk").hidden=false; }
+function mtAskClose(){ $("mtAsk").hidden=true; }
+function mtQuitGame(){
+  mtAskClose();
+  clearInterval(timerId); clearInterval(cdId); cdId=null; $("countdown").style.display="none";
+  running=false; resetStage(); clearWordPanel();
+  mtQuit(); typePk=null; sendToGarden(gardenKeys,0); gardenKeys=0;
+  show("title");
+}   // 試合中に閉じた・読み直した: やめたことにする
 function mtEndAll(){ clearInterval(mtIv); mtStopFx(); if(mt && mt.ref){ mt.ref.off("value",mt.on); if(mt.evRef) mt.evRef.off("child_added",mt.evOn); } mt=null; }
 function mtResultClose(){ if(mtRes){ mtEndAll(); document.body.classList.remove("mtb"); mtRes=null; try{ Garden.applyTheme(); }catch(e){} mtRes=null; $("mtResult").hidden=true; $("registerBox").style.display=""; $("retryBtn").textContent="もう一回 (Enter)"; document.getElementById("screen-result").classList.remove("mtr"); $("resultKeys").innerHTML='<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる'; } }
 /* ---- チャットの対戦の欄 ---- */
