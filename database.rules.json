@@ -74,6 +74,15 @@
           ".write": "newData.exists()",
           ".validate": "newData.hasChildren(['n']) && newData.child('n').isNumber() && newData.child('n').val() >= 0 && (!newData.child('r').exists() || newData.child('r').isNumber()) && (!data.exists() || !data.child('r').exists() || (newData.child('r').val() === data.child('r').val() + 1 || (newData.child('r').val() === data.child('r').val() && newData.child('n').val() >= data.child('n').val())))"
         }
+      },
+      "match": {
+        ".read": true,
+        ".indexOn": [
+          "t"
+        ],
+        "$m": {
+          ".write": true
+        }
       }
     }
   }
