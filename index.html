@@ -601,6 +601,11 @@ h1{
 .mt-rules{margin:.2rem 0 .4rem; padding-left:1.2rem; font-size:.8rem; line-height:1.6; color:var(--steel); text-align:left}
 .mt-rules b{color:#ff7ad9; font-weight:700}
 .mt-bgmb{font-size:.8rem; padding:.3rem .7rem}
+.mt-ilist{grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); gap:.15rem .8rem; margin:.3rem 0 .2rem; padding:.4rem .6rem; border-radius:8px; background:rgba(255,210,74,.06); border:1px solid rgba(255,210,74,.25); font-size:.8rem; text-align:left}
+.mt-ilist > b{grid-column:1/-1; color:#ffd24a}
+.wc-panel #wcMatch{max-height:min(30rem,56vh)}   /* 対戦の欄はアイテム一覧まで見えるように */
+.mt-ilist span small{color:var(--steel); margin-left:.4rem; font-size:.72rem}
+.mt-ilist .mt-inote{grid-column:1/-1; color:var(--steel); font-size:.72rem}
 .mt-result{max-width:30rem; margin:.4rem auto .6rem; text-align:left}
 .mt-result h3{text-align:center; margin:.2rem 0 .5rem; color:#ffd24a; letter-spacing:.15em; text-shadow:0 0 12px rgba(255,210,74,.6)}
 .mt-res{list-style:none; padding:0; margin:0; display:grid; gap:.3rem}
@@ -611,6 +616,7 @@ h1{
 .mt-res li.quit{opacity:.45}
 .mt-res .mt-sc{text-align:right; font-variant-numeric:tabular-nums}
 .mt-res .mt-mi{color:var(--steel); font-size:.8rem; text-align:right}
+.wc-msg .mt-rsn{display:inline-block; margin:0 .5rem 0 .2rem; white-space:nowrap}
 .mt-bonus{text-align:center; color:#ffe08a; font-weight:bold; margin:.6rem 0 0}
 #screen-result.mtr .result-count{color:#4ee6ff; text-shadow:0 0 18px rgba(78,230,255,.7), 0 4px 0 #1a3b6a}
 #screen-result.mtr #resultDiff{color:#ff7ad9; letter-spacing:.3em}
@@ -4684,8 +4690,8 @@ document.addEventListener("keydown",e=>{
   if(scene==="result"){
     if(Date.now()-resultAt<800) return;   // 時間切れの直後に打ち続けたキーで、名前欄などが動かないように
     if(mtRes){   // 対戦の結果
-      const gd=mtRes.m.ghost?mtRes.m.d:null;
-      if(e.key==="Enter"){ e.preventDefault(); mtResultClose(); if(gd) mtGhost(gd); else { show("title"); openWorld(); } }
+      if(e.key==="Enter"){ e.preventDefault(); mtRematch(); }
+      else if((e.key==="c"||e.key==="C") && !mtRes.m.ghost){ mtResultClose(); show("title"); openWorld(); }
       else if(e.key==="Escape"){ mtResultClose(); show("title"); }
       else if(e.key==="g"||e.key==="G"){ mtResultClose(); openGarden(); }
       else if(e.key==="m"||e.key==="M"){ mtBgmToggle(); }
@@ -4734,7 +4740,7 @@ document.addEventListener("keydown",e=>{
     // タイムアタック・単語帳はミスしてもペナルティ無し(回数だけ記録)
     if(isQ(diff)) return;
     // ミス上限でネジが1本戻る
-    if(miss % MISS_PENALTY[diff]===0 && score>0){
+    if(miss % MISS_PENALTY[diff]===0 && score>0 && !mtOn()){   // 対戦では戻さない
       score--; $("score").textContent=score;
       reviveScrew();
       sndPenalty();
@@ -4776,7 +4782,7 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
     else if(b.dataset.diff) startGame(b.dataset.diff);
   });
 });
-$("retryBtn").addEventListener("click",()=>{ if(mtRes){ const gd=mtRes.m.ghost?mtRes.m.d:null; mtResultClose(); if(gd) mtGhost(gd); else { show("title"); openWorld(); } return; } startGame(diff); });
+$("retryBtn").addEventListener("click",()=>{ if(mtRes){ mtRematch(); return; } startGame(diff); });
 $("titleBtn").addEventListener("click",()=>{ if(diff==="book") openBooks(); else show("title"); });
 
 let resultAt=0;
@@ -5866,6 +5872,7 @@ function wcCardHTML(c){
 function wcMsgHTML(m){
   const me=m.o===myId(), head=`<span class="wc-t">${wcTime(m.t)}</span><span class="wc-n">${m.rk||m.rc ? (()=>{ try{ return Garden.roseName(m.n,m); }catch(e){ return wcEsc(m.n); } })() : wcEsc(m.n)}</span>`;
   if(m.c){ const ch=wcCardHTML(m.c); if(ch) return `<div class="wc-msg card${me?" me":""}">${head}🏅 自慢のカード${wcRxHTML(m)}${ch}${m.x?`<span class="wc-who">${wcEsc(m.x)}</span>`:""}</div>`; }
+  if(m.mr && Array.isArray(m.rs)) return `<div class="wc-msg dish mtm">${head}⚔️ 対戦の結果(${DIFF_LABEL[m.md]||""}) ${m.rs.map((x,i)=>`<span class="mt-rsn">${["🥇","🥈","🥉","4位"][i]||""} ${wcEsc(x.n)} ${x.s<0?"やめました":wcEsc(x.s)+"本"}</span>`).join("")}${wcRxHTML(m)}</div>`;   // 対戦の結果
   if(m.mt) return wcMatchHTML(m,head);   // 対戦の募集
   if(m.d){
     const lb=Garden.wcLabel(m.d,+m.g||0); if(!lb) return "";
@@ -6165,7 +6172,8 @@ const MT_ITEMS={
   rocket: { ic:"🚀", nm:"ロケット",     to:"me",  ds:"次の3語が2倍" },
 };
 /* 拾ったときに出す、ひと目で分かる説明(人数で量が変わるものは、その数で) */
-const mtItemShort = k => ({ fog:"相手のローマ字をかくす", flip:"相手の言葉をさかさまに", drunk:"相手の画面をゆらす", bomb:`相手におじゃま ×${mtDuo()?2:3}`, thief:`相手から${mtDuo()?1:2}本とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
+const mtItemShort = (k,all) => ({ fog:"相手のローマ字をかくす", flip:"相手の言葉をさかさまに", drunk:"相手の画面をゆらす", bomb:all?"相手におじゃま ×2〜3":`相手におじゃま ×${mtDuo()?2:3}`, thief:all?"相手から1〜2本とる":`相手から${mtDuo()?1:2}本とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
+const mtItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.entries(MT_ITEMS).map(([k,it])=>`<span>${it.ic} ${it.nm}<small>${mtItemShort(k,true)}</small></span>`).join("")}<small class="mt-inote">🎁つきの言葉を打つと手に入る ・ Space で使う ・ 2つまで ・ ×2〜3 などは2人のときは少なめ</small></div>`;
 const mtDuo = () => Object.values(mt.p).filter(p=>!p.q).length<=2;   // 2人の対戦(攻撃が必ず同じ相手に当たるので、少し弱める)
 /* 順位ごとの出やすさ: 上位は守りと自分強化、下位は強い攻撃が出やすい */
 const MT_ITEM_W=[
@@ -6236,6 +6244,7 @@ function mtBgmStart(){
   mtBgmStop(); if(!mtBgmOn) return; const ac=mtAC(); if(!ac) return;
   mtBgmStep=0; mtBgmNext=ac.currentTime+.05; mtBgmBpm=132;
   mtBgmT=setInterval(()=>{
+    if(!mtOn()){ mtBgmStop(); return; }   // 試合が終わっていたら止める
     const ac=mtAC(); if(!ac) return; const sp=60/mtBgmBpm/4;
     while(mtBgmNext<ac.currentTime+.12){
       const t=mtBgmNext-ac.currentTime, i=mtBgmStep%16;
@@ -6307,7 +6316,8 @@ function mtEnter(id,d){
   mt={ id, d, st:mtNow()+MT_LOBBY, h:"", p:{}, ghost:false, playing:false };
   mt.ref=db.ref(`${MT_PATH}/${id}`);
   mt.on=mt.ref.on("value",sn=>{ const v=sn.val(); if(!mt || mt.id!==id) return; if(!v){ if(!mt.playing && !mt.over) mtCancel("募集した人が対戦をやめました"); return; }
-    mt.h=v.h; mt.st=v.st; mt.d=v.d; const me=mtMe(), mine=mt.p[me];
+    mt.h=v.h; mt.st=v.st; mt.d=v.d; mt.prev=v.prev||null; if(v.rm!==mt.rm){ mt.rm=v.rm||null; if(mtRes && mtRes.m===mt) mtResultBtns(); }
+    const me=mtMe(), mine=mt.p[me];
     mt.p=v.p||{}; if(mine && mt.p[me] && (mt.playing||mt.over)) mt.p[me]=Object.assign(mt.p[me],mine,{ q:mt.p[me].q });   // 自分の数字は手元のものを使う
     if(mt.playing) mtBoard(); else if(!mt.over) mtLobby(); });
   mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn();
@@ -6317,6 +6327,7 @@ function mtEnter(id,d){
 function mtLobbyTick(){
   if(!mt || mt.playing) return;
   const left=mt.st-mtNow();
+  if(mt.prev && mt.h===mtMe() && left>1600 && mt.prev.every(u=>mt.p[u]) && Object.keys(mt.p).length>=2) mtStartNow();   // もう一回: 前のメンバーがそろったらすぐ始める
   if(left<=0){
     if(Object.keys(mt.p).length<2){ if(mt.h===mtMe()) mt.ref.remove().catch(()=>{}); mtCancel("相手が集まりませんでした"); return; }
     mtBegin(); return;
@@ -6329,7 +6340,7 @@ function mtLobby(){
   $("mtTitle").textContent=`⚔️ 対戦の待合室 ・ ${DIFF_LABEL[mt.d]}`;
   $("mtBody").innerHTML=`<p class="mt-left">${ps.length>=2?`あと <b>${left}</b> 秒で始まります`:`相手を待っています ・ あと <b>${left}</b> 秒`}</p>
     <ol class="mt-ps">${ps.map(([u,p])=>`<li${u===mtMe()?' class="me"':""}>${wcEsc(p.n)}${u===mt.h?' <small>募集した人</small>':""}</li>`).join("")}${Array.from({length:Math.max(0,MT_MAX-ps.length)},()=>`<li class="empty">…</li>`).join("")}</ol>
-    <ul class="mt-rules"><li>60秒で多く抜いた人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。3連鎖ごとに上の人へ<b>おじゃまネジ</b>、10連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3本</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません</li></ul>`;
+    <ul class="mt-rules"><li>60秒で多く抜いた人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。3連鎖ごとに上の人へ<b>おじゃまネジ</b>、10連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3本</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもネジは戻りません</li></ul>${mtItemList()}`;
   $("mtStart").hidden=!(host && ps.length>=2);
 }
 function mtStartNow(){ if(mt && !mt.playing && mt.h===mtMe() && Object.keys(mt.p).length>=2) mt.ref.child("st").set(mtNow()+1500).catch(()=>{}); }
@@ -6375,7 +6386,7 @@ function mtVs(){
   const el=$("mtVs"), ps=Object.values(mt.p);
   el.innerHTML=`<div class="mtvs-in"><div class="mtvs-t">${mt.ghost?"PRACTICE":"BATTLE"} ・ ${DIFF_LABEL[mt.d]}</div><div class="mtvs-ns">${ps.map((p,i)=>`${i?'<b class="mtvs-x">VS</b>':""}<span>${wcEsc(p.n)}</span>`).join("")}</div><div class="mtvs-n" id="mtVsN">3</div></div>`;
   el.hidden=false; el.classList.remove("go"); mtSfx.count();
-  let n=0; const cd=setInterval(()=>{ n++;   // 3・2・1 のあとに「打て!」(ゲームのカウントダウンと同じ 0.7秒ごと)
+  let n=0; const cd=mt.vsT=setInterval(()=>{ if(!mtOn()){ clearInterval(cd); return; } n++;   // 3・2・1 のあとに「打て!」(ゲームのカウントダウンと同じ 0.7秒ごと)
     if(n<3){ const c=$("mtVsN"); if(c){ c.textContent=3-n; c.classList.remove("tick"); void c.offsetWidth; c.classList.add("tick"); } mtSfx.count(); }
     else { clearInterval(cd); el.classList.add("go"); el.innerHTML=`<div class="mtvs-go">打て!</div>`; mtSfx.go(); mtBgmStart(); setTimeout(()=>{ el.hidden=true; },700); } },700);
 }
@@ -6430,11 +6441,11 @@ function mtRoulette(i,k){
   mt.spinT=setInterval(()=>{
     if(!mt || !mt.spin){ return; }
     n++; mt.spin.ic=MT_ITEMS[ks[n%ks.length]].ic; mtTone(900+(n%4)*120,.03,"square",.025); mtHud();
-    if(n>=12){ clearInterval(mt.spinT); mt.spin=null; mtSfx.item(); mtFeed(`🎁 ${MT_ITEMS[k].ic} ${MT_ITEMS[k].nm}: ${mtItemShort(k)} ・ Space で使う`); mtHud(); }
+    if(n>=12){ clearInterval(mt.spinT); mt.spin=null; mtSfx.item(); mtFeed(`🎁 ${MT_ITEMS[k].ic} ${MT_ITEMS[k].nm}: ${mtItemShort(k)} ・ Space で使う`); mtHud(); if(mt.useAfter){ mt.useAfter=false; mtUseItem(); } }
   },65);
 }
 function mtUseItem(){
-  if(mt.spin && mt.spin.i===0) return;   // ルーレットが止まるまで待つ
+  if(mt.spin && mt.spin.i===0){ mt.useAfter=true; return; }   // ルーレットが止まったら使う
   const k=mt.items.shift(); if(!k){ mtSfx.miss(); return; }
   if(mt.spin) mt.spin.i--;
   const it=MT_ITEMS[k], me=mtMe(); mtSfx.use();
@@ -6546,7 +6557,7 @@ function mtPop(t,cls){ const el=$("mtPop"); if(!el) return; el.textContent=t; el
 function mtFeed(html){ const el=$("mtFeed"); if(!el) return; const d=document.createElement("div"); d.innerHTML=html; el.prepend(d); while(el.children.length>4) el.lastChild.remove(); setTimeout(()=>d.classList.add("out"),2600); setTimeout(()=>d.remove(),3200); }
 function mtBanner(t,sub){ const el=$("mtBanner"); if(!el) return; el.innerHTML=`<b>${wcEsc(t)}</b><small>${wcEsc(sub||"")}</small>`; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on"); }
 /* ---- 終わり ---- */
-function mtStopFx(){ mtBgmStop(); if(mt){ clearInterval(mt.spinT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
+function mtStopFx(){ mtBgmStop(); if(mt){ clearInterval(mt.spinT); clearInterval(mt.vsT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
 function mtFinish(toGarden){
   const me=mtMe(), m=mt; m.playing=false; m.over=true; clearInterval(mtIv); mtStopFx(); document.body.classList.add("mtb"); for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);   // 結果も会場の見た目のまま
   if(m.evRef) m.evRef.off("child_added",m.evOn);
@@ -6559,12 +6570,30 @@ function mtFinish(toGarden){
   $("resultScore").textContent=score; $("resultUnit").textContent="本";
   $("resultSubLine").textContent=`ミス ${miss}回 ・ 最大 ${m.maxChain}連鎖 ・ 送ったおじゃま ${m.so}`; $("resultNew").textContent="";
   $("registerBox").style.display="none";
-  $("resultKeys").innerHTML = (m.ghost ? "<b>Enter</b> もう一回" : "<b>Enter</b> 抜けたネジの報告へ")+" ・ <b>Esc</b> タイトルへ ・ <b>G</b> 庭へ ・ <b>M</b> BGM";
-  $("retryBtn").textContent = m.ghost ? "もう一回 (Enter)" : "報告へ (Enter)";
+  mtResultBtns();
   document.getElementById("screen-result").classList.add("mtr");
   $("mtResult").hidden=false; mtResult();
   show("result"); resultAt=Date.now();
   clearInterval(mtIv); mtIv=setInterval(mtResult,500);
+}
+function mtResultBtns(){
+  const m=mtRes&&mtRes.m; if(!m) return;
+  $("resultKeys").innerHTML = `<b>Enter</b> ${m.ghost?"もう一回":m.rm?"もう一回に参加":"同じメンバーでもう一回"}${m.ghost?"":" ・ <b>C</b> 抜けたネジの報告へ"} ・ <b>Esc</b> タイトルへ ・ <b>G</b> 庭へ ・ <b>M</b> BGM`;
+  $("retryBtn").textContent = m.ghost ? "もう一回 (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)";
+}
+/* もう一回: だれかが先に作っていれば参加、なければ作って、前のメンバーを30秒待つ(そろえばすぐ始まる) */
+async function mtRematch(){
+  const m=mtRes&&mtRes.m; if(!m) return;
+  if(m.ghost){ const d=m.d; mtResultClose(); mtGhost(d); return; }
+  if(m.rm){ const id=m.rm; mtResultClose(); show("title"); mtJoin(id); return; }
+  if(!db || !playerName) return;
+  const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+30000, me=mtMe(), prev=Object.keys(m.p).filter(u=>!m.p[u].q && m.p[u].g==null), d=m.d, old=m.ref;
+  try{
+    await ref.set({ h:me, d, st, t:mtNow(), prev, p:{ [me]:{ n:playerName.slice(0,10), s:0, c:0, k:0, m:0 } } });
+    await old.child("rm").set(id);
+    db.ref(WC_PATH).push({ n:playerName.slice(0,10), t:Date.now(), o:myId(), x:`もう一回 対戦します(${DIFF_LABEL[d]})`, mt:id, md:d, ms:st }).catch(()=>{});
+  }catch(e){ return; }
+  mtResultClose(); show("title"); mtEnter(id,d);
 }
 function mtResult(){
   const r=mtRes; if(!r) return;
@@ -6573,7 +6602,12 @@ function mtResult(){
   const rows=mtSort(ps.map(([u,p])=>[u,Object.assign({},p,{ fs:p.fs??p.s??0 })]));
   const humans=ps.filter(([u,p])=>p.g==null && !p.q).length, rank=rows.findIndex(([u])=>u===me);
   if(fixed && !r.paid){
-    r.paid=true; clearInterval(mtIv);
+    r.paid=true;
+    const poster=(rows.find(([u,p])=>!p.q && p.g==null)||[])[0];   // 結果は、残っている人のうち一番上の人がチャットに貼る
+    if(!r.m.ghost && humans>=2 && poster===me && db && !wcMsgs.some(x=>x.mr===r.m.id)){
+      const rs=rows.map(([u,p])=>({ n:String(p.n||"").slice(0,10), s:p.q?-1:p.fs }));
+      db.ref(WC_PATH).push({ n:(playerName||"").slice(0,10), t:Date.now(), o:myId(), mr:r.m.id, md:r.m.d, rs, x:`対戦の結果(${DIFF_LABEL[r.m.d]}): 1位 ${rs[0].n} ${rs[0].s}本` }).catch(()=>{});
+    }
     if(!r.m.ghost && humans>=2){ r.bonus=Math.floor(r.toGarden*(MT_BONUS[rank]||0)); if(r.bonus>0) sendToGarden(0,r.bonus,0,true); }
     if(rank===0) mtSfx.win(); else mtSfx.lose();
   }
@@ -6585,6 +6619,7 @@ function mtQuit(){
   if(!mt.ghost && mt.ref) mt.ref.child(`p/${me}`).update({ q:1, f:1, fs:score }).catch(()=>{});
   mtEndAll();
 }
+window.addEventListener("pagehide",()=>{ if(mtOn()) mtQuit(); });   // 試合中に閉じた・読み直した: やめたことにする
 function mtEndAll(){ clearInterval(mtIv); mtStopFx(); if(mt && mt.ref){ mt.ref.off("value",mt.on); if(mt.evRef) mt.evRef.off("child_added",mt.evOn); } mt=null; }
 function mtResultClose(){ if(mtRes){ mtEndAll(); document.body.classList.remove("mtb"); mtRes=null; try{ Garden.applyTheme(); }catch(e){} mtRes=null; $("mtResult").hidden=true; $("registerBox").style.display=""; $("retryBtn").textContent="もう一回 (Enter)"; document.getElementById("screen-result").classList.remove("mtr"); $("resultKeys").innerHTML='<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる'; } }
 /* ---- チャットの対戦の欄 ---- */
@@ -6594,7 +6629,8 @@ function wcMatchToggle(){
   wcPaneShow("wcMatch");
   const ds=["easy","normal","hard"];
   box.innerHTML = ds.map((d,i)=>`<button class="btn" data-mtc="${d}"><span class="wdn"><span class="kbdh">${i+1}</span> ⚔️ ${DIFF_LABEL[d]}で募集</span><span class="wde">1分間、参加する人を待ちます(${MT_MAX}人まで)</span></button>`).join("")
-    + ds.map((d,i)=>`<button class="btn" data-mtg="${d}"><span class="wdn"><span class="kbdh">${i+4}</span> 👻 ${DIFF_LABEL[d]}でゴーストと練習</span><span class="wde">ひとりで試せます。ごほうびはありません</span></button>`).join("");
+    + ds.map((d,i)=>`<button class="btn" data-mtg="${d}"><span class="wdn"><span class="kbdh">${i+4}</span> 👻 ${DIFF_LABEL[d]}でゴーストと練習</span><span class="wde">ひとりで試せます。ごほうびはありません</span></button>`).join("")
+    + mtItemList();
 }
 function wcMatchHTML(m,head){
   const left=Math.ceil(((+m.ms||0)-mtNow())/1000), me=m.o===myId();
