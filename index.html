@@ -695,7 +695,9 @@ body.mtb #screen-game .game-esc{display:flex; gap:.6rem; justify-content:center}
 @keyframes mtTick{from{transform:scale(1.8); opacity:0} 30%{transform:scale(1); opacity:1}}
 .mtvs-go{font-size:clamp(4rem,14vw,8rem); color:#4ee6ff; text-shadow:0 0 30px rgba(78,230,255,.9), 0 6px 0 #1a3b6a; animation:mtGo .7s ease-out}
 @keyframes mtVsIn{from{opacity:0; transform:scale(1.3)}}
-@keyframes mtGo{from{transform:scale(2.5); opacity:0} 40%{transform:scale(1); opacity:1}}
+@keyframes mtGo{from{transform:scale(2.5); opacity:0} 25%{transform:scale(1); opacity:1} 60%{opacity:1} 100%{opacity:0; transform:translateY(-20px)}}
+.mt-vs.go{background:none; align-items:flex-start; padding-top:3vh}   /* 「打て!」の時はもう始まっている: 暗い幕を外し、言葉に重ならない上のほうに出す */
+.mt-vs.go .mtvs-go{font-size:clamp(2.6rem,8vw,4.4rem); animation:mtGo .8s ease-out forwards}
 /* 言葉の種類: おじゃま・金・アイテム箱・大ネジ */
 body.mtb .word-panel.oj{border-color:#a060ff; background:repeating-linear-gradient(45deg,#2a1840 0 12px,#22123a 12px 24px); box-shadow:0 0 22px rgba(160,96,255,.6)}
 body.mtb .word-panel.oj #wordText{color:#d0a8ff}
