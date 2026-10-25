@@ -676,6 +676,9 @@ body.mtb #screen-game .game-esc{display:flex; gap:.6rem; justify-content:center}
 .mtvs-t{color:#ff7ad9; letter-spacing:.4em; font-size:1rem; margin-bottom:1rem}
 .mtvs-ns{display:flex; flex-wrap:wrap; gap:.8rem 1.2rem; align-items:center; justify-content:center; font-size:clamp(1.4rem,4vw,2.2rem); color:#fff; text-shadow:0 0 12px rgba(78,230,255,.8)}
 .mtvs-x{color:#ffd24a; font-size:.8em; text-shadow:0 0 12px rgba(255,210,74,.9)}
+.mtvs-n{margin-top:1.4rem; font-size:clamp(4rem,12vw,7rem); line-height:1; color:#ffd24a; text-shadow:0 0 26px rgba(255,210,74,.9), 0 6px 0 #6a3a00; animation:mtTick .7s ease-out}
+.mtvs-n.tick{animation:mtTick .7s ease-out}
+@keyframes mtTick{from{transform:scale(1.8); opacity:0} 30%{transform:scale(1); opacity:1}}
 .mtvs-go{font-size:clamp(4rem,14vw,8rem); color:#4ee6ff; text-shadow:0 0 30px rgba(78,230,255,.9), 0 6px 0 #1a3b6a; animation:mtGo .7s ease-out}
 @keyframes mtVsIn{from{opacity:0; transform:scale(1.3)}}
 @keyframes mtGo{from{transform:scale(2.5); opacity:0} 40%{transform:scale(1); opacity:1}}
@@ -6370,9 +6373,11 @@ function mtBegin(){
 /* 始まる前の VS 画面(カウントダウンのあいだ) */
 function mtVs(){
   const el=$("mtVs"), ps=Object.values(mt.p);
-  el.innerHTML=`<div class="mtvs-in"><div class="mtvs-t">${mt.ghost?"PRACTICE":"BATTLE"} ・ ${DIFF_LABEL[mt.d]}</div><div class="mtvs-ns">${ps.map((p,i)=>`${i?'<b class="mtvs-x">VS</b>':""}<span>${wcEsc(p.n)}</span>`).join("")}</div></div>`;
+  el.innerHTML=`<div class="mtvs-in"><div class="mtvs-t">${mt.ghost?"PRACTICE":"BATTLE"} ・ ${DIFF_LABEL[mt.d]}</div><div class="mtvs-ns">${ps.map((p,i)=>`${i?'<b class="mtvs-x">VS</b>':""}<span>${wcEsc(p.n)}</span>`).join("")}</div><div class="mtvs-n" id="mtVsN">3</div></div>`;
   el.hidden=false; el.classList.remove("go"); mtSfx.count();
-  let n=0; const cd=setInterval(()=>{ n++; if(n<3) mtSfx.count(); else { clearInterval(cd); el.classList.add("go"); el.innerHTML=`<div class="mtvs-go">打て!</div>`; mtSfx.go(); mtBgmStart(); setTimeout(()=>{ el.hidden=true; },700); } },700);
+  let n=0; const cd=setInterval(()=>{ n++;   // 3・2・1 のあとに「打て!」(ゲームのカウントダウンと同じ 0.7秒ごと)
+    if(n<3){ const c=$("mtVsN"); if(c){ c.textContent=3-n; c.classList.remove("tick"); void c.offsetWidth; c.classList.add("tick"); } mtSfx.count(); }
+    else { clearInterval(cd); el.classList.add("go"); el.innerHTML=`<div class="mtvs-go">打て!</div>`; mtSfx.go(); mtBgmStart(); setTimeout(()=>{ el.hidden=true; },700); } },700);
 }
 function mtNextWord(){
   const pn=$("wordPanel"); let w;
