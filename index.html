@@ -705,10 +705,11 @@ body.mtb .word-panel.box::after{content:"🎁"; position:absolute; top:-.7rem; r
 @keyframes mtBob{50%{transform:translateY(-4px) rotate(8deg)}}
 body.mtb .word-panel.big{border-color:#ff5a5a; box-shadow:0 0 34px rgba(255,90,90,.7)}
 body.mtb .word-panel.big::before{content:"大ネジ"; position:absolute; top:-.75rem; left:50%; transform:translateX(-50%); width:auto; height:auto; padding:0 .6rem; border-radius:999px; background:#ff5a5a; color:#fff; font-size:.8rem; box-shadow:none}
-body.mtb .word-panel.flip #wordText, body.mtb .word-panel.flip #wordKana{display:inline-block; transform:rotate(180deg)}
+body.mtb .word-panel.flip #wordText, body.mtb .word-panel.flip #wordKana, body.mtb .word-panel.flip #romaji{display:inline-block; transform:rotate(180deg)}   /* 言葉もよみがなもローマ字も */
+body.mtb .word-panel.flip{display:flex; flex-direction:column; align-items:center}
 body.mtb .word-panel.hit{animation:mtHit .35s}
 @keyframes mtHit{20%{transform:translate(-8px,3px)} 40%{transform:translate(7px,-3px)} 60%{transform:translate(-4px,2px)} 80%{transform:translate(3px,0)}}
-body.mtb-fog #romaji .rest{filter:blur(6px); opacity:.25}
+body.mtb-fog #romaji .rest, body.mtb-fog #wordKana{filter:blur(6px); opacity:.25}   /* よみがなもローマ字もかくす */
 body.mtb-fog #screen-game .word-panel{box-shadow:inset 0 0 60px rgba(220,220,240,.35)}
 /* フィーバー・2倍・ラストスパート */
 body.mtb-fever #screen-game .word-panel{border-color:transparent; background:linear-gradient(#1c1638,#120e26) padding-box, linear-gradient(90deg,#ff5a5a,#ffd24a,#5aff8a,#4ee6ff,#ff7ad9,#ff5a5a) border-box; background-size:auto, 300% 100%; animation:mtRainbow 1.2s linear infinite}
@@ -6181,8 +6182,8 @@ const MT_BONUS=[1,.5,.25,0];   // 順位ごとのごほうび: 自分が抜い�
 const MT_OJ=["おじゃまします","ねじねじねじ","からまったねじ","さびついたねじ","ねじれたねじ","じゃましにきた","ぐるぐるねじまき","ねじがはずれない"].map(k=>({ t:k, k, oj:true }));
 /* アイテム: atk 相手へ(1位を狙う。自分が1位なら2位) / all ほかの全員へ / me 自分に */
 const MT_ITEMS={
-  fog:    { ic:"🌫️", nm:"霧",           to:"atk", ds:"相手のローマ字を6秒かくす" },
-  flip:   { ic:"🙃", nm:"さかさま",     to:"atk", ds:"相手の言葉を2語さかさまにする" },
+  fog:    { ic:"🌫️", nm:"霧",           to:"atk", ds:"相手のよみがなとローマ字を6秒かくす" },
+  flip:   { ic:"🙃", nm:"さかさま",     to:"atk", ds:"相手の言葉・よみがな・ローマ字を2語さかさまにする" },
   drunk:  { ic:"🍶", nm:"酔わせる",     to:"atk", ds:"相手の画面を7秒ゆらす" },
   bomb:   { ic:"💣", nm:"おじゃま爆弾", to:"atk", ds:"相手におじゃまネジを送る(2人なら2つ、3人以上なら3つ)" },
   thief:  { ic:"🧲", nm:"ネジ泥棒",     to:"atk", ds:"相手から本数をとる(2人なら1本、3人以上なら2本)" },
@@ -6191,7 +6192,7 @@ const MT_ITEMS={
   rocket: { ic:"🚀", nm:"ロケット",     to:"me",  ds:"次の3語が2倍" },
 };
 /* 拾ったときに出す、ひと目で分かる説明(人数で量が変わるものは、その数で) */
-const mtItemShort = (k,all) => ({ fog:"相手のローマ字をかくす", flip:"相手の言葉をさかさまに", drunk:"相手の画面をゆらす", bomb:all?"相手におじゃま ×2〜3":`相手におじゃま ×${mtDuo()?2:3}`, thief:all?"相手から1〜2本とる":`相手から${mtDuo()?1:2}本とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
+const mtItemShort = (k,all) => ({ fog:"相手のよみがなとローマ字をかくす", flip:"相手の言葉を全部さかさまに", drunk:"相手の画面をゆらす", bomb:all?"相手におじゃま ×2〜3":`相手におじゃま ×${mtDuo()?2:3}`, thief:all?"相手から1〜2本とる":`相手から${mtDuo()?1:2}本とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
 const mtItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.entries(MT_ITEMS).map(([k,it])=>`<span>${it.ic} ${it.nm}<small>${mtItemShort(k,true)}</small></span>`).join("")}<small class="mt-inote">🎁つきの言葉を打つと手に入る ・ Space で使う ・ 2つまで ・ ×2〜3 などは2人のときは少なめ</small></div>`;
 const mtDuo = () => Object.values(mt.p).filter(p=>!p.q).length<=2;   // 2人の対戦(攻撃が必ず同じ相手に当たるので、少し弱める)
 /* 順位ごとの出やすさ: 上位は守りと自分強化、下位は強い攻撃が出やすい */
@@ -6496,7 +6497,7 @@ function mtRecv(v){
   if(v.k==="oj"){ mt.pend+=v.n; mtFeed(`💜 ${wcEsc(from)}からおじゃまネジ ×${v.n}`); }
   else if(v.k==="bomb"){ const n=v.n||3; mt.pend+=n; mtFeed(`💣 ${wcEsc(from)}のおじゃま爆弾! ×${n}`); }
   else if(v.k==="fog"){ mt.fogUntil=now+6000; mtFeed(`🌫️ ${wcEsc(from)}の霧`); }
-  else if(v.k==="flip"){ mt.flip+=2; $("wordPanel").classList.add("flip"); mtFeed(`🙃 ${wcEsc(from)}のさかさま`); }
+  else if(v.k==="flip"){ mt.flip+=1; $("wordPanel").classList.add("flip"); /* 今の言葉と次の言葉の2語 */ mtFeed(`🙃 ${wcEsc(from)}のさかさま`); }
   else if(v.k==="drunk"){ mt.drunkUntil=now+7000; mtFeed(`🍶 ${wcEsc(from)}に酔わされた`); }
   else if(v.k==="thief"){ const n=Math.min(v.n||2,score); score-=n; $("score").textContent=score; mtFeed(`🧲 ${wcEsc(from)}に${n}本とられた`); }
   else if(v.k==="thunder"){ mt.pend+=1; mt.fogUntil=Math.max(mt.fogUntil,now+((v.n||3)<=2?2000:3000)); mtFeed(`⚡ ${wcEsc(from)}のかみなり`); }
