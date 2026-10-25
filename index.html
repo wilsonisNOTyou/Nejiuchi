@@ -654,6 +654,7 @@ body.mtb #screen-game .game-esc{display:flex; gap:.6rem; justify-content:center}
 .mt-items small{color:#8a7ab8; font-size:.75rem}
 .mt-it{display:inline-flex; align-items:center; gap:.25rem; padding:.2rem .55rem; border-radius:8px; border:1px solid #ffd24a; background:rgba(255,210,74,.12); color:#ffe9a8}
 .mt-it b{font-size:1.1rem; font-weight:400}
+.mt-it.spin{border-color:#4ee6ff; background:rgba(78,230,255,.15); animation:mtBlink .13s steps(2) infinite}
 .mt-it.empty{border-style:dashed; border-color:#5a4a8a; background:none; color:#5a4a8a}
 .mt-pend{color:#ff8ad8; font-weight:bold; animation:mtBlink .6s steps(2) infinite}
 @keyframes mtBlink{50%{opacity:.4}}
@@ -6154,19 +6155,21 @@ const MT_ITEMS={
   fog:    { ic:"🌫️", nm:"霧",           to:"atk", ds:"相手のローマ字を6秒かくす" },
   flip:   { ic:"🙃", nm:"さかさま",     to:"atk", ds:"相手の言葉を2語さかさまにする" },
   drunk:  { ic:"🍶", nm:"酔わせる",     to:"atk", ds:"相手の画面を7秒ゆらす" },
-  bomb:   { ic:"💣", nm:"おじゃま爆弾", to:"atk", ds:"相手におじゃまネジを3つ送る" },
-  thief:  { ic:"🧲", nm:"ネジ泥棒",     to:"atk", ds:"相手から2本とる" },
-  thunder:{ ic:"⚡", nm:"かみなり",     to:"all", ds:"ほかの全員に、おじゃま1つと霧3秒" },
-  shield: { ic:"🛡️", nm:"盾",           to:"me",  ds:"次に来る攻撃を1回ふせぐ" },
+  bomb:   { ic:"💣", nm:"おじゃま爆弾", to:"atk", ds:"相手におじゃまネジを送る(2人なら2つ、3人以上なら3つ)" },
+  thief:  { ic:"🧲", nm:"ネジ泥棒",     to:"atk", ds:"相手から本数をとる(2人なら1本、3人以上なら2本)" },
+  thunder:{ ic:"⚡", nm:"かみなり",     to:"all", ds:"ほかの全員に、おじゃま1つと霧(2人なら2秒、3人以上なら3秒)" },
+  shield: { ic:"🛡️", nm:"盾",           to:"me",  ds:"たまったおじゃまを消して、次の攻撃も1回ふせぐ" },
   rocket: { ic:"🚀", nm:"ロケット",     to:"me",  ds:"次の3語が2倍" },
-  clean:  { ic:"🧹", nm:"おそうじ",     to:"me",  ds:"たまったおじゃまと、かかっている邪魔を消す" },
 };
+/* 拾ったときに出す、ひと目で分かる説明(人数で量が変わるものは、その数で) */
+const mtItemShort = k => ({ fog:"相手のローマ字をかくす", flip:"相手の言葉をさかさまに", drunk:"相手の画面をゆらす", bomb:`相手におじゃま ×${mtDuo()?2:3}`, thief:`相手から${mtDuo()?1:2}本とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
+const mtDuo = () => Object.values(mt.p).filter(p=>!p.q).length<=2;   // 2人の対戦(攻撃が必ず同じ相手に当たるので、少し弱める)
 /* 順位ごとの出やすさ: 上位は守りと自分強化、下位は強い攻撃が出やすい */
 const MT_ITEM_W=[
-  { shield:4, rocket:3, clean:2, fog:2, flip:2, drunk:1, bomb:1, thief:0, thunder:0 },
-  { shield:2, rocket:3, clean:2, fog:3, flip:3, drunk:2, bomb:2, thief:2, thunder:1 },
-  { shield:1, rocket:3, clean:2, fog:3, flip:2, drunk:3, bomb:3, thief:3, thunder:2 },
-  { shield:1, rocket:3, clean:2, fog:2, flip:2, drunk:3, bomb:4, thief:4, thunder:3 },
+  { shield:5, rocket:3, fog:2, flip:2, drunk:1, bomb:1, thief:0, thunder:0 },
+  { shield:3, rocket:3, fog:3, flip:3, drunk:2, bomb:2, thief:2, thunder:1 },
+  { shield:2, rocket:3, fog:3, flip:2, drunk:3, bomb:3, thief:3, thunder:2 },
+  { shield:2, rocket:3, fog:2, flip:2, drunk:3, bomb:4, thief:4, thunder:3 },
 ];
 const MT_EVENTS={
   double:{ nm:"全員2倍タイム", ds:"10秒間、全員1語2本" },
@@ -6413,20 +6416,32 @@ function mtTarget(){ const me=mtMe(), rows=mtSort(Object.entries(mt.p).filter(([
 function mtGetItem(){
   if(mt.items.length>=2){ mtFeed("🎁 アイテムがいっぱいです(2つまで)"); return; }
   const rank=Math.max(0,mtSort(Object.entries(mt.p)).findIndex(([u])=>u===mtMe())), k=mtPick(Math.random,MT_ITEM_W[Math.min(3,rank)]);
-  mt.items.push(k); mtSfx.item(); mtFeed(`🎁 ${MT_ITEMS[k].ic} ${MT_ITEMS[k].nm}を手に入れた(Space で使う)`); mtHud();
+  mt.items.push(k); mtRoulette(mt.items.length-1,k);
+}
+/* アイテムのルーレット: 少し回ってから止まる(止まるまでは使えない) */
+function mtRoulette(i,k){
+  const ks=Object.keys(MT_ITEMS); let n=0;
+  mt.spin={ i, ic:MT_ITEMS[ks[0]].ic }; clearInterval(mt.spinT);
+  mt.spinT=setInterval(()=>{
+    if(!mt || !mt.spin){ return; }
+    n++; mt.spin.ic=MT_ITEMS[ks[n%ks.length]].ic; mtTone(900+(n%4)*120,.03,"square",.025); mtHud();
+    if(n>=12){ clearInterval(mt.spinT); mt.spin=null; mtSfx.item(); mtFeed(`🎁 ${MT_ITEMS[k].ic} ${MT_ITEMS[k].nm}: ${mtItemShort(k)} ・ Space で使う`); mtHud(); }
+  },65);
 }
 function mtUseItem(){
+  if(mt.spin && mt.spin.i===0) return;   // ルーレットが止まるまで待つ
   const k=mt.items.shift(); if(!k){ mtSfx.miss(); return; }
+  if(mt.spin) mt.spin.i--;
   const it=MT_ITEMS[k], me=mtMe(); mtSfx.use();
   if(it.to==="me"){
-    if(k==="shield") mt.shield++;
-    if(k==="rocket") mt.boost+=3;
-    if(k==="clean"){ mt.pend=0; mt.fogUntil=0; mt.drunkUntil=0; mt.flip=0; $("wordPanel").classList.remove("flip"); }
-    mtFeed(`${it.ic} ${it.nm}! ${it.ds}`);
-  }else if(it.to==="all"){ mtSend("all",k,1); mtFeed(`${it.ic} ${it.nm}をみんなに!`); }
+    if(k==="shield"){ const c=mt.pend; mt.pend=0; mt.shield++; mtFeed(`${it.ic} 盾!${c?` おじゃま ${c}つを消した。`:""} 次の攻撃を1回ふせぐ`); }
+    if(k==="rocket"){ mt.boost+=3; mtFeed(`${it.ic} ロケット! 次の3語が2倍`); }
+  }else if(it.to==="all"){ mtSend("all",k,mtDuo()?2:3); mtFeed(`${it.ic} ${it.nm}をみんなに!`); }
   else { const to=mtTarget(); if(!to){ mtFeed("相手がいません"); return; }
-    if(k==="thief"){ const n=Math.min(2,mt.p[to].s||0); score+=n; $("score").textContent=score; }
-    mtSend(to,k,1); mtFeed(`${it.ic} ${wcEsc(mt.p[to].n)}に${it.nm}!`); }
+    let n=1;
+    if(k==="bomb") n=mtDuo()?2:3;
+    if(k==="thief"){ n=Math.min(mtDuo()?1:2, mt.p[to].s||0); score+=n; $("score").textContent=score; }
+    mtSend(to,k,n); mtFeed(`${it.ic} ${wcEsc(mt.p[to].n)}に${it.nm}!${k==="bomb"?` おじゃま ×${n}`:k==="thief"?` ${n}本とった`:""}`); }
   mtHud();
 }
 /* 送る: 通信の対戦は Firebase に、ゴーストは手元で */
@@ -6444,12 +6459,12 @@ function mtRecv(v){
   mtSfx.hit(); const pn=$("wordPanel"); pn.classList.remove("hit"); void pn.offsetWidth; pn.classList.add("hit");
   const now=Date.now();
   if(v.k==="oj"){ mt.pend+=v.n; mtFeed(`💜 ${wcEsc(from)}からおじゃまネジ ×${v.n}`); }
-  else if(v.k==="bomb"){ mt.pend+=3; mtFeed(`💣 ${wcEsc(from)}のおじゃま爆弾! ×3`); }
+  else if(v.k==="bomb"){ const n=v.n||3; mt.pend+=n; mtFeed(`💣 ${wcEsc(from)}のおじゃま爆弾! ×${n}`); }
   else if(v.k==="fog"){ mt.fogUntil=now+6000; mtFeed(`🌫️ ${wcEsc(from)}の霧`); }
   else if(v.k==="flip"){ mt.flip+=2; $("wordPanel").classList.add("flip"); mtFeed(`🙃 ${wcEsc(from)}のさかさま`); }
   else if(v.k==="drunk"){ mt.drunkUntil=now+7000; mtFeed(`🍶 ${wcEsc(from)}に酔わされた`); }
-  else if(v.k==="thief"){ const n=Math.min(2,score); score-=n; $("score").textContent=score; mtFeed(`🧲 ${wcEsc(from)}に${n}本とられた`); }
-  else if(v.k==="thunder"){ mt.pend+=1; mt.fogUntil=Math.max(mt.fogUntil,now+3000); mtFeed(`⚡ ${wcEsc(from)}のかみなり`); }
+  else if(v.k==="thief"){ const n=Math.min(v.n||2,score); score-=n; $("score").textContent=score; mtFeed(`🧲 ${wcEsc(from)}に${n}本とられた`); }
+  else if(v.k==="thunder"){ mt.pend+=1; mt.fogUntil=Math.max(mt.fogUntil,now+((v.n||3)<=2?2000:3000)); mtFeed(`⚡ ${wcEsc(from)}のかみなり`); }
   mtHud();
 }
 function clearWordPanelKeep(){ chunks=[]; chunkIdx=0; buf=""; typedRomaji=""; nAmbig=false; }
@@ -6491,7 +6506,8 @@ function mtGhostStep(sec){
   while(mt.gplan && mt.gplan.length && mt.gplan[0].t<=sec){   // ゴーストの攻撃: 1位を狙う(自分が1位なら2位)
     const a=mt.gplan.shift(), gu="ghost"+a.i, rows=mtSort(Object.entries(mt.p)), to=rows[0][0]!==gu ? rows[0][0] : rows[1] && rows[1][0];
     if(!to) continue;
-    if(to===me) mtRecv({ f:gu, to:me, k:a.k, n:a.k==="oj"?1+Math.floor(a.i/2):1 }); else mtGhostHit(to,a.k,1);
+    const n=a.k==="oj"?1+Math.floor(a.i/2):a.k==="bomb"?(mtDuo()?2:3):a.k==="thief"?(mtDuo()?1:2):1;
+    if(to===me) mtRecv({ f:gu, to:me, k:a.k, n }); else mtGhostHit(to,a.k,n);
   }
   MT_GHOSTS.forEach((g,i)=>{
     const p=mt.p["ghost"+i]; if(!p) return;
@@ -6504,8 +6520,8 @@ function mtGhostStep(sec){
 }
 function mtGhostHit(u,k,n){   // ゴーストが攻撃を受けると、少し遅れる
   const p=mt.p[u]; if(!p) return;
-  const sec={ oj:1.4*n, bomb:4, fog:2.5, flip:1.5, drunk:2.5, thunder:2, thief:0 }[k]||0;
-  p.debt=(p.debt||0)+sec; if(k==="thief") p.minus=(p.minus||0)+2;
+  const sec={ oj:1.4*n, bomb:1.4*n, fog:2.5, flip:1.5, drunk:2.5, thunder:2, thief:0 }[k]||0;
+  p.debt=(p.debt||0)+sec; if(k==="thief") p.minus=(p.minus||0)+n;
   if(k==="fog"||k==="thunder") p.foggy=Date.now()+4000; if(k==="drunk") p.drunky=Date.now()+5000;
 }
 /* ---- 表示 ---- */
@@ -6518,14 +6534,14 @@ function mtBoard(){
 }
 function mtHud(){
   const el=$("mtHud"); if(!el || !mt || !mt.playing) return;
-  const it=k=>k?`<span class="mt-it"><b>${MT_ITEMS[k].ic}</b>${MT_ITEMS[k].nm}</span>`:`<span class="mt-it empty">空き</span>`;
-  el.innerHTML=`<span class="mt-chain${mt.chain>=3?" hot":""}">${mt.chain}<small>連鎖</small></span><span class="mt-items">${it(mt.items[0])}${it(mt.items[1])}<small>Space で使う</small></span>${mt.pend?`<span class="mt-pend">💜 おじゃま ×${mt.pend}</span>`:""}`;
+  const it=(k,i)=>mt.spin && mt.spin.i===i ? `<span class="mt-it spin"><b>${mt.spin.ic}</b>…</span>` : k?`<span class="mt-it"><b>${MT_ITEMS[k].ic}</b>${MT_ITEMS[k].nm}</span>`:`<span class="mt-it empty">空き</span>`;
+  el.innerHTML=`<span class="mt-chain${mt.chain>=3?" hot":""}">${mt.chain}<small>連鎖</small></span><span class="mt-items">${it(mt.items[0],0)}${it(mt.items[1],1)}<small>Space で使う</small></span>${mt.pend?`<span class="mt-pend">💜 おじゃま ×${mt.pend}</span>`:""}`;
 }
 function mtPop(t,cls){ const el=$("mtPop"); if(!el) return; el.textContent=t; el.className="mt-pop "+(cls||""); void el.offsetWidth; el.classList.add("on"); }
 function mtFeed(html){ const el=$("mtFeed"); if(!el) return; const d=document.createElement("div"); d.innerHTML=html; el.prepend(d); while(el.children.length>4) el.lastChild.remove(); setTimeout(()=>d.classList.add("out"),2600); setTimeout(()=>d.remove(),3200); }
 function mtBanner(t,sub){ const el=$("mtBanner"); if(!el) return; el.innerHTML=`<b>${wcEsc(t)}</b><small>${wcEsc(sub||"")}</small>`; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on"); }
 /* ---- 終わり ---- */
-function mtStopFx(){ mtBgmStop(); const bb=$("mtBgm"); if(bb) bb.hidden=true; try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
+function mtStopFx(){ mtBgmStop(); if(mt){ clearInterval(mt.spinT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
 function mtFinish(toGarden){
   const me=mtMe(), m=mt; m.playing=false; m.over=true; clearInterval(mtIv); mtStopFx(); document.body.classList.add("mtb"); for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);   // 結果も会場の見た目のまま
   if(m.evRef) m.evRef.off("child_added",m.evOn);
