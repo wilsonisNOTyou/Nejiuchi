@@ -6257,7 +6257,9 @@ setTimeout(wcStart,1500);   // 開いているあいだ、新しい報告と飛�
    ゴースト: 待っても相手が来なかったときに選べる。通信なしで、決まった速さで打ち、攻撃もしてくる */
 const MT_PATH="nejiuchi/match", MT_LOBBY=60000, MT_MAX=4, MT_SEND_MS=250;
 const MT_GHOSTS=[{ n:"ゴースト・ゆっくり", kps:3.2 },{ n:"ゴースト・ふつう", kps:4.6 },{ n:"ゴースト・はやい", kps:6.2 }];
-const MT_BONUS=[1,.5,.25,0];   // 順位ごとのごほうび: 自分が抜いた本数ぶん庭に届くネジに、さらに何倍を足すか(1位は2倍になる)
+/* 順位のごほうび(人と対戦したときだけ): 1位は参加した人数ぶんの腐葉土、2位からは1つずつ減る。やめた人はなし
+   大木が開く前は腐葉土を使えないので、かわりにネジ(届くネジに、1位はさらに同じだけ・2位は半分・3位は4分の1) */
+const MT_BONUS=[1,.5,.25,0];
 const MT_OJ=["おじゃまします","ねじねじねじ","からまったねじ","さびついたねじ","ねじれたねじ","じゃましにきた","ぐるぐるねじまき","ねじがはずれない"].map(k=>({ t:k, k, oj:true }));
 /* アイテム: atk 相手へ(1位を狙う。自分が1位なら2位) / all ほかの全員へ / me 自分に */
 const MT_ITEMS={
@@ -6466,7 +6468,7 @@ function mtLobby(){
 }
 /* 待合室の遊び方(種類ごと) */
 function mtRules(mo){
-  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点(Enter ですぐ4択にもできる)</li><li>いちばん早く正解した人と、最下位で正解した人は🎁<b>アイテム</b>をもらえる。<b>Space</b> で使う</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
+  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点(Enter ですぐ4択にもできる)</li><li>いちばん早く正解した人と、最下位で正解した人は🎁<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
   return `<ul class="mt-rules"><li>60秒で多く抜いた人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。3連鎖ごとに上の人へ<b>おじゃまネジ</b>、10連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3本</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもネジは戻りません</li></ul>${mtItemList()}`;
 }
 function mtStartNow(){ if(mt && mt.alone){ const d=mt.d, mo=mt.mo; mtLeaveQuiet(); mtCloseLobby(); mtGhost(d,mo); return; } if(mt && !mt.playing && mt.h===mtMe() && Object.keys(mt.p).length>=2) mt.ref.child("st").set(mtNow()+1500).catch(()=>{}); }
@@ -6743,11 +6745,16 @@ function mtResult(){
       const rs=rows.map(([u,p])=>({ n:String(p.n||"").slice(0,10), s:p.q?-1:p.fs }));
       db.ref(WC_PATH).push({ n:(playerName||"").slice(0,10), t:Date.now(), o:myId(), mr:r.m.id, mo, md:r.m.d, rs, x:`対戦の結果(${mtLabel(mo,r.m.d)}): 1位 ${rs[0].n} ${rs[0].s}${unit}` }).catch(()=>{});
     }
-    if(!r.m.ghost && humans>=2){ r.bonus=Math.floor(r.toGarden*(MT_BONUS[rank]||0)); if(r.bonus>0) sendToGarden(0,r.bonus,0,true); }
+    if(!r.m.ghost && humans>=2 && !(r.m.p[me]||{}).q){
+      const n=ps.filter(([u,p])=>p.g==null).length; let bt=false; try{ bt=Garden.btOpen(); }catch(e){}
+      const rk=rows.filter(([u,p])=>!p.q).findIndex(([u])=>u===me);   // やめた人は数えない順位
+      if(bt){ r.fuyo=Math.max(0,n-rk); if(r.fuyo>0) try{ Garden.fuyoGive(r.fuyo); }catch(e){ r.fuyo=0; } }
+      else { r.bonus=Math.floor(r.toGarden*(MT_BONUS[rank]||0)); if(r.bonus>0) sendToGarden(0,r.bonus,0,true); }
+    }
     if(rank===0) mtSfx.win(); else mtSfx.lose();
   }
   $("mtResult").innerHTML=`<h3>${fixed?(rank===0?"🏆 優勝!":"対戦の結果"):"集計中…"}</h3><ol class="mt-res">${rows.map(([u,p],i)=>`<li class="${u===me?"me":""}${p.q?" quit":""}"><span class="mt-rk">${i+1}位</span><span class="mt-nm">${wcEsc(p.n)}</span><span class="mt-sc">${p.q?"やめました":`${(+p.fs||0).toLocaleString("ja-JP")}${unit}`}</span><span class="mt-mi">${mo==="type"?`${p.mc||0}連鎖 ・ ミス ${p.m||0}`:wcEsc(p.dt||"")}</span></li>`).join("")}</ol>`
-    + (fixed ? (r.m.ghost ? `<p class="bk-note">ゴーストとの対戦には、順位のごほうびはありません</p>` : r.bonus>0 ? `<p class="mt-bonus">🏅 ${rank+1}位のごほうび 庭に 🔩${r.bonus.toLocaleString("ja-JP")}ネジ</p>` : humans<2 ? `<p class="bk-note">相手がいなかったので、ごほうびはありません</p>` : "") : "");
+    + (fixed ? (r.m.ghost ? `<p class="bk-note">ゴーストとの対戦には、順位のごほうびはありません</p>` : r.fuyo>0 ? `<p class="mt-bonus">🏅 ${rank+1}位のごほうび 🍂 腐葉土 ${r.fuyo}個</p>` : r.bonus>0 ? `<p class="mt-bonus">🏅 ${rank+1}位のごほうび 庭に 🔩${r.bonus.toLocaleString("ja-JP")}ネジ</p>` : humans<2 ? `<p class="bk-note">相手がいなかったので、ごほうびはありません</p>` : "") : "");
 }
 function mtQuit(){
   if(!mt) return; const me=mtMe();
@@ -6789,9 +6796,9 @@ const MTQ_ITEMS={
   late:  { ic:"🐢", nm:"出遅れ",         to:"atk", ds:"相手の次の問題で、選択肢が2秒遅れて出る" },
   more:  { ic:"➕", nm:"選択肢ふやし",   to:"atk", ds:"相手の次の問題の選択肢が6つになる" },
   steal: { ic:"🧲", nm:"点数どろぼう",   to:"atk", ds:"次の問題で相手が正解したら、その点の半分をもらう" },
-  fifty: { ic:"✂️", nm:"しぼりこみ",     to:"me",  ds:"今の問題のはずれを2つ消す" },
-  peek:  { ic:"👀", nm:"のぞき見",       to:"me",  ds:"今の問題で、先に答えた人の選択が見える" },
-  dbl:   { ic:"🎲", nm:"ダブルチャンス", to:"me",  ds:"今の問題は点が2倍。間違えたら −100点" },
+  fifty: { ic:"✂️", nm:"しぼりこみ",     to:"me",  ds:"自分の次の問題のはずれを2つ消す" },
+  peek:  { ic:"👀", nm:"のぞき見",       to:"me",  ds:"自分の次の問題で、先に答えた人の選択が見える" },
+  dbl:   { ic:"🎲", nm:"ダブルチャンス", to:"me",  ds:"自分の次の問題は点が2倍。間違えたら −100点" },
 };
 const MTQ_ITEM_W=[   // 順位ごとの出やすさ: 上位は自分用、下位は攻撃が出やすい
   { tshort:2, late:2, more:1, steal:1, fifty:2, peek:2, dbl:3 },
@@ -6799,7 +6806,7 @@ const MTQ_ITEM_W=[   // 順位ごとの出やすさ: 上位は自分用、下位
   { tshort:3, late:3, more:3, steal:3, fifty:2, peek:1, dbl:2 },
   { tshort:3, late:3, more:3, steal:4, fifty:2, peek:1, dbl:2 },
 ];
-const mtqItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.values(MTQ_ITEMS).map(it=>`<span>${it.ic} ${it.nm}<small>${it.ds}</small></span>`).join("")}<small class="mt-inote">いちばん早く正解した人と、最下位で正解した人がもらえる ・ Space で使う ・ 2つまで ・ 自分用は答える前に使う</small></div>`;
+const mtqItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.values(MTQ_ITEMS).map(it=>`<span>${it.ic} ${it.nm}<small>${it.ds}</small></span>`).join("")}<small class="mt-inote">いちばん早く正解した人と、最下位で正解した人がもらえる ・ Space で使う ・ 2つまで ・ どれも次の問題に効く</small></div>`;
 const mtqLvName = d => (TQ_RANK_GROUPS.find(g=>g[0]===d)||[,""])[1];
 const mtLabel = (mo,d) => mo==="toeic" ? `TOEIC ${mtqLvName(d)}` : DIFF_LABEL[d]||"";
 const mtUnit = mo => mo==="toeic" ? "点" : "本";
@@ -6913,6 +6920,11 @@ function mtqView(i){
   }
   return mt.view[i]=v;
 }
+function mtqCut(i){   // しぼりこみで消すはずれ(選択肢ふやしのあとで決める)
+  const sf=mt.self[i]; if(!sf || !sf.fifty) return [];
+  if(!sf.cut) sf.cut=mtShuf(mtqView(i).filter(o=>o.j!==mt.qs[i].ok).map(o=>o.j),Math.random).slice(0,2);
+  return sf.cut;
+}
 const mtqLim = i => mt.qs[i].rd.lim - (mt.eff[i] && mt.eff[i].tshort ? 3000 : 0);   // 時間どろぼうで短くなる
 const mtqTyping = () => { const i=mt && mt.qi; return mt && mt.mo==="toeic" && mt.phase==="q" && i>=0 && mt.qs[i].rd.f==="rev" && mt.typeRev && !mt.revOpen && !(mt.p[mtMe()].a||{})[i] && !mtqOut(); };
 const mtqOut = () => mtNow()-(mt.base+mt.qs[mt.qi].at) >= mtqLim(mt.qi);   // 自分だけ時間切れ(時間どろぼう)
@@ -6955,7 +6967,7 @@ function mtqAnswer(j,typed){
 }
 function mtqPick(k){   // 番号キー・タップ: 画面に出ている順の k 番目
   const i=mt.qi; if(i<0 || mt.phase!=="q" || !mt.revOpen || !mt.lateShown) return;
-  const v=mtqView(i).filter(o=>!(mt.self[i] && mt.self[i].cut && mt.self[i].cut.includes(o.j)));
+  const cut=mtqCut(i), v=mtqView(i).filter(o=>!cut.includes(o.j));
   if(v[k]) mtqAnswer(v[k].j,false);
 }
 /* 逆4択で英単語を打つ: 合っている文字だけ進む。Enter で4択にする */
@@ -6998,12 +7010,11 @@ function mtqUseItem(){
   if(mt.spin && mt.spin.i===0){ mtFeed("ルーレットが止まったら使えます"); return; }
   const k=mt.items[0]; if(!k){ mtSfx.miss(); return; }
   const it=MTQ_ITEMS[k], i=mt.qi, me=mtMe();
-  if(it.to==="me"){
-    if(i<0 || mt.phase!=="q" || (mt.p[me].a||{})[i] || mtqOut()){ mtFeed(`${it.ic} ${it.nm}は、問題に答える前に使えます`); mtSfx.miss(); return; }
-    const sf=mt.self[i]=mt.self[i]||{}; if(sf[k]){ mtFeed("この問題ではもう使っています"); return; }
+  if(it.to==="me"){   // 自分用も、次の問題に効く
+    const q=i+1; if(q>=MTQ_N){ mtFeed("もう次の問題がありません"); mtSfx.miss(); return; }
+    const sf=mt.self[q]=mt.self[q]||{}; if(sf[k]){ mtFeed(`第${q+1}問には、もう${it.nm}を使っています`); return; }
     sf[k]=1;
-    if(k==="fifty"){ const v=mtqView(i).filter(o=>o.j!==mt.qs[i].ok); sf.cut=mtShuf(v.map(o=>o.j),Math.random).slice(0,2); }
-    mtFeed(`${it.ic} ${it.nm}! ${{ fifty:"はずれを2つ消した", peek:"先に答えた人の選択が見える", dbl:"この問題は2倍(間違えたら −100)" }[k]}`);
+    mtFeed(`${it.ic} ${it.nm}! 第${q+1}問で${{ fifty:"はずれを2つ消す", peek:"先に答えた人の選択が見える", dbl:"点が2倍(間違えたら −100)" }[k]}`);
   }else{
     const q=i+1; if(q>=MTQ_N){ mtFeed("もう次の問題がありません"); mtSfx.miss(); return; }
     const to=mtTarget(); if(!to){ mtFeed("相手がいません"); return; }
@@ -7048,9 +7059,9 @@ function mtqRender(){
   if(!rev && !mt.revOpen && !my) opts=`<div class="mtq-typed" id="mtqTyped"><span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span></div><p class="mtq-hint">英単語を打つ(打てたら ${MTQ_TYPE_PT}点) ・ <b>Enter</b> ですぐ4択(${q.rd.pt}点) ・ ${MTQ_TYPE_OPEN/1000}秒で4択が出ます</p>`;
   else if(!rev && !mt.lateShown && !my) opts=`<div class="mtq-wait">🐢 出遅れ… 選択肢はもうすぐ</div>`;
   else {
-    const v=mtqView(i).filter(o=>!(sf.cut && sf.cut.includes(o.j)) || rev), peek=!rev && sf.peek;
+    const cuts=mtqCut(i), v=mtqView(i).filter(o=>!cuts.includes(o.j) || rev), peek=!rev && sf.peek;
     opts=`<div class="mtq-opts${v.length>4?" six":""}">${v.map((o,k)=>{ const who=(rev||peek)?us.filter(u=>u!==me || rev).filter(u=>{ const a=(mt.p[u].a||{})[i]; return a && a[0]===o.j; }):[];
-      const cut=rev && sf.cut && sf.cut.includes(o.j);
+      const cut=rev && cuts.includes(o.j);
       const cls=rev?(o.j===q.ok?" ok":(my&&my[0]===o.j?" ng":" dim")):(my?(my[0]===o.j?" pick":" dim"):"");
       return `<button class="btn mtq-opt${en?" en":""}${cls}${cut?" cut":""}" data-k="${k}"><span class="no">${k+1}</span><span class="tx">${tqEsc(o.txt)}</span>${who.length?`<span class="mtq-who">${who.map(u=>`<i class="${u===me?"me":""}">${wcEsc(mt.p[u].n)}${rev&&sc.per[u][i]?` ${sc.per[u][i]>0?"+":""}${sc.per[u][i]}`:""}</i>`).join("")}</span>`:""}</button>`; }).join("")}</div>`;
   }
@@ -14967,7 +14978,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, fuyoGive:n=>{ S.fuyo=(S.fuyo||0)+Math.max(0,n|0); save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
