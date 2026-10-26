@@ -715,12 +715,26 @@ body.mtb #screen-game .game-esc{display:flex; gap:.6rem; justify-content:center}
 .mtq-fb{margin:.7rem 0 .2rem; font-weight:bold; color:#ffe08a; min-height:1.4em}
 .mtq-ans{display:flex; flex-wrap:wrap; gap:.3rem .8rem; justify-content:center; font-size:.78rem; color:#8a7ab8}
 .mtq-ans .on{color:#6dff9a}
-.mta-main.mtq-fog .mtq-opt .tx{filter:blur(6px)}
-.mta-main.mtq-fog .mtq-card{border-color:#a888c8}
+.mtq-tags{display:flex; flex-wrap:wrap; gap:.3rem; justify-content:center; margin:.3rem 0 .1rem}
+.mtq-tag{font-size:.78rem; padding:.1rem .55rem; border-radius:999px; font-weight:bold}
+.mtq-tag.atk{background:rgba(255,90,122,.2); border:1px solid #ff5a7a; color:#ffb3c2}
+.mtq-tag.me{background:rgba(255,210,74,.15); border:1px solid #ffd24a; color:#ffe9a8}
+.mtq-typed{font-family:Georgia,"Times New Roman",serif; font-size:clamp(1.5rem,5vw,2rem); min-height:2.4rem; margin:.4rem 0 .2rem; color:#4ee6ff; letter-spacing:.04em}
+.mtq-typed .done{color:#4ee6ff; text-shadow:0 0 10px rgba(78,230,255,.6)}
+.mtq-hint{color:#b8a8ff; font-size:.82rem; margin:.2rem 0 .4rem}
+.mtq-hint b{color:#ffd24a}
+.mtq-wait{padding:1.6rem 0; color:#ffb3c2; font-weight:bold; animation:mtBlink .6s steps(2) infinite}
+.mtq-opt.cut{opacity:.25; text-decoration:line-through}
+.mta-items{margin:.5rem 0 0; min-height:2rem}
+.mta-items .mt-space{cursor:pointer}
 @media (max-width:640px){
   #screen-battle .mt-row{grid-template-columns:1.2rem minmax(0,1.4fr) minmax(0,1fr) 4.2rem 3.4rem; gap:.35rem; font-size:.8rem}
   #screen-battle .mt-row .mt-x{display:none}
   .mtq-opts{grid-template-columns:1fr}
+  .mta-items .mt-it{font-size:.78rem; white-space:nowrap}
+  .mta-items .mt-space{font-size:.85rem; white-space:nowrap}
+  .mt-feed{width:92vw}
+  .mt-feed div{white-space:normal; text-align:center}
   #screen-battle .hud small{display:none}
   #screen-battle .hud{font-size:.85rem}
 }
@@ -2858,6 +2872,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div class="timebar"><i id="mtaBar"></i></div>
     <div class="mt-board" id="mtaBoard"></div>
     <div class="mta-main" id="mtaMain"></div>
+    <div class="mt-hud mta-items" id="mtaItems"></div>
     <p class="game-esc"><button class="btn" id="mtaQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button><button class="btn mt-bgm" id="mtaBgm" tabindex="-1">🔊 BGM</button></p>
   </section>
 
@@ -6203,11 +6218,12 @@ $("wcDish").addEventListener("click",e=>{ const b=e.target.closest("[data-wcd]")
 $("wcCard").addEventListener("click",e=>{ const b=e.target.closest("[data-wcc]"); if(b) wcCardPost(+b.dataset.wcc); });
 $("wcCardBtn").addEventListener("click",wcCardToggle);
 $("wcMatchBtn").addEventListener("click",wcMatchToggle);
-$("wcMatch").addEventListener("click",e=>{ const m=e.target.closest("[data-mtm]"); if(m){ wcMatchPane(m.dataset.mtm,m.dataset.lv); return; } const c=e.target.closest("[data-mtc]"); if(c){ mtCreate(c.dataset.mtc,c.dataset.mo); return; } const g=e.target.closest("[data-mtg]"); if(g) mtGhost(g.dataset.mtg,g.dataset.mo); });
+$("wcMatch").addEventListener("click",e=>{ const m=e.target.closest("[data-mtm]"); if(m){ wcMatchPane(m.dataset.mtm); return; } const c=e.target.closest("[data-mtc]"); if(c) mtCreate(c.dataset.mtc,c.dataset.mo); });
 $("mtaMain").addEventListener("pointerdown",e=>{   // 会場: 選択肢(押した瞬間に)
   if(!mtOn() || e.button>0) return;
-  const j=e.target.closest("[data-j]"); if(j){ e.preventDefault(); mtqAnswer(+j.dataset.j); return; }
+  const j=e.target.closest("[data-k]"); if(j){ e.preventDefault(); mtqPick(+j.dataset.k); return; }
 });
+$("mtaItems").addEventListener("pointerdown",e=>{ if(mtOn() && e.target.closest("[data-item]")){ e.preventDefault(); mtqUseItem(); } });
 $("mtaQuit").addEventListener("mousedown",e=>e.preventDefault());
 $("mtaQuit").addEventListener("click",()=>{ if(mtOn()) mtAskOpen(); });
 $("mtaBgm").addEventListener("click",mtBgmToggle);
@@ -6238,7 +6254,7 @@ setTimeout(wcStart,1500);   // 開いているあいだ、新しい報告と飛�
    言葉: 一人ひとり違う言葉で、長さの並びだけそろえる。ときどき金の言葉(3本)と、アイテム箱つきの言葉が出る
    連鎖: ミスなしで続けて打つと伸びる。3連鎖ごとにおじゃまネジを送り、送られていれば先に相殺する。10連鎖でフィーバー(8秒間2倍)
    ほかに: 試合中に1回の全員イベント、残り10秒のラストスパート(2倍)
-   ゴーストと練習: 通信なしで、決まった速さで打ち、攻撃もしてくるゴーストと対戦する(ひとりで試せるように) */
+   ゴースト: 待っても相手が来なかったときに選べる。通信なしで、決まった速さで打ち、攻撃もしてくる */
 const MT_PATH="nejiuchi/match", MT_LOBBY=60000, MT_MAX=4, MT_SEND_MS=250;
 const MT_GHOSTS=[{ n:"ゴースト・ゆっくり", kps:3.2 },{ n:"ゴースト・ふつう", kps:4.6 },{ n:"ゴースト・はやい", kps:6.2 }];
 const MT_BONUS=[1,.5,.25,0];   // 順位ごとのごほうび: 自分が抜いた本数ぶん庭に届くネジに、さらに何倍を足すか(1位は2倍になる)
@@ -6367,12 +6383,14 @@ function mtEventOf(id,d){
 }
 
 /* ---- 募集・参加・待合室 ---- */
+const mtMyP = () => ({ n:(playerName||"あなた").slice(0,10), s:0, c:0, k:0, m:0, pc:window.IS_MOBILE?0:1 });   // pc: パソコンで参加(全員そうなら TOEIC の第2ラウンドで打てる)
 async function mtCreate(d,mo="type"){
-  if(!db){ $("wcNote").textContent="※Firebase未設定のため募集できません。ゴーストと練習はできます"; return; }
+  if(window.IS_MOBILE && mo==="type") return;
+  if(!db){ closeWorld(); mtEnterLocal(d,mo); return; }   // 通信なし(プレビューなど): 手元だけの待合室。だれも来ないので、ゴーストと遊べる
   if(!playerName){ $("wcNote").textContent="対戦するには名前を決めてください"; closeWorld(); openNameWin(); return; }
   const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+MT_LOBBY, me=mtMe();
   try{
-    await ref.set({ h:me, mo, d, st, t:mtNow(), p:{ [me]:{ n:playerName.slice(0,10), s:0, c:0, k:0, m:0 } } });
+    await ref.set({ h:me, mo, d, st, t:mtNow(), p:{ [me]:mtMyP() } });
     if(!(await wcPost({ x:`対戦相手を募集しています(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }))){ ref.remove().catch(()=>{}); return; }
   }catch(e){ $("wcNote").textContent=/permission/i.test(String(e&&(e.code||e.message)||"")) ? "※募集できませんでした(Firebase のルールに nejiuchi/match を追加してください)" : "※募集できませんでした。通信環境を確認してください"; return; }
   db.ref(MT_PATH).orderByChild("t").endAt(mtNow()-86400000).limitToFirst(20).once("value").then(sn=>sn.forEach(c=>{ c.ref.remove().catch(()=>{}); })).catch(()=>{});   // 1日より前の対戦は消す
@@ -6389,7 +6407,7 @@ async function mtJoin(id){
     if(!ps[me]){
       if(mtNow()>=v.st){ $("wcNote").textContent="この対戦はもう始まっています"; return; }
       if(Object.keys(ps).length>=MT_MAX){ $("wcNote").textContent=`満員です(${MT_MAX}人まで)`; return; }
-      await db.ref(`${MT_PATH}/${id}/p/${me}`).set({ n:playerName.slice(0,10), s:0, c:0, k:0, m:0 });
+      await db.ref(`${MT_PATH}/${id}/p/${me}`).set(mtMyP());
     }
     closeWorld(); mtEnter(id,v.d,v.mo||"type");
   }catch(e){ $("wcNote").textContent="参加できませんでした。通信環境を確認してください"; }
@@ -6407,12 +6425,25 @@ function mtEnter(id,d,mo="type"){
   clearInterval(mtIv); mtIv=setInterval(mtLobbyTick,250);
   mtLobby();
 }
+const MT_LOBBY_LOCAL=10000;
+function mtEnterLocal(d,mo){
+  mtLeaveQuiet();
+  mt={ id:"l"+Date.now().toString(36), d, mo, st:mtNow()+MT_LOBBY_LOCAL, h:mtMe(), p:{ [mtMe()]:mtMyP() }, ghost:false, local:true, playing:false };
+  mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn();
+  clearInterval(mtIv); mtIv=setInterval(mtLobbyTick,250);
+  mtLobby();
+}
+/* だれも来なかった: ゴーストと遊ぶか、やめるかを選ぶ */
+function mtAlone(){
+  if(mt.ref){ if(mt.h===mtMe()) mt.ref.remove().catch(()=>{}); mt.ref.off("value",mt.on); }
+  mt.alone=true; clearInterval(mtIv); mtLobby();
+}
 function mtLobbyTick(){
-  if(!mt || mt.playing) return;
+  if(!mt || mt.playing || mt.alone) return;
   const left=mt.st-mtNow();
   if(mt.prev && mt.h===mtMe() && left>1600 && mt.prev.every(u=>mt.p[u]) && Object.keys(mt.p).length>=2) mtStartNow();   // もう一回: 前のメンバーがそろったらすぐ始める
   if(left<=0){
-    if(Object.keys(mt.p).length<2){ if(mt.h===mtMe()) mt.ref.remove().catch(()=>{}); mtCancel("相手が集まりませんでした"); return; }
+    if(Object.keys(mt.p).length<2){ mtAlone(); return; }
     mtBegin(); return;
   }
   mtLobby();
@@ -6421,6 +6452,13 @@ function mtLobby(){
   if(!mt || mt.playing || !mtLobbyOpen) return;
   const ps=Object.entries(mt.p), host=mt.h===mtMe(), left=Math.max(0,Math.ceil((mt.st-mtNow())/1000));
   $("mtTitle").textContent=`⚔️ 対戦の待合室 ・ ${mtLabel(mt.mo,mt.d)}`;
+  if(mt.alone){
+    $("mtBody").innerHTML=`<p class="mt-left">相手が集まりませんでした</p><p class="bk-p">強さの違う3人のゴーストと遊べます。ゴーストとの対戦でも、ふだんと同じようにネジと庭の時間が届きます(順位のごほうびはありません)</p>${mtRules(mt.mo)}`;
+    $("mtStart").innerHTML='👻 ゴーストと遊ぶ <span class="kbdh">Enter</span>'; $("mtStart").hidden=false;
+    $("mtLeave").innerHTML='やめる <span class="kbdh">Esc</span>';
+    return;
+  }
+  $("mtStart").innerHTML='今すぐ始める <span class="kbdh">Enter</span>'; $("mtLeave").innerHTML='抜ける <span class="kbdh">Esc</span>';
   $("mtBody").innerHTML=`<p class="mt-left">${ps.length>=2?`あと <b>${left}</b> 秒で始まります`:`相手を待っています ・ あと <b>${left}</b> 秒`}</p>
     <ol class="mt-ps">${ps.map(([u,p])=>`<li${u===mtMe()?' class="me"':""}>${wcEsc(p.n)}${u===mt.h?' <small>募集した人</small>':""}</li>`).join("")}${Array.from({length:Math.max(0,MT_MAX-ps.length)},()=>`<li class="empty">…</li>`).join("")}</ol>
     ${mtRules(mt.mo)}`;
@@ -6428,18 +6466,18 @@ function mtLobby(){
 }
 /* 待合室の遊び方(種類ごと) */
 function mtRules(mo){
-  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds}・${r.lim/1000}秒)`).join("、")}を${MTQ_PER}問ずつ</li><li><b>1〜4</b> かクリックで答える。正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分</li><li>いちばん早く正解した人は +30点</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>3問続けて正解するたびに、上の人の次の問題に<b>霧</b>(選択肢が少しのあいだ見えにくい)</li><li>料理とお酒の効果はかかりません</li></ul>`;
+  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点(Enter ですぐ4択にもできる)</li><li>いちばん早く正解した人と、最下位で正解した人は🎁<b>アイテム</b>をもらえる。<b>Space</b> で使う</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
   return `<ul class="mt-rules"><li>60秒で多く抜いた人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。3連鎖ごとに上の人へ<b>おじゃまネジ</b>、10連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3本</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもネジは戻りません</li></ul>${mtItemList()}`;
 }
-function mtStartNow(){ if(mt && !mt.playing && mt.h===mtMe() && Object.keys(mt.p).length>=2) mt.ref.child("st").set(mtNow()+1500).catch(()=>{}); }
+function mtStartNow(){ if(mt && mt.alone){ const d=mt.d, mo=mt.mo; mtLeaveQuiet(); mtCloseLobby(); mtGhost(d,mo); return; } if(mt && !mt.playing && mt.h===mtMe() && Object.keys(mt.p).length>=2) mt.ref.child("st").set(mtNow()+1500).catch(()=>{}); }
 function mtCloseLobby(){ mtLobbyOpen=false; $("mt").classList.remove("open"); }
 function mtLeaveQuiet(){
   clearInterval(mtIv);
-  if(mt && mt.ref){ mt.ref.off("value",mt.on); if(mt.evRef) mt.evRef.off("child_added",mt.evOn); if(!mt.playing && !mt.over) mt.ref.child(`p/${mtMe()}`).remove().catch(()=>{}); }
+  if(mt && mt.ref){ mt.ref.off("value",mt.on); if(mt.evRef) mt.evRef.off("child_added",mt.evOn); if(!mt.playing && !mt.over && !mt.alone) mt.ref.child(`p/${mtMe()}`).remove().catch(()=>{}); }
   mt=null;
 }
 function mtLeave(){
-  if(mt && mt.ref && mt.h===mtMe() && Object.keys(mt.p).length<=1) mt.ref.remove().catch(()=>{});
+  if(mt && mt.ref && !mt.alone && mt.h===mtMe() && Object.keys(mt.p).length<=1) mt.ref.remove().catch(()=>{});
   mtLeaveQuiet(); mtCloseLobby();
 }
 function mtCancel(msg){ mtLeaveQuiet(); mtCloseLobby(); wcPopup(`⚔️ ${wcEsc(msg)}`); }
@@ -6447,7 +6485,7 @@ function mtGhost(d,mo="type"){
   if(window.IS_MOBILE && mo==="type") return;
   mtLeaveQuiet(); closeWorld();
   const me=mtMe(), id="g"+Date.now().toString(36);
-  mt={ id, d, mo, st:Date.now(), h:me, ghost:true, playing:false, p:{ [me]:{ n:(playerName||"あなた").slice(0,10), s:0, c:0, k:0, m:0 } } };
+  mt={ id, d, mo, st:Date.now(), h:me, ghost:true, playing:false, p:{ [me]:mtMyP() } };
   MT_GHOSTS.forEach((g,i)=>{ mt.p["ghost"+i]={ n:g.n, s:0, c:0, k:0, m:0, g:i, debt:0, minus:0 }; });
   mtBegin();
 }
@@ -6564,11 +6602,8 @@ function mtRecv(v){
   if(!mtOn()) return;
   const me=mtMe(), from=(mt.p[v.f]||{}).n||"だれか";
   if(v.k==="bigwin"){ mt.bigDone=true; if(currentWord && currentWord.big){ mtFeed(`🏆 ${wcEsc(from)}が大ネジを取った`); clearWordPanelKeep(); pickWord(); } else mtFeed(`🏆 ${wcEsc(from)}が大ネジを取った`); return; }
+  if(mt.mo==="toeic"){ mtqHit(v); return; }   // 点数どろぼうは、自分あてでなくても覚える
   if(v.to!==me && v.to!=="all") return;
-  if(mt.mo!=="type"){   // TOEIC の霧
-    if(v.k==="tqfog"){ mt.qfogAt=mt.qi+1; mtSfx.hit(); mtFeed(`🌫️ ${wcEsc(from)}から霧! 次の問題が少しのあいだ見えにくい`); }
-    return;
-  }
   if(mt.shield>0){ mt.shield--; mtSfx.block(); mtFeed(`🛡️ ${wcEsc(from)}の攻撃を盾でふせいだ`); mtHud(); return; }
   mtSfx.hit(); const pn=$("wordPanel"); pn.classList.remove("hit"); void pn.offsetWidth; pn.classList.add("hit");
   const now=Date.now();
@@ -6665,7 +6700,7 @@ function mtFinish(toGarden){
   if(m.ghost){ mtGhostStep(GAME_SECONDS); for(const u in m.p) if(u!==me) m.p[u].fs=m.p[u].s; }
   else m.ref.child(`p/${me}`).update({ s:score, fs:score, m:miss, f:1, mc:m.maxChain, so:m.so }).catch(()=>{});
   mtRes={ m, toGarden, at:Date.now(), paid:false };
-  $("resultDiff").textContent=`— 対戦 ・ ${DIFF_LABEL[m.d]}${m.ghost?"(ゴーストと練習)":""} —`;
+  $("resultDiff").textContent=`— 対戦 ・ ${DIFF_LABEL[m.d]}${m.ghost?"(ゴーストと対戦)":""} —`;
   $("resultCount").classList.remove("ta"); $("resultCaption").textContent="抜いたネジ";
   $("resultScore").textContent=score; $("resultUnit").textContent="本";
   $("resultSubLine").textContent=`ミス ${miss}回 ・ 最大 ${m.maxChain}連鎖 ・ 送ったおじゃま ${m.so}`; $("resultNew").textContent="";
@@ -6678,18 +6713,18 @@ function mtFinish(toGarden){
 }
 function mtResultBtns(){
   const m=mtRes&&mtRes.m; if(!m) return;
-  $("resultKeys").innerHTML = `<b>Enter</b> ${m.ghost?"もう一回":m.rm?"もう一回に参加":"同じメンバーでもう一回"}${m.ghost?"":" ・ <b>C</b> 抜けたネジの報告へ"} ・ <b>Esc</b> タイトルへ ・ <b>G</b> 庭へ ・ <b>M</b> BGM`;
-  $("retryBtn").textContent = m.ghost ? "もう一回 (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)";
+  $("resultKeys").innerHTML = `<b>Enter</b> ${m.ghost?"もう一回募集する":m.rm?"もう一回に参加":"同じメンバーでもう一回"}${m.ghost?"":" ・ <b>C</b> 抜けたネジの報告へ"} ・ <b>Esc</b> タイトルへ ・ <b>G</b> 庭へ ・ <b>M</b> BGM`;
+  $("retryBtn").textContent = m.ghost ? "もう一回募集する (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)";
 }
 /* もう一回: だれかが先に作っていれば参加、なければ作って、前のメンバーを30秒待つ(そろえばすぐ始まる) */
 async function mtRematch(){
   const m=mtRes&&mtRes.m; if(!m) return;
-  if(m.ghost){ const d=m.d, mo=m.mo; mtResultClose(); mtGhost(d,mo); return; }
+  if(m.ghost){ const d=m.d, mo=m.mo; mtResultClose(); show("title"); mtCreate(d,mo); return; }   // ゴーストとの対戦のあとは、もう一度募集する
   if(m.rm){ const id=m.rm; mtResultClose(); show("title"); mtJoin(id); return; }
   if(!db || !playerName) return;
   const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+30000, me=mtMe(), prev=Object.keys(m.p).filter(u=>!m.p[u].q && m.p[u].g==null), d=m.d, mo=m.mo||"type", old=m.ref;
   try{
-    await ref.set({ h:me, mo, d, st, t:mtNow(), prev, p:{ [me]:{ n:playerName.slice(0,10), s:0, c:0, k:0, m:0 } } });
+    await ref.set({ h:me, mo, d, st, t:mtNow(), prev, p:{ [me]:mtMyP() } });
     await old.child("rm").set(id);
     db.ref(WC_PATH).push({ n:playerName.slice(0,10), t:Date.now(), o:myId(), x:`もう一回 対戦します(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }).catch(()=>{});
   }catch(e){ return; }
@@ -6712,7 +6747,7 @@ function mtResult(){
     if(rank===0) mtSfx.win(); else mtSfx.lose();
   }
   $("mtResult").innerHTML=`<h3>${fixed?(rank===0?"🏆 優勝!":"対戦の結果"):"集計中…"}</h3><ol class="mt-res">${rows.map(([u,p],i)=>`<li class="${u===me?"me":""}${p.q?" quit":""}"><span class="mt-rk">${i+1}位</span><span class="mt-nm">${wcEsc(p.n)}</span><span class="mt-sc">${p.q?"やめました":`${(+p.fs||0).toLocaleString("ja-JP")}${unit}`}</span><span class="mt-mi">${mo==="type"?`${p.mc||0}連鎖 ・ ミス ${p.m||0}`:wcEsc(p.dt||"")}</span></li>`).join("")}</ol>`
-    + (fixed ? (r.m.ghost ? `<p class="bk-note">ゴーストとの練習には、ごほうびはありません</p>` : r.bonus>0 ? `<p class="mt-bonus">🏅 ${rank+1}位のごほうび 庭に 🔩${r.bonus.toLocaleString("ja-JP")}ネジ</p>` : humans<2 ? `<p class="bk-note">相手がいなかったので、ごほうびはありません</p>` : "") : "");
+    + (fixed ? (r.m.ghost ? `<p class="bk-note">ゴーストとの対戦には、順位のごほうびはありません</p>` : r.bonus>0 ? `<p class="mt-bonus">🏅 ${rank+1}位のごほうび 庭に 🔩${r.bonus.toLocaleString("ja-JP")}ネジ</p>` : humans<2 ? `<p class="bk-note">相手がいなかったので、ごほうびはありません</p>` : "") : "");
 }
 function mtQuit(){
   if(!mt) return; const me=mtMe();
@@ -6736,33 +6771,56 @@ function mtEndAll(){ clearInterval(mtIv); mtStopFx(); if(mt && mt.ref){ mt.ref.o
 function mtResultClose(){ if(mtRes){ mtEndAll(); document.body.classList.remove("mtb"); mtRes=null; try{ Garden.applyTheme(); }catch(e){} mtRes=null; $("mtResult").hidden=true; $("registerBox").style.display=""; $("retryBtn").textContent="もう一回 (Enter)"; document.getElementById("screen-result").classList.remove("mtr"); $("resultKeys").innerHTML='<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる'; } }
 /* ---- TOEIC の対戦: 会場の画面(screen-battle)で遊ぶ ----
    全員に同じ問題を同じ順番で出し、時間で次へ進む。答えたあと、だれがどれを選んだかを見せて答え合わせ
-   3ラウンド(4択・逆4択・穴埋め4択を4問ずつ)。レベルはランキングと同じ区分け */
+   3ラウンド(4択・逆4択・穴埋め4択を4問ずつ)。レベルはランキングと同じ区分け(基本・470〜990点・熟語)
+   逆4択は、全員パソコンなら英単語を打てる(打てたら点が倍)。4択にもできる
+   答え: p/{人}/a/{問}=[選んだ番号(4・5 は増やされたはずれ), 答えた時間(ms), 打てた, ダブルチャンス]
+   アイテム: いちばん早く正解した人と、最下位で正解した人がもらう。点数どろぼうだけは、全員の点数に関わるので全員が覚える */
 const MT_MODES={ type:{ nm:"タイピング", ic:"⌨️" }, toeic:{ nm:"TOEIC", ic:"📘" } };
-const MTQ_LVS=["b1","b2","b3","470","630","730","860","990","i1","i2"];
+const MT_MODE_DS={ type:"60秒で多く抜いた人の勝ち。おじゃまネジとアイテムで邪魔し合う", toeic:"4択・逆4択・穴埋め4択を4問ずつ、早く正しく答える。アイテムで邪魔し合う" };
 const MTQ_ROUNDS=[
-  { f:"choice", nm:"4択",     ds:"英単語の意味を選ぶ",       lim:8000,  pt:100 },
-  { f:"rev",    nm:"逆4択",   ds:"日本語に合う英単語を選ぶ", lim:8000,  pt:150 },
+  { f:"choice", nm:"4択",       ds:"英単語の意味を選ぶ",         lim:8000,  pt:100 },
+  { f:"rev",    nm:"逆4択",     ds:"日本語に合う英単語を選ぶ",   lim:8000,  pt:100 },
   { f:"fill",   nm:"穴埋め4択", ds:"例文の空所に入る語句を選ぶ", lim:12000, pt:200 },
 ];
+const MTQ_TYPE_LIM=12000, MTQ_TYPE_OPEN=6000, MTQ_TYPE_PT=200;   // 打てるとき: 制限時間・4択が出るまで・打てたときの点
 const MTQ_PER=4, MTQ_N=MTQ_ROUNDS.length*MTQ_PER, MTQ_REV=2600, MTQ_GAP=3800;   // 答え合わせ(次のラウンドの前は少し長く)
-const mtqLvName = d => (TQ_LEVELS.find(x=>x[0]===d)||[,""])[1];
+const MTQ_ITEMS={
+  tshort:{ ic:"⏳", nm:"時間どろぼう",   to:"atk", ds:"相手の次の問題が3秒短くなる" },
+  late:  { ic:"🐢", nm:"出遅れ",         to:"atk", ds:"相手の次の問題で、選択肢が2秒遅れて出る" },
+  more:  { ic:"➕", nm:"選択肢ふやし",   to:"atk", ds:"相手の次の問題の選択肢が6つになる" },
+  steal: { ic:"🧲", nm:"点数どろぼう",   to:"atk", ds:"次の問題で相手が正解したら、その点の半分をもらう" },
+  fifty: { ic:"✂️", nm:"しぼりこみ",     to:"me",  ds:"今の問題のはずれを2つ消す" },
+  peek:  { ic:"👀", nm:"のぞき見",       to:"me",  ds:"今の問題で、先に答えた人の選択が見える" },
+  dbl:   { ic:"🎲", nm:"ダブルチャンス", to:"me",  ds:"今の問題は点が2倍。間違えたら −100点" },
+};
+const MTQ_ITEM_W=[   // 順位ごとの出やすさ: 上位は自分用、下位は攻撃が出やすい
+  { tshort:2, late:2, more:1, steal:1, fifty:2, peek:2, dbl:3 },
+  { tshort:3, late:3, more:2, steal:2, fifty:2, peek:2, dbl:2 },
+  { tshort:3, late:3, more:3, steal:3, fifty:2, peek:1, dbl:2 },
+  { tshort:3, late:3, more:3, steal:4, fifty:2, peek:1, dbl:2 },
+];
+const mtqItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.values(MTQ_ITEMS).map(it=>`<span>${it.ic} ${it.nm}<small>${it.ds}</small></span>`).join("")}<small class="mt-inote">いちばん早く正解した人と、最下位で正解した人がもらえる ・ Space で使う ・ 2つまで ・ 自分用は答える前に使う</small></div>`;
+const mtqLvName = d => (TQ_RANK_GROUPS.find(g=>g[0]===d)||[,""])[1];
 const mtLabel = (mo,d) => mo==="toeic" ? `TOEIC ${mtqLvName(d)}` : DIFF_LABEL[d]||"";
 const mtUnit = mo => mo==="toeic" ? "点" : "本";
 const mtShuf = (a,r) => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 function mtaBegin(){
   mt.base=(mt.ghost?mtNow():mt.st)+2100;   // 3・2・1 のあと
-  mt.over2=false; $("mtaMain").innerHTML=""; $("mtaMain").className="mta-main";
+  mt.over2=false; gardenKeys=0; $("mtaMain").innerHTML=""; $("mtaMain").className="mta-main";
   mtqInit();
   show("battle"); mtBgmBtn();
-  mtVs(); mtqRender(); mtBoard();
+  mtVs(); mtqRender(); mtqItems(); mtBoard();
   clearInterval(mtIv); mtIv=setInterval(()=>{ if(mtOn()) mtqTick(); },100);
 }
 function mtaKey(e){
   const k=e.key;
   if(mtAskIsOpen()){ e.preventDefault(); if(k==="Enter"||k==="y"||k==="Y") mtQuitGame(); else if(k==="Escape"||k==="n"||k==="N") mtAskClose(); return; }
   if(k==="Escape"){ e.preventDefault(); if(mtOn()) mtAskOpen(); return; }
+  if(mtOn() && mtqTyping()){ e.preventDefault(); mtqTypeKey(k); return; }   // 逆4択で英単語を打っているあいだ(M も打つ)
   if(k==="m"||k==="M"){ e.preventDefault(); mtBgmToggle(); return; }
-  if(mtOn() && /^[1-4]$/.test(k)){ e.preventDefault(); mtqAnswer(+k-1); }
+  if(!mtOn()) return;
+  if(k===" "){ e.preventDefault(); mtqUseItem(); return; }
+  if(/^[1-6]$/.test(k)){ e.preventDefault(); mtqPick(+k-1); }
 }
 function mtaHud(l,c,r,frac){ $("mtaL").innerHTML=l; $("mtaC").innerHTML=c; $("mtaR").innerHTML=r; $("mtaBar").style.width=Math.max(0,Math.min(1,frac))*100+"%"; }
 /* 終わり(タイピングと同じ結果の画面へ) */
@@ -6774,12 +6832,12 @@ function mtFinishCommon(o){
   if(m.ghost){ if(o.ghostFinal) o.ghostFinal(); for(const u in m.p) if(u!==me) m.p[u].fs=m.p[u].s; }
   else m.ref.child(`p/${me}`).update({ s:o.s, fs:o.s, f:1, dt:o.dt }).catch(()=>{});
   mtRes={ m, toGarden:o.toGarden, at:Date.now(), paid:false };
-  if(o.toGarden>0) sendToGarden(0,o.toGarden,0,true);
-  $("resultDiff").textContent=`— 対戦 ・ ${mtLabel(m.mo,m.d)}${m.ghost?"(ゴーストと練習)":""} —`;
+  typePk=null; sendToGarden(gardenKeys,o.toGarden,o.mins||0,true); gardenKeys=0;   // 逆4択で打った文字も、ふだんと同じく庭の時間に
+  $("resultDiff").textContent=`— 対戦 ・ ${mtLabel(m.mo,m.d)}${m.ghost?"(ゴーストと対戦)":""} —`;
   $("resultCount").classList.remove("ta"); $("resultCaption").textContent=o.cap;
   $("resultScore").textContent=o.s.toLocaleString("ja-JP"); $("resultUnit").textContent=o.unit;
   $("resultSubLine").textContent=o.sub; $("resultNew").textContent="";
-  $("resultGarden").textContent = o.toGarden>0 ? `庭に 🔩${o.toGarden.toLocaleString("ja-JP")}ネジ 届きました` : "";
+  $("resultGarden").textContent = o.toGarden>0 ? `庭に 🔩${o.toGarden.toLocaleString("ja-JP")}ネジ${o.mins?` ・ 庭の時間 +${tqHours(o.mins)}`:""} 届きました` : "";
   $("registerBox").style.display="none";
   mtResultBtns();
   document.getElementById("screen-result").classList.add("mtr");
@@ -6808,35 +6866,56 @@ function mtqFillChoices(w,r){   // 穴埋め4択: 例文の空所
   return mtShuf([{ txt:ans, ok:true }, ...ds.split("/").map(t=>({ txt:t, ok:false }))],r);
 }
 function mtqInit(){
-  const r=dbRand("tq-"+mt.id), pool=mtShuf(TQ.filter(w=>w.lv===mt.d && TQ_SENT[w.en]),r).slice(0,MTQ_N);
-  mt.qs=pool.map((w,i)=>{ const rd=MTQ_ROUNDS[Math.floor(i/MTQ_PER)];
+  const r=dbRand("tq-"+mt.id), lvs=(TQ_RANK_GROUPS.find(g=>g[0]===mt.d)||TQ_RANK_GROUPS[0])[2];
+  const pool=mtShuf(TQ.filter(w=>lvs.includes(w.lv) && TQ_SENT[w.en]),r).slice(0,MTQ_N);
+  mt.typeRev=Object.values(mt.p).every(p=>p.g!=null || p.pc);   // 全員パソコン
+  mt.qs=pool.map((w,i)=>{ const rd=Object.assign({},MTQ_ROUNDS[Math.floor(i/MTQ_PER)]); if(rd.f==="rev" && mt.typeRev) rd.lim=MTQ_TYPE_LIM;
     return { w, rd, o:rd.f==="rev"?mtqRevChoices(w,r):rd.f==="fill"?mtqFillChoices(w,r):mtqChoices(w,r) }; });
   let at=0; mt.qs.forEach((q,i)=>{ q.ok=q.o.findIndex(o=>o.ok); q.at=at; q.end=at+q.rd.lim; at=q.end+((i+1)%MTQ_PER===0?MTQ_GAP:MTQ_REV); });
-  mt.qEnd=at; mt.qi=-1; mt.phase=""; mt.qfogAt=-1; mt.sentQ={};
+  mt.qEnd=at; mt.qi=-1; mt.phase=""; mt.items=[]; mt.eff={}; mt.self={}; mt.steals=[]; mt.got={}; mt.view={}; mt.buf="";
   for(const u of Object.keys(mt.p)) mt.p[u].a=mt.p[u].a||{};
   mt.gq={};
   if(mt.ghost){   // ゴースト: 正答率と速さが違う。答えは、その秒数がたってから出す
-    const acc=[.55,.72,.88], spd=[.65,.48,.33];
+    const acc=[.55,.72,.88], spd=[.65,.48,.33], typ=[.25,.45,.65];
     Object.keys(mt.p).filter(u=>mt.p[u].g!=null).forEach(u=>{ const g=mt.p[u].g, gr=dbRand(mt.id+"-q"+g); mt.gq[u]=[];
-      mt.qs.forEach((q,i)=>{ const ok=gr()<acc[g]-(q.rd.f==="fill"?.08:0), c=ok?q.ok:[0,1,2,3].filter(x=>x!==q.ok)[Math.floor(gr()*3)], t=Math.min(q.rd.lim-300,Math.max(700,q.rd.lim*spd[g]*(.6+gr()*.8))); mt.gq[u][i]=[c,Math.round(t)]; }); });
+      mt.qs.forEach((q,i)=>{ const ok=gr()<acc[g]-(q.rd.f==="fill"?.08:0), c=ok?q.ok:[0,1,2,3].filter(x=>x!==q.ok)[Math.floor(gr()*3)], t=Math.min(q.rd.lim-300,Math.max(700,q.rd.lim*spd[g]*(.6+gr()*.8)));
+        const tp=ok && q.rd.f==="rev" && mt.typeRev && gr()<typ[g];
+        mt.gq[u][i]=[c,Math.round(tp?Math.min(q.rd.lim-300,t*1.3):t),tp?1:0,0]; }); });
   }
 }
-/* 点数: 正解でラウンドの点(4択100・逆4択150・穴埋め200)。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30 */
+/* 1問の点数: 正解でラウンドの点(4択100・逆4択100・打てたら200・穴埋め200)。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30
+   ダブルチャンスは2倍か −100。点数どろぼうは、その問題で相手が取った点の半分を移す */
 function mtqScore(upTo){
-  const us=Object.keys(mt.p), tot={}, streak={}, per={}, cor={};
-  for(const u of us){ tot[u]=0; streak[u]=0; cor[u]=0; }
+  const us=Object.keys(mt.p), tot={}, per={}, cor={}, first={};
+  for(const u of us){ tot[u]=0; cor[u]=0; per[u]={}; }
   for(let i=0;i<=upTo && i<MTQ_N;i++){
-    const q=mt.qs[i], oks=us.filter(u=>{ const a=(mt.p[u].a||{})[i]; return a && a[0]===q.ok; });
-    const first=oks.slice().sort((a,b)=>mt.p[a].a[i][1]-mt.p[b].a[i][1])[0];
+    const q=mt.qs[i], ok = u => { const a=(mt.p[u].a||{})[i]; return a && a[0]===q.ok; };
+    const oks=us.filter(ok), fu=oks.slice().sort((a,b)=>mt.p[a].a[i][1]-mt.p[b].a[i][1])[0]; first[i]=fu;
+    const pt={};
     for(const u of us){
-      const a=(mt.p[u].a||{})[i]; let pt=0;
-      if(a && a[0]===q.ok){ streak[u]++; cor[u]++; pt=q.rd.pt+Math.round(q.rd.pt/2*Math.max(0,1-a[1]/q.rd.lim)); if(u===first && oks.length>1) pt+=30; }
-      else streak[u]=0;
-      tot[u]+=pt; (per[u]=per[u]||{})[i]=pt;
+      const a=(mt.p[u].a||{})[i]; let x=0;
+      if(ok(u)){ cor[u]++; const base=a[2]?MTQ_TYPE_PT:q.rd.pt; x=base+Math.round(base/2*Math.max(0,1-a[1]/q.rd.lim)); if(u===fu && oks.length>1) x+=30; }
+      if(a && a[3]) x = ok(u) ? x*2 : -100;
+      pt[u]=x;
     }
+    for(const st of mt.steals) if(st.q===i && pt[st.to]>0 && pt[st.f]!=null){ const x=Math.floor(pt[st.to]/2); pt[st.to]-=x; pt[st.f]+=x; }
+    for(const u of us){ tot[u]+=pt[u]; per[u][i]=pt[u]; }
   }
-  return { tot, per, streak, cor };
+  return { tot, per, cor, first };
 }
+/* 自分の画面の選択肢: 選択肢ふやし(+2)・しぼりこみ(-2)を入れたもの。番号は元の選択肢の番号(増やしたはずれは 4・5) */
+function mtqView(i){
+  if(mt.view[i]) return mt.view[i];
+  const q=mt.qs[i]; let v=q.o.map((o,j)=>({ txt:o.txt, j }));
+  if(mt.eff[i] && mt.eff[i].more){
+    const xs=mtShuf(mt.qs.filter((x,k)=>k!==i && x.rd.f===q.rd.f).flatMap(x=>x.o.filter(o=>!o.ok).map(o=>o.txt)).filter(t=>!q.o.some(o=>o.txt===t)),Math.random).slice(0,2);
+    v=mtShuf(v.concat(xs.map((t,k)=>({ txt:t, j:4+k }))),Math.random);
+  }
+  return mt.view[i]=v;
+}
+const mtqLim = i => mt.qs[i].rd.lim - (mt.eff[i] && mt.eff[i].tshort ? 3000 : 0);   // 時間どろぼうで短くなる
+const mtqTyping = () => { const i=mt && mt.qi; return mt && mt.mo==="toeic" && mt.phase==="q" && i>=0 && mt.qs[i].rd.f==="rev" && mt.typeRev && !mt.revOpen && !(mt.p[mtMe()].a||{})[i] && !mtqOut(); };
+const mtqOut = () => mtNow()-(mt.base+mt.qs[mt.qi].at) >= mtqLim(mt.qi);   // 自分だけ時間切れ(時間どろぼう)
 function mtqTick(){
   const now=mtNow(), t=now-mt.base, me=mtMe();
   if(t<0){ mtaHud(`得点 <b>0</b>`,`第1ラウンド ${MTQ_ROUNDS[0].nm}`,`<b>${MTQ_ROUNDS[0].lim/1000}</b> 秒`,1); return; }
@@ -6845,36 +6924,111 @@ function mtqTick(){
   const q=mt.qs[i], w=t-q.at, ph=t<q.end?"q":"rev", ri=Math.floor(i/MTQ_PER);
   if(i!==mt.qi || ph!==mt.phase){
     const newQ=i!==mt.qi; mt.qi=i; mt.phase=ph;
-    if(newQ){ mt.qAt=now; if(i===MTQ_N-MTQ_PER && !mt.spurt){ mt.spurt=true; mtBgmBpm=156; } mtSfx.count(); }
+    if(newQ){ mt.qAt=now; mt.buf=""; mt.revOpen=!(q.rd.f==="rev" && mt.typeRev); mt.lateShown=!(mt.eff[i] && mt.eff[i].late); mt.outShown=false;
+      if(i===MTQ_N-MTQ_PER && !mt.spurt){ mt.spurt=true; mtBgmBpm=156; } mtSfx.count(); }
     if(ph==="rev"){ mtqReveal();   // 次のラウンドは、答え合わせのあいだに知らせる(問題に重ならないように)
-      const nr=MTQ_ROUNDS[ri+1]; if((i+1)%MTQ_PER===0 && nr){ mtSfx.event(); mtBanner(`次は第${ri+2}ラウンド ${nr.nm}`,`${nr.ds} ・ 正解 ${nr.pt}点`); } }
+      const nr=MTQ_ROUNDS[ri+1]; if((i+1)%MTQ_PER===0 && nr){ mtSfx.event(); mtBanner(`次は第${ri+2}ラウンド ${nr.nm}`, nr.f==="rev" && mt.typeRev ? `英単語を打てたら ${MTQ_TYPE_PT}点 ・ 4択なら ${nr.pt}点` : `${nr.ds} ・ 正解 ${nr.pt}点`); } }
     mt.ansSig=null; mtqRender();
+  }
+  if(ph==="q"){   // 時間で変わる表示: 打てるときの4択・出遅れ・時間どろぼう
+    if(!mt.revOpen && w>=MTQ_TYPE_OPEN){ mt.revOpen=true; mtqRender(); }
+    if(!mt.lateShown && now-mt.qAt>=2000){ mt.lateShown=true; mtqRender(); }
+    if(!mt.outShown && mtqOut()){ mt.outShown=true; mtqRender(); }
   }
   for(const u in mt.gq) for(let j=0;j<=i;j++){ const a=mt.gq[u][j]; if(a && !mt.p[u].a[j] && (j<i || ph==="rev" || w>=a[1])) mt.p[u].a[j]=a; }
   const us=Object.keys(mt.p), sig=us.map(u=>(mt.p[u].a||{})[i]?1:0).join("");
-  if(sig!==mt.ansSig){ mt.ansSig=sig; if(ph==="rev") mtqRender(); else mtqAns(); }   // 遅れて届いた答えも出す
+  if(sig!==mt.ansSig){ mt.ansSig=sig; if(ph==="rev" || (mt.self[i] && mt.self[i].peek)) mtqRender(); else mtqAns(); }   // 遅れて届いた答えも出す
   const sc=mtqScore(ph==="rev"?i:i-1); for(const u of us){ mt.p[u].s=sc.tot[u]||0; mt.p[u].cor=sc.cor[u]||0; }
-  const left=ph==="q"?(q.end-t)/1000:0;
+  const lim=mtqLim(i), left=ph==="q"?Math.max(0,lim-w)/1000:0;
   mtaHud(`得点 <b>${(sc.tot[me]||0).toLocaleString("ja-JP")}</b>`,`第${ri+1}ラウンド ${q.rd.nm} <b>${i%MTQ_PER+1}</b> / ${MTQ_PER}`,ph==="q"?`<b>${Math.ceil(left)}</b> 秒`:`答え合わせ`, ph==="q"?left/(q.rd.lim/1000):0);
   document.body.classList.toggle("mtb-spurt",!!mt.spurt);
-  mtqFogFx(); mtBoard();
+  mtBoard();
 }
-function mtqAnswer(j){
+/* 答える */
+function mtqAnswer(j,typed){
   const i=mt.qi, me=mtMe();
-  if(mt.phase!=="q" || i<0 || (mt.p[me].a||{})[i]) return;
-  const t=Math.max(0,Math.round(mtNow()-(mt.base+mt.qs[i].at)));
-  mt.p[me].a=mt.p[me].a||{}; mt.p[me].a[i]=[j,t]; mtSfx.type(); mtSfx.done(1);
-  if(!mt.ghost) mt.ref.child(`p/${me}/a/${i}`).set([j,t]).catch(()=>{});
+  if(mt.phase!=="q" || i<0 || (mt.p[me].a||{})[i] || mtqOut()) return;
+  const t=Math.max(0,Math.round(mtNow()-(mt.base+mt.qs[i].at))), a=[j,t,typed?1:0,mt.self[i]&&mt.self[i].dbl?1:0];
+  mt.p[me].a=mt.p[me].a||{}; mt.p[me].a[i]=a; mtSfx.type(); mtSfx.done(typed?2:1);
+  if(!mt.ghost) mt.ref.child(`p/${me}/a/${i}`).set(a).catch(()=>{});
   mtqRender();
 }
+function mtqPick(k){   // 番号キー・タップ: 画面に出ている順の k 番目
+  const i=mt.qi; if(i<0 || mt.phase!=="q" || !mt.revOpen || !mt.lateShown) return;
+  const v=mtqView(i).filter(o=>!(mt.self[i] && mt.self[i].cut && mt.self[i].cut.includes(o.j)));
+  if(v[k]) mtqAnswer(v[k].j,false);
+}
+/* 逆4択で英単語を打つ: 合っている文字だけ進む。Enter で4択にする */
+function mtqTypeKey(k){
+  const i=mt.qi, w=mt.qs[i].w;
+  if(k==="Enter"){ mt.revOpen=true; mtqRender(); return; }
+  if(k.length!==1) return;
+  const want=w.en[mt.buf.length];
+  if(want!=null && k.toLowerCase()===want.toLowerCase()){ mt.buf+=want; gardenKeys++; mtSfx.type();
+    if(mt.buf.length>=w.en.length){ mtqAnswer(mt.qs[i].ok,true); return; }
+    const el=$("mtqTyped"); if(el) el.innerHTML=`<span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span>`; }
+  else if(k===" "){ mtqUseItem(); }   // 空白を打つところでなければ、アイテム
+  else mtTone(200,.05,"square",.02);
+}
+/* 答え合わせ: アイテムを配る(いちばん早く正解した人・最下位で正解した人) */
 function mtqReveal(){
   const i=mt.qi, me=mtMe(), sc=mtqScore(i), a=(mt.p[me].a||{})[i], ok=a && a[0]===mt.qs[i].ok;
   if(ok) mtSfx.gold(); else mtSfx.miss();
-  if(sc.streak[me]>=3 && sc.streak[me]%3===0 && !mt.sentQ[i]){ mt.sentQ[i]=1; const to=mtTarget(); if(to){ mtSend(to,"tqfog",1); mtSfx.send(); mtFeed(`🌫️ ${sc.streak[me]}問連続正解! ${wcEsc(mt.p[to].n)}の次の問題に霧`); } }
-  if(mt.ghost && i<MTQ_N-1){ const gs=Object.keys(mt.p).filter(u=>mt.p[u].g!=null && sc.streak[u]>=3 && sc.streak[u]%3===0); if(gs.length && mtTarget0(gs[0])===me && !mt.sentQ["g"+i]){ mt.sentQ["g"+i]=1; mtRecv({ f:gs[0], to:me, k:"tqfog", n:1 }); } }
+  const rows=mtSort(Object.entries(mt.p).filter(([u,p])=>!p.q)), last=rows.length>1 ? rows[rows.length-1][0] : null;
+  const gets = u => { const b=(mt.p[u].a||{})[i]; return b && b[0]===mt.qs[i].ok && (sc.first[i]===u || u===last); };
+  if(gets(me) && !mt.got[i]){ mt.got[i]=1; mtqGetItem(sc.first[i]===me?"いちばん早く正解":"最下位で正解"); }
+  if(mt.ghost && i<MTQ_N-1) for(const u of Object.keys(mt.p)) if(mt.p[u].g!=null && gets(u)){   // ゴーストも、もらったらすぐ攻撃する
+    const gr=dbRand(mt.id+"-gi"+i+u); if(gr()>.6) continue;
+    const k=mtPick(gr,{ tshort:3, late:3, more:2, steal:2 }), to=mtTarget0(u); if(!to) continue;
+    if(to===me) mtRecv({ f:u, to:me, k, q:i+1 }); else { if(k==="steal") mt.steals.push({ f:u, to, q:i+1 }); mtqGhostHit(to,k,i+1); }
+  }
+}
+function mtqGetItem(why){
+  if(mt.items.length>=2){ mtFeed(`🎁 ${why}! でもアイテムがいっぱいです(2つまで)`); return; }
+  const rank=Math.max(0,mtSort(Object.entries(mt.p)).findIndex(([u])=>u===mtMe())), k=mtPick(Math.random,MTQ_ITEM_W[Math.min(3,rank)]);
+  mt.items.push(k);
+  const ks=Object.keys(MTQ_ITEMS); let n=0; mt.spin={ i:mt.items.length-1, ic:MTQ_ITEMS[ks[0]].ic }; clearInterval(mt.spinT);
+  mtFeed(`🎁 ${why}! アイテムをもらった`);
+  mt.spinT=setInterval(()=>{ if(!mt || !mt.spin) return; n++; mt.spin.ic=MTQ_ITEMS[ks[n%ks.length]].ic; mtTone(900+(n%4)*120,.03,"square",.025); mtqItems();
+    if(n>=12){ clearInterval(mt.spinT); mt.spin=null; mtSfx.item(); mtFeed(`${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}: ${MTQ_ITEMS[k].ds}`); mtqItems(); } },65);
+  mtqItems();
+}
+/* アイテムを使う(先に持ったほうから) */
+function mtqUseItem(){
+  if(mt.spin && mt.spin.i===0){ mtFeed("ルーレットが止まったら使えます"); return; }
+  const k=mt.items[0]; if(!k){ mtSfx.miss(); return; }
+  const it=MTQ_ITEMS[k], i=mt.qi, me=mtMe();
+  if(it.to==="me"){
+    if(i<0 || mt.phase!=="q" || (mt.p[me].a||{})[i] || mtqOut()){ mtFeed(`${it.ic} ${it.nm}は、問題に答える前に使えます`); mtSfx.miss(); return; }
+    const sf=mt.self[i]=mt.self[i]||{}; if(sf[k]){ mtFeed("この問題ではもう使っています"); return; }
+    sf[k]=1;
+    if(k==="fifty"){ const v=mtqView(i).filter(o=>o.j!==mt.qs[i].ok); sf.cut=mtShuf(v.map(o=>o.j),Math.random).slice(0,2); }
+    mtFeed(`${it.ic} ${it.nm}! ${{ fifty:"はずれを2つ消した", peek:"先に答えた人の選択が見える", dbl:"この問題は2倍(間違えたら −100)" }[k]}`);
+  }else{
+    const q=i+1; if(q>=MTQ_N){ mtFeed("もう次の問題がありません"); mtSfx.miss(); return; }
+    const to=mtTarget(); if(!to){ mtFeed("相手がいません"); return; }
+    if(k==="steal") mt.steals.push({ f:me, to, q });
+    if(mt.ghost) mtqGhostHit(to,k,q); else mt.evRef.push({ f:me, to, k, q, t:mtNow() }).catch(()=>{});
+    mtSfx.send(); mtFeed(`${it.ic} ${wcEsc(mt.p[to].n)}に${it.nm}! (第${q+1}問)`);
+  }
+  mt.items.shift(); if(mt.spin) mt.spin.i--; mtSfx.use(); mtqItems(); mtqRender();
+}
+/* 受けた攻撃: 次の問題(q)に効く */
+function mtqHit(v){
+  const it=MTQ_ITEMS[v.k], from=(mt.p[v.f]||{}).n||"だれか"; if(!it || v.q==null) return;
+  if(v.k==="steal"){ if(!mt.steals.some(x=>x.f===v.f && x.to===v.to && x.q===v.q)) mt.steals.push({ f:v.f, to:v.to, q:v.q }); }
+  if(v.to!==mtMe()) return;
+  (mt.eff[v.q]=mt.eff[v.q]||{})[v.k]=from;
+  mtSfx.hit(); const mm=$("mtaMain"); mm.classList.remove("hit"); void mm.offsetWidth; mm.classList.add("hit");
+  mtFeed(`${it.ic} ${wcEsc(from)}の${it.nm}! 第${v.q+1}問: ${{ tshort:"3秒短くなる", late:"選択肢が2秒遅れて出る", more:"選択肢が6つになる", steal:"正解すると点の半分をとられる" }[v.k]}`);
+}
+function mtqGhostHit(u,k,q){   // ゴーストが攻撃を受けた: 答えが遅れたり、間違えやすくなる
+  const a=mt.gq[u] && mt.gq[u][q]; if(!a) return; const lim=mt.qs[q].rd.lim;
+  if(k==="tshort" && a[1]>lim-3000) mt.gq[u][q]=null;
+  if(k==="late") a[1]=Math.min(lim-300,a[1]+2000);
+  if(k==="more" && a[0]===mt.qs[q].ok && Math.random()<.3) a[0]=4;
 }
 const mtTarget0 = from => { const rows=mtSort(Object.entries(mt.p).filter(([u,p])=>!p.q)); return rows[0] && rows[0][0]!==from ? rows[0][0] : rows[1] && rows[1][0]; };
-function mtqFogFx(){ const on=mt.qfogAt===mt.qi && mt.phase==="q" && mtNow()-mt.qAt<3000; const el=$("mtaMain"); if(el) el.classList.toggle("mtq-fog",on); }
 /* 問題文: 4択は英単語、逆4択は意味、穴埋めは例文(答え合わせで訳も出す) */
 function mtqPrompt(q,rev){
   const w=q.w;
@@ -6887,20 +7041,41 @@ function mtqRender(){
   const i=mt.qi, el=$("mtaMain"); if(!el) return;
   if(i<0){ el.innerHTML=`<div class="mtq-card"><div class="mtq-no">第1ラウンド ${MTQ_ROUNDS[0].nm}</div><div class="mtq-word">…</div></div>`; return; }
   const q=mt.qs[i], me=mtMe(), my=(mt.p[me].a||{})[i], rev=mt.phase==="rev", sc=rev?mtqScore(i):null, us=Object.keys(mt.p), en=q.rd.f!=="choice";
-  el.innerHTML=`<div class="mtq-card${rev?" rev":""}"><div class="mtq-no">第${Math.floor(i/MTQ_PER)+1}ラウンド ${q.rd.nm} ・ ${i%MTQ_PER+1}問目 ・ 正解 ${q.rd.pt}点</div>
-    ${mtqPrompt(q,rev)}
-    <div class="mtq-opts">${q.o.map((o,j)=>{ const who=rev?us.filter(u=>{ const a=(mt.p[u].a||{})[i]; return a && a[0]===j; }):[];
-      const cls=rev?(j===q.ok?" ok":(my&&my[0]===j?" ng":" dim")):(my?(my[0]===j?" pick":" dim"):"");
-      return `<button class="btn mtq-opt${en?" en":""}${cls}" data-j="${j}"><span class="no">${j+1}</span><span class="tx">${tqEsc(o.txt)}</span>${who.length?`<span class="mtq-who">${who.map(u=>`<i class="${u===me?"me":""}">${wcEsc(mt.p[u].n)}${sc&&sc.per[u]&&sc.per[u][i]?` +${sc.per[u][i]}`:""}</i>`).join("")}</span>`:""}</button>`; }).join("")}</div>
-    <div class="mtq-fb">${rev ? (my ? (my[0]===q.ok ? `⭕ 正解! +${sc.per[me][i]}` : "❌ ざんねん") : "⏱ 時間切れ") : my ? "答えました。みんなを待っています" : window.IS_MOBILE ? "答えをタップ" : "1〜4 で答える(クリックでも)"}</div>
+  const sf=mt.self[i]||{}, ef=mt.eff[i]||{}, out=!rev && !my && mtqOut();
+  const tags=[...Object.keys(ef).map(k=>`<span class="mtq-tag atk">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}(${wcEsc(ef[k])})</span>`), ...["fifty","peek","dbl"].filter(k=>sf[k]).map(k=>`<span class="mtq-tag me">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}</span>`)].join("");
+  const ptTxt = q.rd.f==="rev" && mt.typeRev ? `打てたら ${MTQ_TYPE_PT}点 ・ 4択 ${q.rd.pt}点` : `正解 ${q.rd.pt}点`;
+  let opts;
+  if(!rev && !mt.revOpen && !my) opts=`<div class="mtq-typed" id="mtqTyped"><span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span></div><p class="mtq-hint">英単語を打つ(打てたら ${MTQ_TYPE_PT}点) ・ <b>Enter</b> ですぐ4択(${q.rd.pt}点) ・ ${MTQ_TYPE_OPEN/1000}秒で4択が出ます</p>`;
+  else if(!rev && !mt.lateShown && !my) opts=`<div class="mtq-wait">🐢 出遅れ… 選択肢はもうすぐ</div>`;
+  else {
+    const v=mtqView(i).filter(o=>!(sf.cut && sf.cut.includes(o.j)) || rev), peek=!rev && sf.peek;
+    opts=`<div class="mtq-opts${v.length>4?" six":""}">${v.map((o,k)=>{ const who=(rev||peek)?us.filter(u=>u!==me || rev).filter(u=>{ const a=(mt.p[u].a||{})[i]; return a && a[0]===o.j; }):[];
+      const cut=rev && sf.cut && sf.cut.includes(o.j);
+      const cls=rev?(o.j===q.ok?" ok":(my&&my[0]===o.j?" ng":" dim")):(my?(my[0]===o.j?" pick":" dim"):"");
+      return `<button class="btn mtq-opt${en?" en":""}${cls}${cut?" cut":""}" data-k="${k}"><span class="no">${k+1}</span><span class="tx">${tqEsc(o.txt)}</span>${who.length?`<span class="mtq-who">${who.map(u=>`<i class="${u===me?"me":""}">${wcEsc(mt.p[u].n)}${rev&&sc.per[u][i]?` ${sc.per[u][i]>0?"+":""}${sc.per[u][i]}`:""}</i>`).join("")}</span>`:""}</button>`; }).join("")}</div>`;
+  }
+  const fb = rev ? (my ? (my[0]===q.ok ? `⭕ ${my[2]?"打てた! ":""}正解! ${sc.per[me][i]>=0?"+":""}${sc.per[me][i]}` : `❌ ざんねん${sc.per[me][i]<0?` ${sc.per[me][i]}`:sc.per[me][i]>0?` ・ 🧲 点数どろぼうで +${sc.per[me][i]}`:""}`) : "⏱ 時間切れ")
+    : out ? "⏳ 時間切れ(時間どろぼう)" : my ? (my[2]?"打てた! みんなを待っています":"答えました。みんなを待っています") : (!mt.revOpen ? "" : window.IS_MOBILE ? "答えをタップ" : `1〜${mtqView(i).length} で答える(クリックでも)`);
+  el.innerHTML=`<div class="mtq-card${rev?" rev":""}"><div class="mtq-no">第${Math.floor(i/MTQ_PER)+1}ラウンド ${q.rd.nm} ・ ${i%MTQ_PER+1}問目 ・ ${ptTxt}</div>
+    ${tags?`<div class="mtq-tags">${tags}</div>`:""}
+    ${mtqPrompt(q,rev)}${opts}
+    <div class="mtq-fb">${fb}</div>
     <div class="mtq-ans" id="mtqAns"></div></div>`;
   if(!rev) mtqAns();
 }
 function mtqAns(){ const el=$("mtqAns"), i=mt.qi; if(!el || i<0) return; el.innerHTML=Object.keys(mt.p).filter(u=>!mt.p[u].q).map(u=>`<span class="${(mt.p[u].a||{})[i]?"on":""}">${wcEsc(mt.p[u].n)} ${(mt.p[u].a||{})[i]?"✔":"…"}</span>`).join(""); }
+/* 持っているアイテム(タイピングの対戦と同じ見た目。使えるときは光る) */
+function mtqItems(){
+  const el=$("mtaItems"); if(!el || !mt) return;
+  const it=(k,i)=>mt.spin && mt.spin.i===i ? `<span class="mt-it spin"><b>${mt.spin.ic}</b>…</span>` : k?`<span class="mt-it"><b>${MTQ_ITEMS[k].ic}</b>${MTQ_ITEMS[k].nm}</span>`:`<span class="mt-it empty">空き</span>`;
+  const ready=mt.items.length && !(mt.spin && mt.spin.i===0);
+  el.innerHTML=`<span class="mt-items${ready?" ready":""}">${it(mt.items[0],0)}${it(mt.items[1],1)}${ready?`<span class="mt-space" data-item="1">${window.IS_MOBILE?"タップで使う!":"Space で使う!"}</span>`:""}</span>`;
+}
 function mtqFinish(){
   if(mt.over2) return; mt.over2=true;
   const me=mtMe(), sc=mtqScore(MTQ_N-1), s=sc.tot[me]||0, c=sc.cor[me]||0;
-  mtFinishCommon({ s, unit:"点", cap:"得点", sub:`正解 ${c} / ${MTQ_N}問`, dt:`正解 ${c}/${MTQ_N}`, toGarden:c*TQ_GIFT_SC,
+  let gs=0, gm=0; mt.qs.forEach((q,i)=>{ const a=(mt.p[me].a||{})[i]; if(a && a[0]===q.ok){ const x=(q.rd.f==="fill"||a[2])?2:1; gs+=TQ_GIFT_SC*x; gm+=TQ_GIFT_MIN*x; } });   // ふだんの TOEIC と同じ: 穴埋めと、打てた逆4択は倍
+  mtFinishCommon({ s, unit:"点", cap:"得点", sub:`正解 ${c} / ${MTQ_N}問`, dt:`正解 ${c}/${MTQ_N}`, toGarden:gs, mins:gm,
     ghostFinal:()=>{ for(const u of Object.keys(mt.p)) if(mt.p[u].g!=null){ mt.p[u].s=sc.tot[u]||0; mt.p[u].dt=`正解 ${sc.cor[u]||0}/${MTQ_N}`; } } });
 }
 /* ---- チャットの対戦の欄 ---- */
@@ -6909,27 +7084,20 @@ function wcMatchToggle(){
   if(!box.hidden){ box.hidden=true; return; }
   wcPaneShow("wcMatch"); wcMatchPane("");
 }
-/* 対戦の欄: まず種類を選び、次に募集かゴーストと練習 */
-const MT_MODE_DS={ type:"60秒で多く抜いた人の勝ち。おじゃまネジとアイテムで邪魔し合う", toeic:`4択・逆4択・穴埋め4択を${MTQ_PER}問ずつ、早く正しく答える` };
-function wcMatchPane(mo,lv){
+/* 対戦の欄: まず種類を選び、次に難易度・レベルを選んで募集する */
+function wcMatchPane(mo){
   const box=$("wcMatch"); wcCur=-1; box.scrollTop=0;
   const btn = (attrs,key,nm,ds) => `<button class="btn" ${attrs}><span class="wdn">${key!==""?`<span class="kbdh">${key}</span> `:""}${nm}</span>${ds?`<span class="wde">${ds}</span>`:""}</button>`;
-  const back = (key,to,nm) => btn(`data-mtm="${to}"`,key,`← ${nm}`,"");
   if(!mo){
     const ms=Object.keys(MT_MODES).filter(k=>!(window.IS_MOBILE && k==="type"));
     box.innerHTML=ms.map((k,i)=>btn(`data-mtm="${k}"`,i+1,`${MT_MODES[k].ic} ${MT_MODES[k].nm}の対戦`,MT_MODE_DS[k])).join("")
       + (window.IS_MOBILE?`<small class="mt-inote">タイピングの対戦はパソコンで遊べます</small>`:"");
     return;
   }
-  if(mo==="toeic" && !lv){   // TOEIC: まずレベル(ランキングと同じ区分け)
-    box.innerHTML=MTQ_LVS.map((d,i)=>btn(`data-mtm="toeic" data-lv="${d}"`,(i+1)%10,`📘 ${mtqLvName(d)}`,"")).join("") + back("","","種類を選びなおす");
-    return;
-  }
-  const ds=mo==="toeic"?[lv]:["easy","normal","hard"];
-  box.innerHTML = ds.map((d,i)=>btn(`data-mtc="${d}" data-mo="${mo}"`,i+1,`⚔️ ${mtLabel(mo,d)}で募集`,`1分間、参加する人を待ちます(${MT_MAX}人まで)`)).join("")
-    + ds.map((d,i)=>btn(`data-mtg="${d}" data-mo="${mo}"`,i+1+ds.length,`👻 ${mtLabel(mo,d)}でゴーストと練習`,"ひとりで試せます。ごほうびはありません")).join("")
-    + (mo==="toeic" ? back(ds.length*2+1,"toeic","レベルを選びなおす") : back(ds.length*2+1,"","種類を選びなおす"))
-    + (mo==="type"?mtItemList():"");
+  const ds=mo==="toeic"?TQ_RANK_GROUPS.map(g=>g[0]):["easy","normal","hard"];
+  box.innerHTML = ds.map((d,i)=>btn(`data-mtc="${d}" data-mo="${mo}"`,i+1,`⚔️ ${mtLabel(mo,d)}で募集`,`1分間、参加する人を待ちます(${MT_MAX}人まで)。だれも来なければゴーストと遊べます`)).join("")
+    + btn(`data-mtm=""`,ds.length+1,"← 種類を選びなおす","")
+    + (mo==="type"?mtItemList():mtqItemList());
 }
 function wcMatchHTML(m,head){
   const left=Math.ceil(((+m.ms||0)-mtNow())/1000), me=m.o===myId();
