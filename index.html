@@ -6257,9 +6257,9 @@ setTimeout(wcStart,1500);   // 開いているあいだ、新しい報告と飛�
    ゴースト: 待っても相手が来なかったときに選べる。通信なしで、決まった速さで打ち、攻撃もしてくる */
 const MT_PATH="nejiuchi/match", MT_LOBBY=60000, MT_MAX=4, MT_SEND_MS=250;
 const MT_GHOSTS=[{ n:"ゴースト・ゆっくり", kps:3.2 },{ n:"ゴースト・ふつう", kps:4.6 },{ n:"ゴースト・はやい", kps:6.2 }];
-/* 順位のごほうび(人と対戦したときだけ): 1位は参加した人数ぶんの腐葉土、2位からは1つずつ減る。やめた人はなし
-   大木が開く前は腐葉土を使えないので、かわりにネジ(届くネジに、1位はさらに同じだけ・2位は半分・3位は4分の1) */
-const MT_BONUS=[1,.5,.25,0];
+/* 順位のごほうび(人と対戦したときだけ): 種類はくじ。1位は参加した人数ぶん、2位からは1つずつ減る。やめた人はなし
+   腐葉土は大木が開いてから(それまでは使えないので、くじに入れない) */
+const MT_GIFTS=["sfert","neji","min","fuyo"];
 const MT_OJ=["おじゃまします","ねじねじねじ","からまったねじ","さびついたねじ","ねじれたねじ","じゃましにきた","ぐるぐるねじまき","ねじがはずれない"].map(k=>({ t:k, k, oj:true }));
 /* アイテム: atk 相手へ(1位を狙う。自分が1位なら2位) / all ほかの全員へ / me 自分に */
 const MT_ITEMS={
@@ -6748,13 +6748,13 @@ function mtResult(){
     if(!r.m.ghost && humans>=2 && !(r.m.p[me]||{}).q){
       const n=ps.filter(([u,p])=>p.g==null).length; let bt=false; try{ bt=Garden.btOpen(); }catch(e){}
       const rk=rows.filter(([u,p])=>!p.q).findIndex(([u])=>u===me);   // やめた人は数えない順位
-      if(bt){ r.fuyo=Math.max(0,n-rk); if(r.fuyo>0) try{ Garden.fuyoGive(r.fuyo); }catch(e){ r.fuyo=0; } }
-      else { r.bonus=Math.floor(r.toGarden*(MT_BONUS[rank]||0)); if(r.bonus>0) sendToGarden(0,r.bonus,0,true); }
+      r.rk=rk; const k=Math.max(0,n-rk), ks=MT_GIFTS.filter(x=>x!=="fuyo" || bt), kind=ks[Math.floor(Math.random()*ks.length)];
+      if(k>0){ if(kind==="min"){ sendToGarden(0,0,180*k,true); r.gift=`⏱ 庭の時間 +${3*k}時間`; } else try{ r.gift=Garden.mtGive(kind,k); }catch(e){ r.gift=""; } }
     }
     if(rank===0) mtSfx.win(); else mtSfx.lose();
   }
   $("mtResult").innerHTML=`<h3>${fixed?(rank===0?"🏆 優勝!":"対戦の結果"):"集計中…"}</h3><ol class="mt-res">${rows.map(([u,p],i)=>`<li class="${u===me?"me":""}${p.q?" quit":""}"><span class="mt-rk">${i+1}位</span><span class="mt-nm">${wcEsc(p.n)}</span><span class="mt-sc">${p.q?"やめました":`${(+p.fs||0).toLocaleString("ja-JP")}${unit}`}</span><span class="mt-mi">${mo==="type"?`${p.mc||0}連鎖 ・ ミス ${p.m||0}`:wcEsc(p.dt||"")}</span></li>`).join("")}</ol>`
-    + (fixed ? (r.m.ghost ? `<p class="bk-note">ゴーストとの対戦には、順位のごほうびはありません</p>` : r.fuyo>0 ? `<p class="mt-bonus">🏅 ${rank+1}位のごほうび 🍂 腐葉土 ${r.fuyo}個</p>` : r.bonus>0 ? `<p class="mt-bonus">🏅 ${rank+1}位のごほうび 庭に 🔩${r.bonus.toLocaleString("ja-JP")}ネジ</p>` : humans<2 ? `<p class="bk-note">相手がいなかったので、ごほうびはありません</p>` : "") : "");
+    + (fixed ? (r.m.ghost ? `<p class="bk-note">ゴーストとの対戦には、順位のごほうびはありません</p>` : r.gift ? `<p class="mt-bonus">🏅 ${r.rk+1}位のごほうび ${r.gift}</p>` : humans<2 ? `<p class="bk-note">相手がいなかったので、ごほうびはありません</p>` : "") : "");
 }
 function mtQuit(){
   if(!mt) return; const me=mtMe();
@@ -9557,6 +9557,15 @@ const DBG_TREE=["bt_ume","bt_grape","bt_sugi"], DBG_SAP_MAX=3;
 const DBG_ROSE=["b1","b2","b3","470","630","730","860","990","i1","i2","ls","lt"];   // 薔薇の種12種
 const dbgDay = () => new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 /* ネジ: 取った累計売上の実績のうち、一番上のごほうびの 10% / 20% / 40% */
+/* 対戦の順位のごほうび(k 個ぶん)。受け取ったものの説明を返す */
+function mtGive(kind,k){
+  k=Math.max(0,k|0); if(!k) return "";
+  let t="";
+  if(kind==="fuyo"){ S.fuyo=(S.fuyo||0)+k; t=`🍂 腐葉土 ${k}個`; }
+  else if(kind==="sfert"){ S.sfert=(S.sfert||0)+k; t=`✨ ${GUR.sfert.name} ${k}個`; }
+  else if(kind==="neji"){ const a=dailyNeji(1)*k; xAdd(S,"money",a); t=`🔩 ${fmtNum(a)}ネジ`; }
+  save(); return t;
+}
 function dailyNeji(lv){
   let rw=0; for(const g of GOALS) if(g.cat==="売上" && /^s\d/.test(g.id) && S.totalSales>=g.need) rw=Math.max(rw,g.rw);
   if(!rw){ const g=GOALS.find(x=>x.id==="s1k"); rw=g?g.rw:200; }
@@ -14978,7 +14987,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, fuyoGive:n=>{ S.fuyo=(S.fuyo||0)+Math.max(0,n|0); save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
