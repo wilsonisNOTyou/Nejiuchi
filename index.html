@@ -6258,8 +6258,8 @@ setTimeout(wcStart,1500);   // 開いているあいだ、新しい報告と飛�
 const MT_PATH="nejiuchi/match", MT_LOBBY=60000, MT_MAX=4, MT_SEND_MS=250;
 const MT_GHOSTS=[{ n:"ゴースト・ゆっくり", kps:3.2 },{ n:"ゴースト・ふつう", kps:4.6 },{ n:"ゴースト・はやい", kps:6.2 }];
 /* 順位のごほうび(人と対戦したときだけ): 種類はくじ。1位は参加した人数ぶん、2位からは1つずつ減る。やめた人はなし
-   腐葉土は大木が開いてから(それまでは使えないので、くじに入れない) */
-const MT_GIFTS=["sfert","neji","min","fuyo"];
+   まだ開いていないもの(腐葉土は大木、コインは薔薇ガチャ)が当たった人には、かわりに肥料 */
+const MT_GIFTS=["sfert","fuyo","coin"];
 const MT_OJ=["おじゃまします","ねじねじねじ","からまったねじ","さびついたねじ","ねじれたねじ","じゃましにきた","ぐるぐるねじまき","ねじがはずれない"].map(k=>({ t:k, k, oj:true }));
 /* アイテム: atk 相手へ(1位を狙う。自分が1位なら2位) / all ほかの全員へ / me 自分に */
 const MT_ITEMS={
@@ -6746,10 +6746,10 @@ function mtResult(){
       db.ref(WC_PATH).push({ n:(playerName||"").slice(0,10), t:Date.now(), o:myId(), mr:r.m.id, mo, md:r.m.d, rs, x:`対戦の結果(${mtLabel(mo,r.m.d)}): 1位 ${rs[0].n} ${rs[0].s}${unit}` }).catch(()=>{});
     }
     if(!r.m.ghost && humans>=2 && !(r.m.p[me]||{}).q){
-      const n=ps.filter(([u,p])=>p.g==null).length; let bt=false; try{ bt=Garden.btOpen(); }catch(e){}
+      const n=ps.filter(([u,p])=>p.g==null).length;
       const rk=rows.filter(([u,p])=>!p.q).findIndex(([u])=>u===me);   // やめた人は数えない順位
-      r.rk=rk; const k=Math.max(0,n-rk), ks=MT_GIFTS.filter(x=>x!=="fuyo" || bt), kind=ks[Math.floor(Math.random()*ks.length)];
-      if(k>0){ if(kind==="min"){ sendToGarden(0,0,180*k,true); r.gift=`⏱ 庭の時間 +${3*k}時間`; } else try{ r.gift=Garden.mtGive(kind,k); }catch(e){ r.gift=""; } }
+      r.rk=rk; const k=Math.max(0,n-rk), kind=MT_GIFTS[Math.floor(Math.random()*MT_GIFTS.length)];
+      if(k>0) try{ r.gift=Garden.mtGive(kind,k); }catch(e){ r.gift=""; }
     }
     if(rank===0) mtSfx.win(); else mtSfx.lose();
   }
@@ -9557,13 +9557,16 @@ const DBG_TREE=["bt_ume","bt_grape","bt_sugi"], DBG_SAP_MAX=3;
 const DBG_ROSE=["b1","b2","b3","470","630","730","860","990","i1","i2","ls","lt"];   // 薔薇の種12種
 const dbgDay = () => new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 /* ネジ: 取った累計売上の実績のうち、一番上のごほうびの 10% / 20% / 40% */
-/* 対戦の順位のごほうび(k 個ぶん)。受け取ったものの説明を返す */
+/* 対戦の順位のごほうび(k 個ぶん)。まだ開いていないものは肥料にかえる。受け取ったものの説明を返す */
+const MT_COIN=100;   // コイン1つぶん(薔薇ガチャ10回)
 function mtGive(kind,k){
   k=Math.max(0,k|0); if(!k) return "";
+  if(kind==="fuyo" && !btOpen()) kind="sfert";
+  if(kind==="coin" && !roseGachaOpen()) kind="sfert";
   let t="";
   if(kind==="fuyo"){ S.fuyo=(S.fuyo||0)+k; t=`🍂 腐葉土 ${k}個`; }
-  else if(kind==="sfert"){ S.sfert=(S.sfert||0)+k; t=`✨ ${GUR.sfert.name} ${k}個`; }
-  else if(kind==="neji"){ const a=dailyNeji(1)*k; xAdd(S,"money",a); t=`🔩 ${fmtNum(a)}ネジ`; }
+  else if(kind==="coin"){ const a=MT_COIN*k; xAdd(S,"roseCoin",a); S.roseCoinTotal=(S.roseCoinTotal||0)+a; t=`🪙 薔薇ガチャコイン ${fmtNum(a)}枚`; }
+  else { S.sfert=(S.sfert||0)+k; t=`✨ ${GUR.sfert.name} ${k}個`; }
   save(); return t;
 }
 function dailyNeji(lv){
@@ -14822,6 +14825,7 @@ const hadSave=load();
 for(const id of Object.keys(BTS)) if(S.objs && S.objs[id]>0){ S.seeds[id]=(S.seeds[id]||0)+S.objs[id]; delete S.objs[id]; }   // 苗木は設置物から種へ
 tick(); checkUnlocks(); buildPlanter();
 function enter(){
+  S.tool=1; S.axeOn=false;   // 開いたときは素手(すぐ収穫できるように)
   tick(); checkUnlocks(); renderAll(); save();
   // 番付の名前をプレイヤー名にそろえる(前の名前で載っている分は移す)
   try{
