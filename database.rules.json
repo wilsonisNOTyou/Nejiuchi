@@ -74,6 +74,35 @@
           ".write": "newData.exists()",
           ".validate": "newData.hasChildren(['n']) && newData.child('n').isNumber() && newData.child('n').val() >= 0 && (!newData.child('r').exists() || newData.child('r').isNumber()) && (!data.exists() || !data.child('r').exists() || (newData.child('r').val() === data.child('r').val() + 1 || (newData.child('r').val() === data.child('r').val() && newData.child('n').val() >= data.child('n').val())))"
         }
+      },
+      "match": {
+        ".read": true,
+        ".indexOn": [
+          "t"
+        ],
+        "$m": {
+          ".write": "!data.exists() || (!newData.exists() && data.child('t').isNumber() && data.child('t').val() < now - 86400000)",
+          "st": {
+            ".write": "data.exists() && newData.isNumber() && newData.val() <= data.val()"
+          },
+          "rm": {
+            ".write": "!data.exists() && newData.isString() && newData.val().length <= 40"
+          },
+          "x": {
+            ".write": "!data.exists() && newData.val() === 1"
+          },
+          "p": {
+            "$u": {
+              ".write": "newData.exists() || now < data.parent().parent().child('st').val()",
+              ".validate": "!newData.exists() || newData.child('n').isString()"
+            }
+          },
+          "ev": {
+            "$e": {
+              ".write": "!data.exists() && newData.exists()"
+            }
+          }
+        }
       }
     }
   }
