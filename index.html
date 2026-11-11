@@ -211,7 +211,7 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
 #screen-garden .kcitem{grid-column:1/-1; background:linear-gradient(135deg,#fffbe6,#fff0c8); border-color:#d9a520; box-shadow:0 0 14px rgba(244,197,66,.45)}
 #screen-garden .kcprev{font-weight:800}
 #screen-garden .ghead.kchead{color:#b8860b!important}
-/* ---- 1京ちゃん: エンディング(夜の庭に王冠が降り、エンドロールのあいだに夜が明ける) ---- */
+/* ---- ゲームクリアのエンディング(夜の庭に王冠が降り、エンドロールのあいだに夜が明ける) ---- */
 #kyoEnd{position:fixed; inset:0; z-index:10050; overflow:hidden; color:#fff8e8; font-family:inherit; text-align:center; background:#04071a; animation:kyin 1.2s ease-out}
 @keyframes kyin{from{opacity:0}to{opacity:1}}
 #kyoEnd .kycv{position:absolute; inset:0; width:100%; height:100%; display:block}
@@ -226,7 +226,7 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
 @keyframes kyrise{from{opacity:0; transform:translateY(22px) scale(.94); letter-spacing:.4em}to{opacity:1; transform:none; letter-spacing:.08em}}
 #kyoEnd .kysub{margin-top:.7rem; font-size:clamp(1rem,3.6vw,1.4rem); font-weight:700; text-shadow:0 2px 8px rgba(0,0,20,.8); animation:kyfade 1s 2.7s both}
 #kyoEnd .kynum{margin-top:.3rem; font-size:clamp(.9rem,3.2vw,1.2rem); color:#ffe08a; font-variant-numeric:tabular-nums; text-shadow:0 2px 8px rgba(0,0,20,.8); animation:kyfade 1s 3.3s both; word-break:break-all}
-#kyoEnd .kyprize{display:inline-block; margin-top:1.2rem; padding:.45rem 1rem; border-radius:999px; font-size:clamp(.85rem,3vw,1.05rem); color:#fff3b0; background:rgba(10,14,40,.55); box-shadow:inset 0 0 0 1px rgba(255,214,110,.5); animation:kyfade 1s 4s both}
+#kyoEnd .kyprize{display:inline-block; margin-top:1.2rem; padding:.45rem 1rem; border-radius:1.4rem; line-height:1.5; max-width:100%; font-size:clamp(.85rem,3vw,1.05rem); color:#fff3b0; background:rgba(10,14,40,.55); box-shadow:inset 0 0 0 1px rgba(255,214,110,.5); animation:kyfade 1s 4s both}
 #kyoEnd .kyprize .kcrown{width:2em; height:1.5em}
 @keyframes kyfade{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
 #kyoEnd .kyroll{position:absolute; inset:0; overflow:hidden; opacity:0; pointer-events:none; text-shadow:0 1px 3px rgba(0,0,30,.95), 0 0 16px rgba(0,0,30,.7), 0 0 4px rgba(0,0,30,.6);
@@ -3242,6 +3242,7 @@ html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
 /* これまでのお知らせ: 鈴のボタンと一覧 */
 #screen-garden .glogbtn{font:inherit; font-weight:700; font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; padding:.25rem .6rem; border-radius:999px; cursor:pointer; background:rgba(255,255,255,.75); border:2px solid var(--wood-d); color:var(--ink); white-space:nowrap}
 #screen-garden .glogbtn[hidden]{display:none}
+#screen-garden .glogbtn .kb, #screen-garden .bmore .kb{color:var(--ink-l); font-size:.72rem; font-weight:400; margin-left:.15rem}
 /* PC: お知らせが出る左上に置く(上の段のボタンの並びを変えない)。お知らせは、その下から並ぶ */
 html:not(.mobile) #screen-garden .glogbtn{position:fixed; left:8px; top:10px; z-index:34; padding:.15rem .55rem; font-size:.8rem; box-shadow:0 2px 0 var(--wood-d)}
 html:not(.mobile) #screen-garden.haslog #g-toasts{top:46px}
@@ -5381,6 +5382,7 @@ document.addEventListener("keydown",e=>{
   }
   if(scene==="title"){
     if((e.key==="v"||e.key==="V") && !e.ctrlKey && !e.metaKey && !e.altKey && window.FX && FX.open){ e.preventDefault(); FX.open(); return; }   // 音と演出
+    if((e.key==="b"||e.key==="B") && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !$("yzBtnRow").hidden){ e.preventDefault(); $("yzBtn").click(); return; }   // 千両箱ガチャのボタンを押す
     if(START_KEYS[e.key]) startGame(START_KEYS[e.key]);
     if(e.key==="8") startPoem(POEMS[0]);
     if(e.key==="r"||e.key==="R") openRanking(rankCur,playerName);
@@ -5403,7 +5405,7 @@ document.addEventListener("keydown",e=>{
   if(scene==="books"){ booksKey(e); return; }
   if(scene==="ranking"){
     if(e.key==="Escape") rankBack();
-    else if(e.key==="Tab" && !$("tqRankLvs").hidden){ e.preventDefault(); tqRankGroupStep(e.shiftKey?-1:1); }   // TOEIC: 基本・470〜990点・熟語 を切り替える
+    else if(e.key==="Tab" && !$("tqRankLvs").hidden){ e.preventDefault(); tqRankGroupStep(e.shiftKey?-1:1); }   // TOEIC: レベル(基本1〜熟語2)を切り替える
     else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
       e.preventDefault();
       const tabs=rankTabsNow(), i=tabs.indexOf(rankCur), n=tabs.length;
@@ -6325,6 +6327,24 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-11-11", t:"千両箱ガチャ", items:[
+    "庭のガチャに、4台目の「千両箱ガチャ」を追加しました。累計獲得ネジが1兆を超えると開きます",
+    "いちばん上の新しいレア度 GZR と、新しい貴重品が19種類出ます。貴重品の「千両箱」タブで、効果を確かめたり使ったりできます",
+    "新しい村人が増えました。工房や仕込みの作り置きを任せる村人、大木の実を収穫する村人、品質と変異に強い村人などです",
+    "ホームにネジボタンを出す宝物、料理の効果を3つ重ねる品、畑1枚をまっさらにする道具、畑の上限を上げる地図などもあります",
+    "番付とランキングに、畑の枚数を追加しました",
+  ]},
+  { d:"2026-11-11", t:"ゲームクリアとエンディング", items:[
+    "実績のいちばん下に、持っているネジが1京を超える実績を追加しました。受け取るとエンディングが流れて、ゲームクリアになります",
+    "ごほうびは、名前の先頭に付く王冠です。番付・ランキング・チャットにも、王冠付きの名前で載ります",
+    "クリアしたあとも、そのまま遊び続けられます。エンディングは、実績の画面からもう一度見られます",
+  ]},
+  { d:"2026-11-11", t:"音と演出を新しくしました", items:[
+    "画面ごとに BGM が流れるようになりました。ホーム・ネジ打ち・一本勝負・庭・ガチャ・TOEIC・ネジの詩・対戦に、それぞれの曲があります",
+    "効果音を作り直し、打ったときの火花、庭の作業で飛ぶ粒、ガチャの光などの演出を足しました",
+    "ホームの「音と演出」(V キー)で、BGM と効果音の音量を変えられます。全曲を聴ける一覧もあります",
+    "新しい音と演出はオフにできます。オフにすると、これまでの音と見た目に戻ります",
+  ]},
   { d:"2026-11-06", t:"TOEIC 英単語の覚えた数ランキング", items:[
     "ランキングに、TOEIC 英単語で覚えた数を競う「TOEIC 覚えた数」を追加しました。単語・穴埋め・リスニングの3つです",
     "3回続けて正解した数を、全レベル合わせて数えます。単語は4択と逆4択の共通の記録です",
@@ -10588,7 +10608,7 @@ function toastNext(){ while(toastWait.length && liveToasts.filter(o=>o.imp && !o
 function toastBtn(){
   const b=$("g-logBtn"); if(!b) return;
   b.hidden=!toastLog.length; root.classList.toggle("haslog",!!toastLog.length);
-  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}`;
+  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}${MOB?"":'<span class="kb">;</span>'}`;
   b.title="これまでのお知らせ";
 }
 /* これまでのお知らせの一覧(見逃した分を読み返す) */
@@ -10885,7 +10905,7 @@ function renderBasket(){
     cards.push({ n:n+un, h:`<span class="bcard food${un?" q3":""}" data-b="${f.id}"><span class="bhd">${ico(f)} ${esc(f.name)} <b>${fmtNum(n+un)}</b></span>${un?`<span class="bqs"><i class="bq">ふつう${fmtNum(n)}</i><i class="bq q3">上位${fmtNum(un)}</i></span>`:""}</span>` });
   }
   const more=cards.length-BASKET_SHOW, shown=basketOpen||more<=1 ? cards : cards.slice(0,BASKET_SHOW);
-  const html = shown.map(x=>x.h).join("") + (more>1 ? `<button class="sbtn bmore" data-bmore>${basketOpen?"たたむ ▲":`ほかに ${more}種類 ▼`}</button>` : "");
+  const html = shown.map(x=>x.h).join("") + (more>1 ? `<button class="sbtn bmore" data-bmore>${basketOpen?"たたむ ▲":`ほかに ${more}種類 ▼`}${MOB?"":' <span class="kb">[</span>'}</button>` : "");
   patchHTML($("g-basket"), cards.length ? html : `<span class="empty">まだ何もありません。実った作物を${kb("素手(1)","素手")}で収穫しましょう</span>`);   // 変わった品だけ描き直す
 }
 $("g-basket").addEventListener("click",e=>{ if(e.target.closest("[data-bmore]")){ basketOpen=!basketOpen; renderBasket(); } });
@@ -16598,6 +16618,8 @@ function onKeyMain(e){
   if(k==="Escape"){ backToTitle(); return; }
   if(k==="-"){ e.preventDefault(); leave(); openToeic(); return; }   // TOEIC 英単語へ
   if(k==="/"){ e.preventDefault(); openLayout(); return; }   // 配置セット
+  if(k===";"){ e.preventDefault(); if(toastLog.length) toastLogOpen(); return; }   // これまでのお知らせ
+  if(k==="["){ const b=$("g-basket").querySelector("[data-bmore]"); if(b){ e.preventDefault(); b.click(); } return; }   // 収穫かごをひらく・たたむ
   if(k==="Enter"){ e.preventDefault(); openWorld(); return; }   // 抜けたネジの報告
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
   if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
@@ -17607,7 +17629,7 @@ function yzBtnRefresh(){
   const row=$("yzBtnRow"); if(!row) return;
   let x=null; try{ x=Garden.yzBtn(); }catch(e){}
   row.hidden=!(x && x.on); if(row.hidden) return;
-  $("yzBtnT").innerHTML=`ネジボタン<small>1押し ${yzJp(x.gain)}ネジ${x.auto?` ・ ネジの泉 ${x.auto}個`:""}</small>`;
+  $("yzBtnT").innerHTML=`ネジボタン${window.IS_MOBILE?"":' <span class="kbdh">B</span>'}<small>1押し ${yzJp(x.gain)}ネジ${x.auto?` ・ ネジの泉 ${x.auto}個`:""}</small>`;
 }
 window.yzBtnRepaint=()=>{ try{ if($("screen-title").classList.contains("active")) refreshGardenStat(); }catch(e){} };
 $("yzBtn").addEventListener("click",e=>{
@@ -19156,17 +19178,19 @@ function tqRankView(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLadder[0
 /* みんなのランキング: 出題形式のタブ(toeic-type など)は、下のレベルのボタンで選んだレベルの記録を出す */
 /* レベルは3つのまとまりで1つのランキングにする(記録はこれまでどおりレベルごとに保存し、見るときに集める) */
 const TQ_RANK_GROUPS=[["base","基本",["b1","b2","b3"]],["score","470〜990点",["470","630","730","860","990"]],["idiom","熟語",["i1","i2"]]];
-const tqRankGroupOf = lv => (TQ_RANK_GROUPS.find(g=>g[2].includes(lv))||TQ_RANK_GROUPS[0])[0];
+/* ランキングは、レベルごとに分ける(基本1〜熟語2 の10個)。対戦や苦手のまとまりは、これまでどおり上の3つ */
+const TQ_RANK_LVS=TQ_LEVELS.filter(([k])=>k!=="weak");
+const tqRankGroupOf = lv => (TQ_RANK_LVS.find(([k])=>k===lv)||TQ_RANK_LVS[0])[0];
 const tqLvHard = lv => TQ_LEVELS.findIndex(([k])=>k===lv);   // 同じ問題数なら、難しい(後ろの)レベルが上
-let tqRankLv="base";
+let tqRankLv="b1";
 window.tqRankKey = d => d==="toeic-listen" ? "toeic-listen-ls" : d;
-window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill|rev)$/.test(d)) return null; const g=TQ_RANK_GROUPS.find(x=>x[0]===tqRankLv)||TQ_RANK_GROUPS[0]; return g[2].map(lv=>[d+"-"+lv,lv]); };
+window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill|rev)$/.test(d)) return null; const lv=tqRankGroupOf(tqRankLv); return [[d+"-"+lv,lv]]; };
 window.tqRankSync = d => {
   const box=$("tqRankLvs"), on=/^toeic-/.test(d) && d!=="toeic-listen";   // リスニングはレベルがない
   box.hidden=!on; if(!on) return;
-  box.innerHTML=TQ_RANK_GROUPS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("")+`<small class="tq-rktab"><span class="kbdh">Tab</span> で切り替え</small>`;
+  box.innerHTML=TQ_RANK_LVS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("")+`<small class="tq-rktab"><span class="kbdh">Tab</span> で切り替え</small>`;
 };
-function tqRankGroupStep(dir){ const n=TQ_RANK_GROUPS.length, i=TQ_RANK_GROUPS.findIndex(g=>g[0]===tqRankLv); tqRankLv=TQ_RANK_GROUPS[(i+dir+n)%n][0]; openRanking(rankCur, playerName); }
+function tqRankGroupStep(dir){ const n=TQ_RANK_LVS.length, i=Math.max(0,TQ_RANK_LVS.findIndex(g=>g[0]===tqRankLv)); tqRankLv=TQ_RANK_LVS[(i+dir+n)%n][0]; openRanking(rankCur, playerName); }
 $("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
 /* ---- 単語リスト ---- */
@@ -19332,7 +19356,7 @@ html.fx body:not(.garden):not(.washi)::after{content:""; position:fixed; inset:0
 /* ---- ホーム ---- */
 html.fx .hazard{background-size:39.6px 39.6px; animation:fx-hazard 2.4s linear infinite; box-shadow:0 0 14px rgba(244,182,58,.25)}
 @keyframes fx-hazard{to{background-position:39.6px 0}}
-html.fx h1{animation:fx-title 4.5s ease-in-out infinite}
+html.fx h1:not(.logo){animation:fx-title 4.5s ease-in-out infinite}
 html.fx #screen-title{position:relative}
 html.fx #screen-title::before{content:""; position:absolute; left:50%; top:-1rem; width:min(760px,96vw); height:17rem; transform:translateX(-50%); pointer-events:none; z-index:-1; background:radial-gradient(ellipse at 50% 40%, rgba(255,186,70,.16), rgba(255,150,40,.05) 45%, transparent 70%); animation:fx-halo 6s ease-in-out infinite}
 @keyframes fx-halo{0%,100%{opacity:.7}50%{opacity:1}}
@@ -19433,7 +19457,7 @@ html.fx #screen-garden .gmachine.shake{filter:drop-shadow(0 0 16px rgba(255,220,
 #fxVig.bara{background:linear-gradient(90deg, rgba(255,0,80,.22), transparent 30%, transparent 70%, rgba(0,200,255,.2)); animation:fx-vig .35s steps(3)}
 html.fx.fx-bara body::after{background:radial-gradient(ellipse at 50% 40%, transparent 42%, rgba(120,0,36,.5)) !important; animation:fx-barapulse 3.4s ease-in-out infinite}
 @keyframes fx-barapulse{0%,100%{opacity:.7}50%{opacity:1}}
-html.fx.fx-bara h1{animation:fx-barah1 3.1s steps(1) infinite}
+html.fx.fx-bara h1:not(.logo){animation:fx-barah1 3.1s steps(1) infinite}
 @keyframes fx-barah1{0%,100%{text-shadow:0 3px 0 #6b4e00, 0 6px 18px rgba(0,0,0,.6)}8%{text-shadow:-4px 0 0 rgba(255,0,90,.85), 4px 0 0 rgba(0,220,255,.85)}11%{text-shadow:3px 2px 0 rgba(255,0,90,.7), -3px -2px 0 rgba(0,220,255,.7)}14%{text-shadow:0 3px 0 #6b4e00, 0 6px 18px rgba(0,0,0,.6)}61%{text-shadow:-2px 0 0 rgba(255,0,90,.8), 2px 0 0 rgba(0,220,255,.8)}64%{text-shadow:0 3px 0 #6b4e00, 0 6px 18px rgba(0,0,0,.6)}}
 html.fx.fx-bara #app.fx-glitch{animation:fx-glitch .32s steps(2)}
 @keyframes fx-glitch{0%{transform:translate(-8px,0) skewX(-3deg); filter:hue-rotate(40deg) saturate(1.6)}25%{transform:translate(7px,2px) skewX(2deg); filter:hue-rotate(-30deg)}50%{transform:translate(-3px,-2px); clip-path:inset(12% 0 38% 0)}75%{transform:translate(4px,1px) skewX(-1deg); clip-path:inset(46% 0 8% 0)}100%{transform:none; filter:none; clip-path:none}}
@@ -19446,6 +19470,7 @@ html.fx .word-panel.hit{box-shadow:0 0 0 3px rgba(190,120,255,.8), 0 0 34px rgba
 /* fx-shake2 */
 </style>
 <script id="fxScript">
+const FX_TG=false;
 /* =====================================================================
    演出パッチ(FX): 音の土台・効果音・画面ごとの BGM・火花などの演出を、いまのゲームの上に重ねる層。
    - 音はすべてここのミキサーを通す(まとめ役の音量・残響・音割れ止め)。もとの効果音もそのまま通る
@@ -19453,6 +19478,7 @@ html.fx .word-panel.hit{box-shadow:0 0 0 3px rgba(190,120,255,.8), 0 0 34px rgba
    - ファイルは使わず、音も絵もその場で作る
    ===================================================================== */
 (()=>{ "use strict";
+const TG=(typeof FX_TG!=="undefined" && FX_TG);   // タイピングガーデン(畑の見た目に合わせて、歯車を出さず、光の粒を草色にする)
 const PRE=(typeof LS_PREFIX!=="undefined" ? LS_PREFIX : "fx:");
 const KEY=PRE+"fx";
 const dbg={ steps:0, snd:0, errs:[] };
@@ -19661,7 +19687,7 @@ const TR={
     if(i%2===0 && !(L===0 && b<2 && i%4)){ const n=tri[[0,1,2,1,0,2,1,2][i>>1]]+12; T(o,t,n,.22,{ v:.036, a:.002, r:.3, rv:.35 }); T(o,t,n+12,.1,{ type:"triangle", v:.007, r:.15 }); }
     if(i===4||i===12){ N(o,t,.03,{ ft:"highpass", f:5200, v:.026 }); T(o,t,91,.07,{ v:.011, r:.1, rv:.4 }); }
     if(i%4===2) hat(o,t,.011);
-    if((b&1) && i===12){ T(o,t,79,.5,{ type:"triangle", v:.018, r:.6, rv:.6 }); T(o,t,86.3,.4,{ v:.009, r:.5, rv:.6 }); }
+    if(!TG && (b&1) && i===12){ T(o,t,79,.5,{ type:"triangle", v:.018, r:.6, rv:.6 }); T(o,t,86.3,.4,{ v:.009, r:.5, rv:.6 }); }
     if(L%2===1) for(const [a,n,len] of TITLE_M[b]) if(a===i){ T(o,t,n,len*sp,{ type:"triangle", lp:2600, v:.034, a:.012, r:.35, vib:7, hold:1, rv:.55 }); T(o,t,n,len*sp,{ v:.018, a:.012, r:.35, hold:1 }); }
   }},
   /* ネジ打ち: 前のめりの拍。メロディーは控えめにして、打つ手のじゃまをしない。残り10秒で畳みかける */
@@ -19891,7 +19917,7 @@ function ambient(dt,sc){
     }
     else if(sc==="poem") add({ k:"dot", x:rnd(0,W), y:-8, vx:rnd(-8,8), vy:rnd(8,22), g:0, dr:0, life:rnd(8,13), age:0, sz:rnd(1,2.2), col:"176,134,52", al:.5, amb:1, ph:R()*6 });
     else if(sc==="toeic") add({ k:"dot", x:rnd(0,W), y:H+8, vx:rnd(-6,6), vy:rnd(-26,-10), g:0, dr:0, life:rnd(7,12), age:0, sz:rnd(1,2.2), col:"120,180,255", al:.4, amb:1, ph:R()*6 });
-    else add({ k:"dot", x:rnd(0,W), y:H+8, vx:rnd(-10,10), vy:rnd(-46,-16), g:0, dr:0, life:rnd(6,11), age:0, sz:rnd(1,2.6), col:pick(["255,176,58","255,210,110","255,140,60"]), al:sc==="game"?.3:.55, amb:1, ph:R()*6 });
+    else add({ k:"dot", x:rnd(0,W), y:H+8, vx:rnd(-10,10), vy:rnd(-46,-16), g:0, dr:0, life:rnd(6,11), age:0, sz:rnd(1,2.6), col:pick(TG?["190,255,150","255,240,170","150,220,120"]:["255,176,58","255,210,110","255,140,60"]), al:sc==="game"?.3:.55, amb:1, ph:R()*6 });
   }
 }
 /* タイトルの後ろで、ゆっくり回る歯車 */
@@ -19912,7 +19938,7 @@ function frame(ts){
   const gb=back.getContext("2d"), gt=top.getContext("2d");
   gb.setTransform(DPR,0,0,DPR,0,0); gt.setTransform(DPR,0,0,DPR,0,0); gb.clearRect(0,0,W,H); gt.clearRect(0,0,W,H);
   /* 歯車(暗い画面のホームだけ。ほかの画面では、すっと消える) */
-  gearAl+=((sc==="title"&&!RM?1:0)-gearAl)*Math.min(1,dt*3); gearA+=dt*.06;
+  gearAl+=((sc==="title"&&!RM&&!TG?1:0)-gearAl)*Math.min(1,dt*3); gearA+=dt*.06;
   if(gearAl>.01){ const u=Math.min(W,H); gear(gb,W*.06,H*.84,u*.3,14,gearA,.045*gearAl); gear(gb,W*.06+u*.44,H*.84+u*.2,u*.19,9,-gearA*14/9+.2,.04*gearAl); gear(gb,W*.95,H*.14,u*.24,12,-gearA*.8,.042*gearAl); gear(gb,W*.95-u*.33,H*.14-u*.13,u*.13,7,gearA*.8*12/7+.3,.036*gearAl); }
   for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.age+=dt; if(p.age>=p.life){ P.splice(i,1); continue; }
     const g=p.top?gt:gb, u=p.age/p.life;
@@ -19992,7 +20018,7 @@ function vis(name,arg){
 }
 
 /* ---------------------------------------------------------------- 設定の窓(キーボードでも操作できる)と、曲の一覧 */
-const SONGS=[["title","ホーム"],["game","ネジ打ち"],["oneshot","一本勝負"],["garden","庭"],["toeic","TOEIC 英単語"],["poem","ネジの詩"],["gacha","ガチャ"],["gachaY","千両箱ガチャ"],["battle","対戦"],["bara","バラバラ"],["ending","エンディング"]];
+const SONGS=[["title","ホーム"],["game",TG?"タイピング":"ネジ打ち"],["oneshot",TG?"ノーミス勝負":"一本勝負"],["garden",TG?"農園":"庭"],["toeic","TOEIC 英単語"],["poem","ネジの詩"],["gacha","ガチャ"],["gachaY","千両箱ガチャ"],["battle","対戦"],["bara","バラバラ"],["ending","エンディング"]].filter(s=>s[0]!=="poem" || $("screen-poem"));
 const songOk=k=>{ let f={}; try{ f=Garden.fxInfo()||{}; }catch(e){} return k==="bara" ? !!f.bara : k==="ending" ? !!f.kyo : true; };
 function setOpt(k,v){
   cfg[k]=v; saveCfg(); applyVol();
